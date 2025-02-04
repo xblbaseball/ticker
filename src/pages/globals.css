@@ -1,0 +1,48 @@
+:root {
+  --ticker-height: 36px;
+  --league-width: 50px;
+  /* works if you want to suffix "Playoffs" on the league logo */
+  /* --league-width: 128px; */
+  --score-width: 650px;
+
+  --marquee-width: calc(1920px - var(--league-width) - var(--score-width));
+  --marquee-header: 100px;
+
+  --score-box-cycle: 480s;
+  /* --score-box-cycle: 36s; */
+  --marquee-cycle: 20s;
+}
+
+body {
+  background-color: #00ff00;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.border-left {
+  border-left: 2px solid white;
+}
+
+.border-right {
+  border-right: 2px solid white;
+}
+
+.flex {
+  display: flex;
+}
+
+.column {
+  flex-direction: column;
+}
+
+.flex-start {
+  justify-content: flex-start;
+}
+
+.flex-end {
+  justify-content: end;
+}
+
+.space-between {
+  justify-content: space-between;
+}

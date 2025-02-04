@@ -1,0 +1,42 @@
+name: Deploy
+on: push
+jobs:
+  cache:
+    name: Collect data from sheets
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: install python deps
+        run: pip install -r requirements.txt
+      - name: copy latest from sheets
+        run: python scripts/get-sheets.py
+        env:
+          G_SHEETS_API_KEY: ${{secrets.G_SHEETS_API_KEY}}
+      - name: save results
+        uses: actions/upload-artifact@v4
+        with:
+          name: json_all
+          path: public/json
+
+  build:
+    name: Build
+    needs: cache
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: Download sheets data
+        uses: actions/download-artifact@v4
+        with:
+          name: json_all
+          path: public/json
+      - name: install npm deps
+        run: npm ci
+      - name: build site
+        run: npm run build
+
+# TODO save out/ as an artifact
+# TODO if main branch, finish with a deploy to pages

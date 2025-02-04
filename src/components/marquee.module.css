@@ -1,0 +1,56 @@
+.container {
+  width: var(--marquee-width);
+}
+
+.category {
+  overflow: hidden;
+}
+
+.header {
+  min-width: var(--marquee-header);
+  padding-left: 4px;
+  /* animation: marquee-header-scroll var(--marquee-cycle) linear 0s infinite forwards; */
+}
+
+.scrollContainer {
+  width: calc(var(--marquee-width) - var(--marquee-header));
+  overflow-x: hidden;
+  margin-left: 8px;
+  overflow: hidden;
+}
+
+.scroll {
+  white-space: nowrap;
+}
+
+.listEntry {
+  width: 10em;
+}
+
+.listEntryLogo {
+  max-height: var(--ticker-height);
+}
+
+.position {
+  padding-bottom: 4px;
+  font-size: 1rem;
+}
+
+.stat {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+/* same as .leagueLogo used elsewhere */
+.logo {
+  height: 28px;
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
+.standing {
+  padding-left: 0.5em;
+  padding-bottom: 4px;
+  padding-right: 2em;
+  font-size: 1.25rem;
+}

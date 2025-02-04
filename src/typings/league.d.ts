@@ -1,0 +1,1 @@
+export type League = "XBL" | "AAA" | "AA";

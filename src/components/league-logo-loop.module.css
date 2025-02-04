@@ -1,0 +1,14 @@
+.leagueLogos {
+  width: var(--league-width);
+  height: 36px;
+}
+
+.leagueLogoContainer {
+  height: 36px;
+}
+
+.leagueLogo {
+  height: 28px;
+  margin-top: 4px;
+  margin-left: 6px;
+}

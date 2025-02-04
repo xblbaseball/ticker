@@ -1,0 +1,16 @@
+.container {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+
+  height: var(--ticker-height);
+  width: 100%;
+
+  background-color: #323c4d;
+
+  font-family: 'Oswald';
+  font-size: 1.5rem;
+  color: white;
+
+  overflow: hidden;
+}
