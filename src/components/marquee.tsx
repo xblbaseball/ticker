@@ -58,7 +58,7 @@ function StandingEntry(
           className={styles.logo}
         />
       </div>
-      <div className={`flex column end ${styles.standing}`}><div>{record}</div></div>
+      <div className={`flex column flex-end ${styles.standing}`}><div>{record}</div></div>
     </div>
   )
 }
@@ -119,7 +119,7 @@ export default function Marquee() {
             <StandingEntry key={`STANDINGS__${league}_${i}`}
               position={i+1}
               teamName={entry.team}
-              record={`(${entry.wins}-${entry.losses})`} />
+              record={`${entry.wins}-${entry.losses}`} />
             )
         )}
         </Category>
