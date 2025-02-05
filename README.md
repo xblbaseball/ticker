@@ -45,7 +45,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Building
 
-To get the same static HTML, CSS, JS files that are served on GH Pages, you need to:
+To see the same static HTML, CSS, JS files that are served on GH Pages, you need to:
 
 1. Build the site.
   ```bash
@@ -55,3 +55,4 @@ To get the same static HTML, CSS, JS files that are served on GH Pages, you need
   ```bash
   python3 -m http.server -d out 8000
   ```
+3. Navigate Chrome to [http://localhost:8000](http://localhost:8000)
