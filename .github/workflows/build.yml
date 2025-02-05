@@ -92,7 +92,7 @@ jobs:
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
         env:
-          NEXT_PUBLIC_BASEPATH: format('/{0}'', ${{github.event.repository.name }})
+          NEXT_PUBLIC_BASEPATH: ${{ format('/{0}', github.event.repository.name ) }}
       - name: upload static site
         uses: actions/upload-pages-artifact@v3
         with:
