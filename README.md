@@ -25,6 +25,16 @@ Maybe you want a nice looking place to overlay text in your broadcast. You can r
 
 We load every single score and marquee element into the page on the first load, then we use CSS animations (with `overflow: hidden`) to scroll through them. The animations are programmatically generated beforehand using the `calc-keyframes.py` script, which does all the math to make sure animation keyframes make sense and are mostly synced up.
 
+### Environment Variables
+
+Create a `.env` file at the root of this repo with the following variables:
+
+```
+G_SHEETS_API_KEY=
+```
+
+You'll need a developer to give you the API key for google sheets
+
 ### Testing
 
 OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
