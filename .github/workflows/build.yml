@@ -1,5 +1,8 @@
 name: Deploy
-on: push
+on:
+  push:
+    branches:
+      - main
 jobs:
   cache:
     name: Collect data from sheets
@@ -21,7 +24,7 @@ jobs:
           path: public/json
 
   build:
-    name: Build
+    name: Build static site
     needs: cache
     runs-on: ubuntu-latest
     environment: production
@@ -37,6 +40,16 @@ jobs:
         run: npm ci
       - name: build site
         run: npm run build
+      - name: upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/
 
-# TODO save out/ as an artifact
-# TODO if main branch, finish with a deploy to pages
+  deploy:
+    name: Deploy to gh-pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
