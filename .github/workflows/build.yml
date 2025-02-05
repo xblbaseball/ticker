@@ -1,11 +1,14 @@
 name: Deploy
 on:
+  # any time we push to main
   push:
     branches:
       - main
+  # run this workflow at 4a and 8p every day
   schedule:
-    # run this workflow at 4a and 8p every day
     - cron: "0 4,20 * * *"
+  # run manually from the Actions tab
+  workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
