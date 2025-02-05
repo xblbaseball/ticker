@@ -19,19 +19,19 @@
 
 /* aligned with vertical-scroll-36 */
 .vertical-scroll-3 {
-  animation: vertical-scroll-3 var(--score-box-cycle) ease 0s infinite forwards;
+  animation: vertical-scroll-3 var(--ticker-cycle) ease 0s infinite forwards;
 }
 
 .vertical-scroll-12 {
-  animation: vertical-scroll-12 var(--score-box-cycle) ease 0s infinite forwards;
+  animation: vertical-scroll-12 var(--ticker-cycle) ease 0s infinite forwards;
 }
 
 .vertical-scroll-36 {
-  animation: vertical-scroll-36 var(--score-box-cycle) ease 0s infinite forwards;
+  animation: vertical-scroll-36 var(--ticker-cycle) ease 0s infinite forwards;
 }
 
 .vertical-scroll-60 {
-  animation: vertical-scroll-60 var(--score-box-cycle) ease 0s infinite forwards;
+  animation: vertical-scroll-60 var(--ticker-cycle) ease 0s infinite forwards;
 }
 
 @keyframes marqueeBodyScroll {
