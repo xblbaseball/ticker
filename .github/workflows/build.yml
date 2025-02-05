@@ -1,7 +1,8 @@
 name: Deploy
 on:
   push:
-    branches: [$default-branch]
+    branches:
+      - main
   schedule:
     # run this workflow at 4a and 8p every day
     - cron: "0 4,20 * * *"
