@@ -34,7 +34,7 @@ function LeaderListEntry(
       <div className={`flex column flex-end ${styles.position}`}>{position}.</div>
       <div className={styles.listEntryLogo}>
         <img
-          src={`/logos/${teamName}.png`}
+          src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           className={styles.logo}
         />
@@ -53,7 +53,7 @@ function StandingEntry(
       <div className={`flex column flex-end ${styles.position}`}>{position}.</div>
       <div className={styles.listEntryLogo}>
         <img
-          src={`/logos/${teamName}.png`}
+          src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           className={styles.logo}
         />

@@ -33,7 +33,7 @@ function Team(
   return <div className={classes.join(" ")}>
     <div className="flex flex-start">
       <div className={styles.teamLogo}>
-        <img src={`/logos/${teamName}.png`}
+        <img src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           style={{maxWidth: "28px"}} />
       </div>
