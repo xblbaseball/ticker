@@ -66,7 +66,7 @@ def main():
         raise Exception("Missing Google Drive API key")
 
     # make sure the json dir exists
-    json_dir = Path("public/json")
+    json_dir = Path("public/json/raw")
     json_dir.mkdir(parents=True, exist_ok=True)
 
     collect_league_stats(json_dir, g_sheets_api_key)
