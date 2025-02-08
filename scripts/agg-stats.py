@@ -253,48 +253,171 @@ def arg_parser():
 
 
 class TeamRecord(TypedDict):
+    """How a team stacks up in a given season"""
+
     team: str
     rank: int
     wins: int
     losses: int
     remaining: int
+    ego_starting: int
+    ego_current: int
+    gb: float
+    win_pct: float
+    win_pct_vs_500: float
+    sweeps_w: int
+    splits: int
+    sweeps_l: int
+    sos: int
+    elo: int
 
 
 class TeamStats(TypedDict):
-    """Stats for a team for a given season"""
+    """Performance stats for a team for a given season"""
 
     # hitting
-    BA: float
-    AB: int
-    AB9: float
-    H: int
-    H9: float
-    HR: int
-    HR9: float
-    SO: int
-    SO9: float
-    BB: int
-    BB9: float
-    OBP: float
-    RC: float  # Run conversion
-    BABIP: float
+    hitting_rank: int
+    rs: int
+    rs9: float
+    ba: float
+    ab: int
+    ab9: float
+    h: int
+    h9: float
+    hr: int
+    hr9: float
+    so: int
+    so9: float
+    bb: int
+    bb9: float
+    obp: float
+    rc: float  # run conversion
+    babip: float
 
     # pitching
-    OppBA: float
-    OppAB9: float
-    OppH: int
-    OppH9: float
-    OppHR: int
-    OppHR9: float
-    OppABHR: float
-    OppK: int
-    OppK9: float
-    OppBB: int
-    OppBB9: float
-    WHIP: float
-    LOB: float
-    E: int
-    FIP: float
+    pitching_rank: int
+    ra: int
+    ra9: float
+    oppba: float
+    oppab9: float
+    opph: int
+    opph9: float
+    opphr: int
+    opphr9: float
+    oppabhr: float
+    oppk: int
+    oppk9: float
+    oppbb: int
+    oppbb9: float
+    whip: float
+    lob: float
+    e: int
+    fip: float
+
+    # mixed
+    rd: int
+    rd9: float
+    innings_played: int
+    innings_game: float
+
+
+def collect_team_records_and_stats(
+    league: str,
+    standings_data: List[List[str]],
+    hitting_data: List[List[str]],
+    pitching_data: List[List[str]],
+):
+    team_records: List[TeamRecord] = []
+    team_stats: List[TeamStats] = []
+    stats_by_team: dict[str, TeamStats] = {}
+
+    # return a different row for AA
+    get_row: int = lambda r: r + 2 if league == "AA" else r
+
+    team_records = [
+        {
+            "ego_starting": int(row[2]) if league == "AA" else None,
+            "ego_current": int(row[3]) if league == "AA" else None,
+            "rank": int(row[0]),
+            "team": row[1],
+            "wins": int(row[get_row(2)]),
+            "losses": int(row[get_row(3)]),
+            "gb": 0.0 if row[get_row(4)] == "-" else float(row[get_row(4)]),
+            "win_pct": float(row[get_row(5)]),
+            "win_pct_vs_500": float(row[get_row(6)]),
+            "sweeps_w": int(row[get_row(7)]),
+            "splits": int(row[get_row(8)]),
+            "sweeps_l": int(row[get_row(9)]),
+            "sos": int(row[get_row(10)]),
+            "elo": int(row[get_row(19)].replace(",", "")),
+        }
+        for row in standings_data[1:]
+    ]
+
+    team_count = len(team_records)
+    games_per_team = 2 * (team_count - 1)
+
+    for i in range(len(team_records)):
+        # I think Ws and Ls in the spreadsheet don't account for teams who drop?
+        team_records[i]["remaining"] = max(
+            games_per_team - (team_records[i]["wins"] + team_records[i]["losses"]), 0
+        )
+
+    for row in standings_data[1:]:
+        stats_by_team[row[1]] = {
+            "team": row[1],
+            "rs": int(row[get_row(8)]),
+            "ra": int(row[get_row(9)]),
+            "rd": int(row[get_row(10)]),
+            "rs9": float(row[get_row(11)]),
+            "ra9": float(row[get_row(12)]),
+            "rd9": float(row[get_row(13)]),
+            "innings_played": int(row[get_row(17)]),
+            "innings_game": float(row[get_row(18)]),
+        }
+
+    for row in hitting_data[1:]:
+        stats_by_team[row[1]] = stats_by_team[row[1]] | {
+            "hitting_rank": int(row[0]),
+            "ba": float(row[2]),
+            "ab": int(row[3]),
+            "ab9": float(row[4]),
+            "h": int(row[5]),
+            "h9": float(row[6]),
+            "hr": int(row[7]),
+            "hr9": float(row[8]),
+            "so": int(row[9]),
+            "so9": float(row[10]),
+            "bb": int(row[11]),
+            "bb9": float(row[12]),
+            "obp": float(row[13]),
+            "rc": float(row[14]),
+            "babip": float(row[15]),
+        }
+
+    for row in pitching_data[1:]:
+        stats_by_team[row[1]] = stats_by_team[row[1]] | {
+            "pitching_rank": row[0],
+            "oppba": float(row[2]),
+            "oppab9": float(row[3]),
+            "opph": int(row[4]),
+            "opph9": float(row[5]),
+            "opphr": int(row[6]),
+            "opphr9": float(row[7]),
+            "oppabhr": float(row[8]),
+            "oppk": int(row[9]),
+            "oppk9": float(row[10]),
+            "oppbb": int(row[11]),
+            "oppbb9": float(row[12]),
+            "whip": float(row[13]),
+            "lob": float(row[14]),
+            "e": int(row[15]),
+            "fip": float(row[16]),
+        }
+
+    team_stats = [stats_by_team[team] for team in stats_by_team.keys()]
+
+    return (team_records, team_stats)
 
 
 class GameResults(TypedDict):
@@ -334,8 +457,6 @@ class SeasonStats(TypedDict):
 
 
 def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonStats:
-    tabs = ["Standings", "Hitting", "Pitching", "Playoffs", "Box%20Scores"]
-
     data = {
         "current_season": season,
         "season_team_records": [],
@@ -346,38 +467,10 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
         "playoffs_game_results": [],
     }
 
-    standings_data = None
+    standings_data: List[List[str]] = None
     with open(g_sheets_dir.joinpath(f"{league}__Standings.json")) as f:
         raw_data = json.loads(f.read())
         standings_data = raw_data["values"]
-
-    win_col = 4 if league == "AA" else 2
-    loss_col = 5 if league == "AA" else 3
-
-    data["season_team_records"] = [
-        {
-            "team": value[1],
-            "rank": int(value[0]),
-            "wins": int(value[win_col]),
-            "losses": int(value[loss_col]),
-            "remaining": None,
-        }
-        # first row is the header
-        for value in standings_data[1:]
-    ]
-
-    team_count = len(data["season_team_records"])
-    games_per_team = 2 * (team_count - 1)
-
-    for i in range(len(data["season_team_records"])):
-        games_played = (
-            data["season_team_records"][i]["wins"]
-            + data["season_team_records"][i]["losses"]
-        )
-        # I think Ws and Ls in the spreadsheet don't account for teams who drop?
-        data["season_team_records"][i]["remaining"] = max(
-            games_per_team - games_played, 0
-        )
 
     hitting_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Hitting.json")) as f:
@@ -389,43 +482,11 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
         raw_data = json.loads(f.read())
         pitching_data = raw_data["values"]
 
-    data["season_team_stats"] = [
-        {
-            "team": hitting_data[i][1],
-            # hitting
-            "BA": float(hitting_data[i][2]),
-            "AB": int(hitting_data[i][3]),
-            "AB9": float(hitting_data[i][4]),
-            "H": int(hitting_data[i][5]),
-            "H9": float(hitting_data[i][6]),
-            "HR": int(hitting_data[i][7]),
-            "HR9": float(hitting_data[i][8]),
-            "SO": int(hitting_data[i][9]),
-            "SO9": float(hitting_data[i][10]),
-            "BB": int(hitting_data[i][11]),
-            "BB9": float(hitting_data[i][12]),
-            "OBP": float(hitting_data[i][13]),
-            "RC": float(hitting_data[i][14]),
-            "BABIP": float(hitting_data[i][15]),
-            # pitching
-            "OppBA": float(pitching_data[i][2]),
-            "OppAB9": float(pitching_data[i][3]),
-            "OppH": int(pitching_data[i][4]),
-            "OppH9": float(pitching_data[i][5]),
-            "OppHR": int(pitching_data[i][6]),
-            "OppHR9": float(pitching_data[i][7]),
-            "OppABHR": float(pitching_data[i][8]),
-            "OppK": int(pitching_data[i][9]),
-            "OppK9": float(pitching_data[i][10]),
-            "OppBB": int(pitching_data[i][11]),
-            "OppBB9": float(pitching_data[i][12]),
-            "WHIP": float(pitching_data[i][13]),
-            "LOB": float(pitching_data[i][14]),
-            "E": int(pitching_data[i][15]),
-            "FIP": float(pitching_data[i][16]),
-        }
-        for i in range(1, team_count + 1)
-    ]
+    season_team_records, season_team_stats = collect_team_records_and_stats(
+        league, standings_data, hitting_data, pitching_data
+    )
+
+    print(season_team_records)
 
     season_scores_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Box%20Scores.json")) as f:
@@ -437,8 +498,8 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
             "week": game[0],
             "away_team": game[1],
             "away_score": game[2],
-            "home_score": game[3]
-            "home_team": game[4]
+            "home_score": game[3],
+            "home_team": game[4],
         }
         for game in season_scores_data[1:]
     ]
@@ -459,13 +520,13 @@ def main(args: MyNamespace):
     }
 
     # write json data
-    for league in LEAGUES:
-        print(season_data[league])
-        # season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
-        # with open(season_json, "w") as f:
-        #     f.write(json.dumps(season_data[league]))
+    # for league in LEAGUES:
+    # print(season_data[league])
+    # season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
+    # with open(season_json, "w") as f:
+    #     f.write(json.dumps(season_data[league]))
 
-        # shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
+    # shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
 
 
 if __name__ == "__main__":
