@@ -252,6 +252,31 @@ def arg_parser():
     return parser
 
 
+def try_int(x: str):
+    """If we can't get an int, just get a float"""
+    ret: int = None
+
+    # we def can't parse an empty string to a number
+    if len(x) == 0:
+        return ret
+
+    try:
+        ret = int(x)
+    except ValueError as e:
+        ret = float(x)
+    return ret
+
+
+def maybe(row: List[str], col: int, type: callable):
+    ret = None
+    try:
+        ret = type(row[col])
+    except IndexError as e:
+        # print(f"Failed to get col {col} from {row}")
+        pass
+    return ret
+
+
 class TeamRecord(TypedDict):
     """How a team stacks up in a given season"""
 
@@ -336,20 +361,20 @@ def collect_team_records_and_stats(
 
     team_records = [
         {
-            "ego_starting": int(row[2]) if league == "AA" else None,
-            "ego_current": int(row[3]) if league == "AA" else None,
-            "rank": int(row[0]),
+            "ego_starting": try_int(row[2]) if league == "AA" else None,
+            "ego_current": try_int(row[3]) if league == "AA" else None,
+            "rank": try_int(row[0]),
             "team": row[1],
-            "wins": int(row[get_row(2)]),
-            "losses": int(row[get_row(3)]),
+            "wins": try_int(row[get_row(2)]),
+            "losses": try_int(row[get_row(3)]),
             "gb": 0.0 if row[get_row(4)] == "-" else float(row[get_row(4)]),
             "win_pct": float(row[get_row(5)]),
             "win_pct_vs_500": float(row[get_row(6)]),
-            "sweeps_w": int(row[get_row(7)]),
-            "splits": int(row[get_row(8)]),
-            "sweeps_l": int(row[get_row(9)]),
-            "sos": int(row[get_row(10)]),
-            "elo": int(row[get_row(19)].replace(",", "")),
+            "sweeps_w": try_int(row[get_row(7)]),
+            "splits": try_int(row[get_row(8)]),
+            "sweeps_l": try_int(row[get_row(9)]),
+            "sos": try_int(row[get_row(10)]),
+            "elo": try_int(row[get_row(19)].replace(",", "")),
         }
         for row in standings_data[1:]
     ]
@@ -366,29 +391,29 @@ def collect_team_records_and_stats(
     for row in standings_data[1:]:
         stats_by_team[row[1]] = {
             "team": row[1],
-            "rs": int(row[get_row(8)]),
-            "ra": int(row[get_row(9)]),
-            "rd": int(row[get_row(10)]),
-            "rs9": float(row[get_row(11)]),
-            "ra9": float(row[get_row(12)]),
-            "rd9": float(row[get_row(13)]),
-            "innings_played": int(row[get_row(17)]),
+            "rs": try_int(row[get_row(11)]),
+            "ra": try_int(row[get_row(12)]),
+            "rd": try_int(row[get_row(13)]),
+            "rs9": float(row[get_row(14)]),
+            "ra9": float(row[get_row(15)]),
+            "rd9": float(row[get_row(16)]),
+            "innings_played": try_int(row[get_row(17)]),
             "innings_game": float(row[get_row(18)]),
         }
 
     for row in hitting_data[1:]:
         stats_by_team[row[1]] = stats_by_team[row[1]] | {
-            "hitting_rank": int(row[0]),
+            "hitting_rank": try_int(row[0]),
             "ba": float(row[2]),
-            "ab": int(row[3]),
+            "ab": try_int(row[3]),
             "ab9": float(row[4]),
-            "h": int(row[5]),
+            "h": try_int(row[5]),
             "h9": float(row[6]),
-            "hr": int(row[7]),
+            "hr": try_int(row[7]),
             "hr9": float(row[8]),
-            "so": int(row[9]),
+            "so": try_int(row[9]),
             "so9": float(row[10]),
-            "bb": int(row[11]),
+            "bb": try_int(row[11]),
             "bb9": float(row[12]),
             "obp": float(row[13]),
             "rc": float(row[14]),
@@ -400,18 +425,18 @@ def collect_team_records_and_stats(
             "pitching_rank": row[0],
             "oppba": float(row[2]),
             "oppab9": float(row[3]),
-            "opph": int(row[4]),
+            "opph": try_int(row[4]),
             "opph9": float(row[5]),
-            "opphr": int(row[6]),
+            "opphr": try_int(row[6]),
             "opphr9": float(row[7]),
             "oppabhr": float(row[8]),
-            "oppk": int(row[9]),
+            "oppk": try_int(row[9]),
             "oppk9": float(row[10]),
-            "oppbb": int(row[11]),
+            "oppbb": try_int(row[11]),
             "oppbb9": float(row[12]),
             "whip": float(row[13]),
             "lob": float(row[14]),
-            "e": int(row[15]),
+            "e": try_int(row[15]),
             "fip": float(row[16]),
         }
 
@@ -432,12 +457,14 @@ class GameResults(TypedDict):
     away_rbi: int
     away_bb: int
     away_so: int
+    away_e: int
     home_ab: int
     home_hits: int
     home_hr: int
     home_rbi: int
     home_bb: int
     home_so: int
+    home_e: int
 
 
 class SeasonGameResults(GameResults):
@@ -448,15 +475,66 @@ class PlayoffsGameResults(GameResults):
     round: str
 
 
+def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
+    if playoffs:
+        game_results: List[PlayoffsGameResults] = []
+    else:
+        game_results: List[SeasonGameResults] = []
+
+    # regular season has errors but playoffs do not
+    get_col = lambda c: c if playoffs else c + 2
+
+    for game in box_score_data[1:]:
+        results = {
+            "away_team": game[1],
+            "home_team": game[4],
+            "away_score": try_int(game[2]),
+            "home_score": try_int(game[3]),
+            "away_e": None if playoffs else try_int(game[5]),
+            "home_e": None if playoffs else try_int(game[6]),
+            "innings": float(game[get_col(5)]),
+            "away_ab": maybe(game, get_col(6), try_int),
+            # "away_r": maybe(game, get_col(7), try_int),
+            "away_hits": maybe(game, get_col(8), try_int),
+            "away_hr": maybe(game, get_col(9), try_int),
+            "away_rbi": maybe(game, get_col(10), try_int),
+            "away_bb": maybe(game, get_col(11), try_int),
+            "away_so": maybe(game, get_col(12), try_int),
+            "home_ab": maybe(game, get_col(13), try_int),
+            # "home_r": maybe(game, get_col(14), try_int),
+            "home_hits": maybe(game, get_col(15), try_int),
+            "home_hr": maybe(game, get_col(16), try_int),
+            "home_rbi": maybe(game, get_col(17), try_int),
+            "home_bb": maybe(game, get_col(18), try_int),
+            "home_so": maybe(game, get_col(19), try_int),
+        }
+        if playoffs:
+            results["round"] = game[0]
+        else:
+            results["week"] = int(game[0])
+
+        game_results.append(results)
+
+    return game_results
+
+
+def calc_playoff_team_stats(playoff_game_results: List[PlayoffsGameResults]):
+    stats_by_team: dict[str, TeamStats] = {}
+    df = pd.DataFrame(playoff_game_results)
+    print(df.head())
+    # need to separate each game by team
+
+
 class SeasonStats(TypedDict):
     current_season: int
     season_team_records: List[TeamRecord]
     season_team_stats: List[TeamStats]
     season_game_results: List[SeasonGameResults]
-    playoff_game_results: List[PlayoffsGameResults]
+    playoffs_game_results: List[PlayoffsGameResults]
 
 
 def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonStats:
+    print(league)
     data = {
         "current_season": season,
         "season_team_records": [],
@@ -485,24 +563,26 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
     season_team_records, season_team_stats = collect_team_records_and_stats(
         league, standings_data, hitting_data, pitching_data
     )
-
-    print(season_team_records)
+    data["season_team_records"] = season_team_records
+    data["season_team_stats"] = season_team_stats
 
     season_scores_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Box%20Scores.json")) as f:
         raw_data = json.loads(f.read())
         season_scores_data = raw_data["values"]
 
-    data["season_game_results"] = [
-        {
-            "week": game[0],
-            "away_team": game[1],
-            "away_score": game[2],
-            "home_score": game[3],
-            "home_team": game[4],
-        }
-        for game in season_scores_data[1:]
-    ]
+    season_game_results = collect_game_results(False, season_scores_data)
+    data["season_game_results"] = season_game_results
+
+    playoff_scores_data = None
+    with open(g_sheets_dir.joinpath(f"{league}__Playoffs.json")) as f:
+        raw_data = json.loads(f.read())
+        playoff_scores_data = raw_data["values"]
+
+    playoffs_game_results = collect_game_results(True, playoff_scores_data)
+    data["playoffs_game_results"] = playoffs_game_results
+
+    calc_playoff_team_stats(playoffs_game_results)
 
     return data
 
