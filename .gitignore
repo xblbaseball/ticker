@@ -45,6 +45,6 @@ next-env.d.ts
 *.pyc
 
 # local data
-public/json/*.json
+public/json/**/*.json
 src/components/logos/*.tsx
 !src/components/logos/template.tsx
