@@ -1,5 +1,6 @@
 import argparse
 import json
+import math
 import pandas as pd
 from pathlib import Path
 import shutil
@@ -268,6 +269,7 @@ def try_int(x: str):
 
 
 def maybe(row: List[str], col: int, type: callable):
+    """Do our best to get the stat. But it might be missing, in which case return None"""
     ret = None
     try:
         ret = type(row[col])
@@ -278,7 +280,7 @@ def maybe(row: List[str], col: int, type: callable):
 
 
 class TeamRecord(TypedDict):
-    """How a team stacks up in a given season"""
+    """How a team stacks up in a given season/playoffs"""
 
     team: str
     rank: int
@@ -298,7 +300,7 @@ class TeamRecord(TypedDict):
 
 
 class TeamStats(TypedDict):
-    """Performance stats for a team for a given season"""
+    """Performance stats for a team for a given season/playoffs"""
 
     # hitting
     hitting_rank: int
@@ -452,6 +454,7 @@ class GameResults(TypedDict):
     away_score: int
     innings: int
     away_ab: int
+    away_r: int
     away_hits: int
     away_hr: int
     away_rbi: int
@@ -459,6 +462,7 @@ class GameResults(TypedDict):
     away_so: int
     away_e: int
     home_ab: int
+    home_r: int
     home_hits: int
     home_hr: int
     home_rbi: int
@@ -493,15 +497,16 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
             "away_e": None if playoffs else try_int(game[5]),
             "home_e": None if playoffs else try_int(game[6]),
             "innings": float(game[get_col(5)]),
+            # not all of these are always recorded. missing records are probably from disconnects
             "away_ab": maybe(game, get_col(6), try_int),
-            # "away_r": maybe(game, get_col(7), try_int),
+            "away_r": maybe(game, get_col(7), try_int),
             "away_hits": maybe(game, get_col(8), try_int),
             "away_hr": maybe(game, get_col(9), try_int),
             "away_rbi": maybe(game, get_col(10), try_int),
             "away_bb": maybe(game, get_col(11), try_int),
             "away_so": maybe(game, get_col(12), try_int),
             "home_ab": maybe(game, get_col(13), try_int),
-            # "home_r": maybe(game, get_col(14), try_int),
+            "home_r": maybe(game, get_col(14), try_int),
             "home_hits": maybe(game, get_col(15), try_int),
             "home_hr": maybe(game, get_col(16), try_int),
             "home_rbi": maybe(game, get_col(17), try_int),
@@ -518,11 +523,87 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
     return game_results
 
 
-def calc_playoff_team_stats(playoff_game_results: List[PlayoffsGameResults]):
-    stats_by_team: dict[str, TeamStats] = {}
-    df = pd.DataFrame(playoff_game_results)
-    print(df.head())
-    # need to separate each game by team
+def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
+    playoffs_team_stats: List[TeamStats] = []
+
+    stats_by_team = {}
+
+    blank_stats = {
+        "innings_pitching": 0,
+        "innings_hitting": 0,
+        "ab": 0,
+        "r": 0,
+        "h": 0,
+        "hr": 0,
+        "rbi": 0,
+        "bb": 0,
+        "so": 0,
+        "oppab": 0,
+        "oppr": 0,
+        "opph": 0,
+        "opprbi": 0,
+        "oppbb": 0,
+        "oppso": 0,
+    }
+
+    for game in playoffs_game_results:
+        away = game["away_team"]
+        home = game["home_team"]
+        if away not in stats_by_team:
+            stats_by_team[away] = blank_stats.copy()
+        if home not in stats_by_team:
+            stats_by_team[home] = blank_stats.copy()
+
+        if game["away_ab"] is None:
+            # we're missing stats. don't count this game
+            continue
+
+        stats_by_team[away]["innings_hitting"] += math.ceil(game["innings"])
+        stats_by_team[away]["innings_pitching"] += math.floor(game["innings"])
+        stats_by_team[home]["inning_hitting"] += math.floor(game["innings"])
+        stats_by_team[home]["inning_pitching"] += math.ceil(game["innings"])
+
+        # capture away team stats
+        stats_by_team[away]["ab"] += game["away_ab"]
+        stats_by_team[away]["r"] += game["away_r"]
+        stats_by_team[away]["h"] += game["away_h"]
+        stats_by_team[away]["hr"] += game["away_hr"]
+        stats_by_team[away]["rbi"] += game["away_rbi"]
+        stats_by_team[away]["bb"] += game["away_bb"]
+        stats_by_team[away]["so"] += game["away_so"]
+        stats_by_team[away]["oppab"] += game["home_ab"]
+        stats_by_team[away]["oppr"] += game["home_r"]
+        stats_by_team[away]["opph"] += game["home_h"]
+        stats_by_team[away]["opphr"] += game["home_hr"]
+        stats_by_team[away]["opprbi"] += game["home_rbi"]
+        stats_by_team[away]["oppbb"] += game["home_bb"]
+        stats_by_team[away]["oppso"] += game["home_so"]
+
+        # capture home team stats
+        stats_by_team[home]["ab"] += game["home_ab"]
+        stats_by_team[home]["r"] += game["home_r"]
+        stats_by_team[home]["h"] += game["home_h"]
+        stats_by_team[home]["hr"] += game["home_hr"]
+        stats_by_team[home]["rbi"] += game["home_rbi"]
+        stats_by_team[home]["bb"] += game["home_bb"]
+        stats_by_team[home]["so"] += game["home_so"]
+        stats_by_team[home]["oppab"] += game["away_ab"]
+        stats_by_team[home]["oppr"] += game["away_r"]
+        stats_by_team[home]["opph"] += game["away_h"]
+        stats_by_team[home]["opphr"] += game["away_hr"]
+        stats_by_team[home]["opprbi"] += game["away_rbi"]
+        stats_by_team[home]["oppbb"] += game["away_bb"]
+        stats_by_team[home]["oppso"] += game["away_so"]
+
+    for team in stats_by_team.keys():
+        raw_stats = stats_by_team[team]
+        stats: TeamStats = {
+            "rs": raw_stats["r"],
+            "rs9": (raw_stats["r"] / raw_stats["innings_hitting"]) * 9,
+            "ba": raw_stats["h"] / raw_stats["ab"],
+            "ab": raw_stats["ab"],
+            "ab9": (raw_stats["ab"] / raw_stats["innings_hitting"]) * 9,
+        }
 
 
 class SeasonStats(TypedDict):
@@ -530,12 +611,14 @@ class SeasonStats(TypedDict):
     season_team_records: List[TeamRecord]
     season_team_stats: List[TeamStats]
     season_game_results: List[SeasonGameResults]
+    playoffs_team_records: List[TeamRecord]
     playoffs_game_results: List[PlayoffsGameResults]
+    playoffs_team_stats: List[TeamStats]
 
 
 def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonStats:
-    print(league)
-    data = {
+    print(f"Running {league}...")
+    data: SeasonStats = {
         "current_season": season,
         "season_team_records": [],
         "season_team_stats": [],
@@ -574,25 +657,25 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
     season_game_results = collect_game_results(False, season_scores_data)
     data["season_game_results"] = season_game_results
 
-    playoff_scores_data = None
+    playoffs_scores_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Playoffs.json")) as f:
         raw_data = json.loads(f.read())
-        playoff_scores_data = raw_data["values"]
+        playoffs_scores_data = raw_data["values"]
 
-    playoffs_game_results = collect_game_results(True, playoff_scores_data)
+    playoffs_game_results = collect_game_results(True, playoffs_scores_data)
     data["playoffs_game_results"] = playoffs_game_results
 
-    calc_playoff_team_stats(playoffs_game_results)
+    # no spreadsheet has these. we have to run the numbers ourselves
+    playoffs_team_stats = calc_playoffs_team_stats(playoffs_game_results)
 
     return data
 
 
 def main(args: MyNamespace):
     if not args.g_sheets_dir.exists():
-        raise Exception("Missing data. Plesae run `scripts/get-sheets.py' first")
-
-    # data = readjson()
-    # df = pd.DataFrame(dict(zip(data[0], data[1:])))
+        raise Exception(
+            "Missing data from Google Sheets. Plesae double check `--g-sheets-dir' or run `scripts/get-sheets.py' first"
+        )
 
     season_data = {
         league: build_season_stats(league, args.g_sheets_dir, args.season)
