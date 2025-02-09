@@ -516,7 +516,7 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
 def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
     playoffs_team_stats: List[TeamStats] = []
 
-    blank_stats = {
+    blank_team_stats_by_game = {
         "innings_pitching": 0,
         "innings_hitting": 0,
         "ab": 0,
@@ -537,13 +537,17 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
 
     stats_by_team: dict[str, dict[str, int | float]] = {}
 
+    league_runs = 0
+    league_innings_hitting = 0
+
+    # aggregate stats by team by looking at each game
     for game in playoffs_game_results:
         away = game["away_team"]
         home = game["home_team"]
         if away not in stats_by_team:
-            stats_by_team[away] = blank_stats.copy()
+            stats_by_team[away] = blank_team_stats_by_game.copy()
         if home not in stats_by_team:
-            stats_by_team[home] = blank_stats.copy()
+            stats_by_team[home] = blank_team_stats_by_game.copy()
 
         if game["away_ab"] is None:
             # we're missing stats. don't count this game
@@ -556,6 +560,11 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         away_stats["innings_pitching"] += math.floor(game["innings"])
         home_stats["inning_hitting"] += math.floor(game["innings"])
         home_stats["inning_pitching"] += math.ceil(game["innings"])
+
+        league_runs += game["away_r"]
+        league_runs += game["home_r"]
+        league_innings_hitting += away_stats["innings_hitting"]
+        league_innings_hitting += home_stats["innings_hitting"]
 
         # capture away team stats
         away_stats["games_played"] += 1
@@ -601,8 +610,15 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         (raw_stats[key] / raw_stats["innings_pitching"]) * 9
     )
 
+    league_era = three_digits(9 * league_runs / league_innings_hitting)
+
+    # do math to get aggregate playoffs stats
     for team in stats_by_team.keys():
         raw_stats = stats_by_team[team]
+
+        league_runs += raw_stats["r"]
+        league_innings_hitting += raw_stats["innings_hitting"]
+
         stats: TeamStats = {
             # hitting
             "rs": raw_stats["r"],
@@ -649,14 +665,17 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
                 / (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"])
             ),
             "e": None,
-            # TODO missing fip constant. need league ERA
+            # TODO is this right?
             "fip": three_digits(
-                (
-                    raw_stats["opphr"] * 13
-                    + 3 * raw_stats["oppbb"]
-                    - 2 * raw_stats["oppso"]
+                league_era
+                - (
+                    (
+                        raw_stats["opphr"] * 13
+                        + 3 * raw_stats["oppbb"]
+                        - 2 * raw_stats["oppso"]
+                    )
+                    / raw_stats["innings_pitching"]
                 )
-                / raw_stats["innings_pitching"]
             ),
             # mixed
             "rd": raw_stats["r"] - raw_stats["oppr"],
@@ -672,6 +691,8 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         }
 
         playoffs_team_stats.append(stats)
+
+    return playoffs_team_stats
 
 
 class SeasonStats(TypedDict):
