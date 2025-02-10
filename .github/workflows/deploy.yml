@@ -21,7 +21,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v4
   build:
-    uses: .github/workflows/collect-stats.yml
+    uses: ./.github/workflows/collect-stats.yml
   deploy:
     name: Deploy to gh-pages
     needs: build
