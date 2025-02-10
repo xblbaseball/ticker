@@ -3,8 +3,13 @@ on:
   workflow_call:
 
 jobs:
+  checkout-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
   collect-stats:
-    uses: .github/workflows/collect-stats.yml
+    uses: ./.github/workflows/collect-stats.yml
 
   # see https://github.com/actions/starter-workflows/blob/main/pages/nextjs.yml
   build:

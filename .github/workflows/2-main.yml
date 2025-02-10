@@ -12,6 +12,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  checkout-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
   deploy:
     name: deploy
     uses: .github/workflows/deploy.yml
