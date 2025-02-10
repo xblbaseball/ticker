@@ -1,52 +1,15 @@
-name: Deploy
+name: Build static site
 on:
-  # any time we push to main
-  push:
-    branches:
-      - main
-  # run this workflow at 6a and 6p eastern every day
-  schedule:
-    # server is in UTC
-    - cron: "0 11,23 * * *"
-  # run manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  workflow_call:
 
 jobs:
-  cache:
-    name: Collect data from sheets
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
-      - name: install python deps
-        run: pip install -r requirements.txt
-      - name: copy latest from sheets
-        run: python scripts/get-sheets.py
-        env:
-          G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
-      - name: save results
-        uses: actions/upload-artifact@v4
-        with:
-          name: json_all
-          path: public/json
+  collect-stats:
+    uses: .github/workflows/collect-stats.yml
 
   # see https://github.com/actions/starter-workflows/blob/main/pages/nextjs.yml
   build:
     name: Build static site
-    needs: cache
+    needs: collect-stats
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -103,15 +66,3 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
-
-  deploy:
-    name: Deploy to gh-pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

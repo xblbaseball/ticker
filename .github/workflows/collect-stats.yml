@@ -1,0 +1,26 @@
+name: Collect Stats
+
+on:
+  workflow_call:
+
+jobs:
+  collect-stats:
+    name: Collect data from sheets
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: install python deps
+        run: pip install -r requirements.txt
+      - name: download latest from sheets
+        run: python scripts/get-sheets.py
+        env:
+          G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
+      - name: structure and aggregate stats
+        run: python scripts/agg-stats.py --season ${{ env.SEASON }}
+      - name: save results
+        uses: actions/upload-artifact@v4
+        with:
+          name: json_all
+          path: public/json

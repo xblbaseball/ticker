@@ -1,0 +1,10 @@
+name: Build
+on:
+  # any time we push
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    uses: .github/workflows/build.yml
