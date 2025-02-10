@@ -1,4 +1,4 @@
-name: Deploy
+name: Build and Test
 on:
   push:
     branches-ignore:
@@ -18,6 +18,8 @@ jobs:
         run: python scripts/get-sheets.py
         env:
           G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
+      - name: structure and aggregate stats
+        run: python scripts/agg-stats.py --season ${{ env.SEASON }}
       - name: save results
         uses: actions/upload-artifact@v4
         with:
