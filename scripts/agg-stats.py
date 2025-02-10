@@ -1,7 +1,6 @@
 import argparse
 import json
 import math
-import pandas as pd
 from pathlib import Path
 import shutil
 from typing import List, TypedDict
@@ -258,14 +257,30 @@ def three_digits(x: int | float) -> int | float:
     return round(x, 3)
 
 
+def maybe(row: List[str], col: int, type: callable):
+    """Do our best to get the stat. But it might be missing, in which case return None"""
+    ret = None
+    try:
+        ret = type(row[col])
+    except IndexError as e:
+        # print(f"Failed to get col {col} from {row}")
+        pass
+    return ret
+
+
 class TeamRecord(TypedDict):
-    """How a team stacks up in a given season/playoffs"""
+    """Generic performance of a team in wins and losses"""
 
     team: str
-    rank: int
     wins: int
     losses: int
     remaining: int
+
+
+class SeasonTeamRecord(TeamRecord):
+    """How a team stacks up in a given season"""
+
+    rank: int
     ego_starting: int
     ego_current: int
     gb: float
@@ -278,8 +293,20 @@ class TeamRecord(TypedDict):
     elo: int
 
 
+class PlayoffsRound(TeamRecord):
+    round: str
+    opponent: str
+
+
+class PlayoffsTeamRecord(TypedDict):
+    team: str
+    rounds: dict[str, PlayoffsRound]
+
+
 class TeamStats(TypedDict):
     """Performance stats for a team for a given season/playoffs"""
+
+    team: str
 
     # hitting
     hitting_rank: int
@@ -334,7 +361,7 @@ def collect_team_records_and_stats(
     hitting_data: List[List[str]],
     pitching_data: List[List[str]],
 ):
-    team_records: List[TeamRecord] = []
+    team_records: List[SeasonTeamRecord] = []
     team_stats: List[TeamStats] = []
     stats_by_team: dict[str, TeamStats] = {}
 
@@ -460,6 +487,7 @@ class PlayoffsGameResults(GameResults):
 
 
 def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
+    """convert the Box%20Score and Playoffs spreadsheet tabs into structured data"""
     if playoffs:
         game_results: List[PlayoffsGameResults] = []
     else:
@@ -486,20 +514,20 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
                 "away_e": None if playoffs else int(game[5]),
                 "home_e": None if playoffs else int(game[6]),
                 # not all of these are always recorded. missing records are probably from disconnects
-                "away_ab": int(game[get_col(6)]),
-                "away_r": int(game[get_col(7)]),
-                "away_hits": int(game[get_col(8)]),
-                "away_hr": int(game[get_col(9)]),
-                "away_rbi": int(game[get_col(10)]),
-                "away_bb": int(game[get_col(11)]),
-                "away_so": int(game[get_col(12)]),
-                "home_ab": int(game[get_col(13)]),
-                "home_r": int(game[get_col(14)]),
-                "home_hits": int(game[get_col(15)]),
-                "home_hr": int(game[get_col(16)]),
-                "home_rbi": int(game[get_col(17)]),
-                "home_bb": int(game[get_col(18)]),
-                "home_so": int(game[get_col(19)]),
+                "away_ab": maybe(game, get_col(6), int),
+                "away_r": maybe(game, get_col(7), int),
+                "away_hits": maybe(game, get_col(8), int),
+                "away_hr": maybe(game, get_col(9), int),
+                "away_rbi": maybe(game, get_col(10), int),
+                "away_bb": maybe(game, get_col(11), int),
+                "away_so": maybe(game, get_col(12), int),
+                "home_ab": maybe(game, get_col(13), int),
+                "home_r": maybe(game, get_col(14), int),
+                "home_hits": maybe(game, get_col(15), int),
+                "home_hr": maybe(game, get_col(16), int),
+                "home_rbi": maybe(game, get_col(17), int),
+                "home_bb": maybe(game, get_col(18), int),
+                "home_so": maybe(game, get_col(19), int),
             }
 
             results |= extra_stats
@@ -514,6 +542,8 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
 
 
 def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
+    """do math to get stats about team performances in the playoffs"""
+
     playoffs_team_stats: List[TeamStats] = []
 
     blank_team_stats_by_game = {
@@ -529,6 +559,7 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         "oppab": 0,
         "oppr": 0,
         "opph": 0,
+        "opphr": 0,
         "opprbi": 0,
         "oppbb": 0,
         "oppso": 0,
@@ -549,7 +580,7 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         if home not in stats_by_team:
             stats_by_team[home] = blank_team_stats_by_game.copy()
 
-        if game["away_ab"] is None:
+        if "away_ab" not in game or game["away_ab"] is None:
             # we're missing stats. don't count this game
             continue
 
@@ -558,8 +589,8 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
 
         away_stats["innings_hitting"] += math.ceil(game["innings"])
         away_stats["innings_pitching"] += math.floor(game["innings"])
-        home_stats["inning_hitting"] += math.floor(game["innings"])
-        home_stats["inning_pitching"] += math.ceil(game["innings"])
+        home_stats["innings_hitting"] += math.floor(game["innings"])
+        home_stats["innings_pitching"] += math.ceil(game["innings"])
 
         league_runs += game["away_r"]
         league_runs += game["home_r"]
@@ -570,14 +601,14 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         away_stats["games_played"] += 1
         away_stats["ab"] += game["away_ab"]
         away_stats["r"] += game["away_r"]
-        away_stats["h"] += game["away_h"]
+        away_stats["h"] += game["away_hits"]
         away_stats["hr"] += game["away_hr"]
         away_stats["rbi"] += game["away_rbi"]
         away_stats["bb"] += game["away_bb"]
         away_stats["so"] += game["away_so"]
         away_stats["oppab"] += game["home_ab"]
         away_stats["oppr"] += game["home_r"]
-        away_stats["opph"] += game["home_h"]
+        away_stats["opph"] += game["home_hits"]
         away_stats["opphr"] += game["home_hr"]
         away_stats["opprbi"] += game["home_rbi"]
         away_stats["oppbb"] += game["home_bb"]
@@ -587,14 +618,14 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         home_stats["games_played"] += 1
         home_stats["ab"] += game["home_ab"]
         home_stats["r"] += game["home_r"]
-        home_stats["h"] += game["home_h"]
+        home_stats["h"] += game["home_hits"]
         home_stats["hr"] += game["home_hr"]
         home_stats["rbi"] += game["home_rbi"]
         home_stats["bb"] += game["home_bb"]
         home_stats["so"] += game["home_so"]
         home_stats["oppab"] += game["away_ab"]
         home_stats["oppr"] += game["away_r"]
-        home_stats["opph"] += game["away_h"]
+        home_stats["opph"] += game["away_hits"]
         home_stats["opphr"] += game["away_hr"]
         home_stats["opprbi"] += game["away_rbi"]
         home_stats["oppbb"] += game["away_bb"]
@@ -620,6 +651,7 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
         league_innings_hitting += raw_stats["innings_hitting"]
 
         stats: TeamStats = {
+            "team": team,
             # hitting
             "rs": raw_stats["r"],
             "rs9": per_9_hitting("r"),
@@ -630,7 +662,11 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
             "h9": per_9_hitting("h"),
             "hr": raw_stats["hr"],
             "hr9": per_9_hitting("hr"),
-            "abhr": three_digits(raw_stats["ab"] / raw_stats["hr"]),
+            "abhr": (
+                three_digits(raw_stats["ab"] / raw_stats["hr"])
+                if raw_stats["hr"] != 0
+                else math.inf
+            ),
             "so": raw_stats["so"],
             "so9": per_9_hitting("so"),
             "bb": raw_stats["bb"],
@@ -638,7 +674,11 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
             "obp": three_digits(
                 (raw_stats["h"] + raw_stats["bb"]) / (raw_stats["ab"] + raw_stats["bb"])
             ),
-            "rc": three_digits(raw_stats["h"] / raw_stats["r"]),
+            "rc": (
+                three_digits(raw_stats["h"] / raw_stats["r"])
+                if raw_stats["r"] != 0
+                else math.inf
+            ),
             "babip": three_digits(
                 (raw_stats["h"] - raw_stats["hr"])
                 / (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"])
@@ -646,13 +686,21 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
             # pitching
             "ra": raw_stats["oppr"],
             "ra9": per_9_pitching("oppr"),
-            "oppba": three_digits(raw_stats["opph"] / raw_stats["oppab"]),
+            "oppba": (
+                three_digits(raw_stats["opph"] / raw_stats["oppab"])
+                if raw_stats["oppab"] != 0
+                else math.inf
+            ),
             "oppab9": per_9_pitching("oppab"),
             "opph": raw_stats["opph"],
             "opph9": per_9_pitching("opph"),
             "opphr": raw_stats["opphr"],
             "opphr9": per_9_pitching("opphr"),
-            "oppabhr": three_digits(raw_stats["ab"] / raw_stats["hr"]),
+            "oppabhr": (
+                three_digits(raw_stats["ab"] / raw_stats["hr"])
+                if raw_stats["hr"] != 0
+                else math.inf
+            ),
             "oppk": raw_stats["oppso"],
             "oppk9": per_9_pitching("oppso"),
             "oppbb": raw_stats["oppbb"],
@@ -686,7 +734,8 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
             )
             / 2,
             "innings_game": three_digits(
-                stats["innings_played"] / raw_stats["games_played"]
+                ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
+                / raw_stats["games_played"]
             ),
         }
 
@@ -695,12 +744,64 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
     return playoffs_team_stats
 
 
+def collect_playoffs_team_records(results: List[PlayoffsGameResults]):
+    """figure out how each round of the playoffs is going for each team"""
+    records_by_team: dict[str, PlayoffsTeamRecord] = {}
+
+    default_round = {"wins": 0, "losses": 0, "remaining": 0}
+
+    for game in results:
+        away_team = game["away_team"]
+        home_team = game["home_team"]
+        this_round = game["round"]
+
+        if home_team not in records_by_team:
+            records_by_team[home_team] = {"team": home_team, "rounds": {}}
+
+        if away_team not in records_by_team:
+            records_by_team[away_team] = {"team": away_team, "rounds": {}}
+
+        if this_round not in records_by_team[home_team]["rounds"]:
+            records_by_team[home_team]["rounds"][this_round] = default_round | {
+                "round": this_round,
+                "team": home_team,
+                "opponent": away_team,
+            }
+
+        if this_round not in records_by_team[away_team]["rounds"]:
+            records_by_team[away_team]["rounds"][this_round] = default_round | {
+                "round": this_round,
+                "team": away_team,
+                "opponent": home_team,
+            }
+
+        home_round_record = records_by_team[home_team]["rounds"][this_round].copy()
+        away_round_record = records_by_team[away_team]["rounds"][this_round].copy()
+
+        winner = away_team if game["away_score"] > game["home_score"] else home_team
+
+        if winner == away_team:
+            away_round_record["wins"] += 1
+            home_round_record["losses"] += 1
+        else:
+            home_round_record["wins"] += 1
+            away_round_record["losses"] += 1
+
+        # TODO it'd be nice to have access to something that tells us how many games are in the series
+
+        records_by_team[away_team]["rounds"][this_round] = away_round_record
+        records_by_team[home_team]["rounds"][this_round] = home_round_record
+
+    records = [records_by_team[team] for team in records_by_team.keys()]
+    return records
+
+
 class SeasonStats(TypedDict):
     current_season: int
-    season_team_records: List[TeamRecord]
+    season_team_records: List[SeasonTeamRecord]
     season_team_stats: List[TeamStats]
     season_game_results: List[SeasonGameResults]
-    playoffs_team_records: List[TeamRecord]
+    playoffs_team_records: List[PlayoffsTeamRecord]
     playoffs_game_results: List[PlayoffsGameResults]
     playoffs_team_stats: List[TeamStats]
 
@@ -753,9 +854,10 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
 
     playoffs_game_results = collect_game_results(True, playoffs_scores_data)
     data["playoffs_game_results"] = playoffs_game_results
+    data["playoffs_team_records"] = collect_playoffs_team_records(playoffs_game_results)
 
     # no spreadsheet has these. we have to run the numbers ourselves
-    playoffs_team_stats = calc_playoffs_team_stats(playoffs_game_results)
+    data["playoffs_team_stats"] = calc_playoffs_team_stats(playoffs_game_results)
 
     return data
 
@@ -772,13 +874,12 @@ def main(args: MyNamespace):
     }
 
     # write json data
-    # for league in LEAGUES:
-    # print(season_data[league])
-    # season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
-    # with open(season_json, "w") as f:
-    #     f.write(json.dumps(season_data[league]))
+    for league in LEAGUES:
+        season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
+        with open(season_json, "w") as f:
+            f.write(json.dumps(season_data[league]))
 
-    # shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
+        shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
 
 
 if __name__ == "__main__":
