@@ -4,7 +4,7 @@ import { League } from "@/typings/league";
 
 /** get the g sheets JSON from one of the files we cached */
 export default function getLocalJson(league: League, tab: string) {
-  const filePath = path.join(process.cwd(), 'public', 'json', `${league}__${tab}.json`);
+  const filePath = path.join(process.cwd(), 'public', 'json', 'raw', `${league}__${tab}.json`);
   const fileContents = fs.readFileSync(filePath, 'utf8');
 
   // TODO error handling
