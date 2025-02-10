@@ -62,7 +62,7 @@ def collect_all_time_stats(json_dir: Path, g_sheets_api_key: str):
 
 def main():
     g_sheets_api_key = os.getenv("G_SHEETS_API_KEY", None)
-    if g_sheets_api_key is None:
+    if g_sheets_api_key is None or g_sheets_api_key == "":
         raise Exception("Missing Google Drive API key")
 
     # make sure the json dir exists
