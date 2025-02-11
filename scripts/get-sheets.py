@@ -34,6 +34,7 @@ def collect_league_stats(json_dir: Path, g_sheets_api_key: str):
 
 def collect_all_time_stats(json_dir: Path, g_sheets_api_key: str):
     common_tab_suffixes = [
+        ["Team", "Abbreviations"],
         ["Head", "to", "Head"],
         ["Standings", "Stats"],
         ["Hitting", "Stats"],

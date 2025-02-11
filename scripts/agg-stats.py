@@ -235,27 +235,26 @@ class TeamStats(TypedDict):
     rd9: float
     innings_played: int
     innings_game: float
+    wins_by_run_rule: int
+    losses_by_run_rule: int
 
 
-def collect_team_records_and_stats(
+def collect_team_records(
     league: str,
     standings_data: List[List[str]],
-    hitting_data: List[List[str]],
-    pitching_data: List[List[str]],
 ):
-    team_records: List[SeasonTeamRecord] = []
-    team_stats: List[TeamStats] = []
-    stats_by_team: dict[str, TeamStats] = {}
+    team_records: dict[str, SeasonTeamRecord] = []
 
     # return a different row for AA
     get_row: int = lambda r: r + 2 if league == "AA" else r
 
-    team_records = [
-        {
+    for row in standings_data[1:]:
+        team = row[1]
+        team_records[team] = {
+            "team": team,
+            "rank": int(row[0]),
             "ego_starting": int(row[2]) if league == "AA" else None,
             "ego_current": int(row[3]) if league == "AA" else None,
-            "rank": int(row[0]),
-            "team": row[1],
             "wins": int(row[get_row(2)]),
             "losses": int(row[get_row(3)]),
             "gb": 0.0 if row[get_row(4)] == "-" else float(row[get_row(4)]),
@@ -267,73 +266,19 @@ def collect_team_records_and_stats(
             "sos": int(row[get_row(10)]),
             "elo": int(row[get_row(19)].replace(",", "")),
         }
-        for row in standings_data[1:]
-    ]
 
     team_count = len(team_records)
     games_per_team = 2 * (team_count - 1)
 
-    for i in range(len(team_records)):
+    for team in team_records.keys():
         # I think Ws and Ls in the spreadsheet don't account for teams who drop?
-        team_records[i]["remaining"] = max(
-            games_per_team - (team_records[i]["wins"] + team_records[i]["losses"]), 0
+        team_records[team]["remaining"] = max(
+            games_per_team
+            - (team_records[team]["wins"] + team_records[team]["losses"]),
+            0,
         )
 
-    for row in standings_data[1:]:
-        stats_by_team[row[1]] = {
-            "team": row[1],
-            "rs": int(row[get_row(11)]),
-            "ra": int(row[get_row(12)]),
-            "rd": int(row[get_row(13)]),
-            "rs9": float(row[get_row(14)]),
-            "ra9": float(row[get_row(15)]),
-            "rd9": float(row[get_row(16)]),
-            "innings_played": int(row[get_row(17)]),
-            "innings_game": float(row[get_row(18)]),
-        }
-
-    for row in hitting_data[1:]:
-        stats_by_team[row[1]] = stats_by_team[row[1]] | {
-            "hitting_rank": int(row[0]),
-            "ba": float(row[2]),
-            "ab": int(row[3]),
-            "ab9": float(row[4]),
-            "h": int(row[5]),
-            "h9": float(row[6]),
-            "hr": int(row[7]),
-            "hr9": float(row[8]),
-            "so": int(row[9]),
-            "so9": float(row[10]),
-            "bb": int(row[11]),
-            "bb9": float(row[12]),
-            "obp": float(row[13]),
-            "rc": float(row[14]),
-            "babip": float(row[15]),
-        }
-
-    for row in pitching_data[1:]:
-        stats_by_team[row[1]] = stats_by_team[row[1]] | {
-            "pitching_rank": row[0],
-            "oppba": float(row[2]),
-            "oppab9": float(row[3]),
-            "opph": int(row[4]),
-            "opph9": float(row[5]),
-            "opphr": int(row[6]),
-            "opphr9": float(row[7]),
-            "oppabhr": float(row[8]),
-            "oppk": int(row[9]),
-            "oppk9": float(row[10]),
-            "oppbb": int(row[11]),
-            "oppbb9": float(row[12]),
-            "whip": float(row[13]),
-            "lob": float(row[14]),
-            "e": int(row[15]),
-            "fip": float(row[16]),
-        }
-
-    team_stats = [stats_by_team[team] for team in stats_by_team.keys()]
-
-    return (team_records, team_stats)
+    return team_records
 
 
 class GameResults(TypedDict):
@@ -341,6 +286,8 @@ class GameResults(TypedDict):
     away_team: str
     home_score: int
     away_score: int
+    run_rule: bool
+    winner: str
     innings: int
     away_ab: int
     away_r: int
@@ -379,12 +326,19 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
     get_col = lambda c: c if playoffs else c + 2
 
     for game in box_score_data[1:]:
+        away_team = game[1]
+        home_team = game[4]
+        away_score = int(game[2])
+        home_score = int(game[3])
+        innings = float(game[get_col(5)])
         results = {
-            "away_team": game[1],
-            "home_team": game[4],
-            "away_score": int(game[2]),
-            "home_score": int(game[3]),
-            "innings": float(game[get_col(5)]),
+            "away_team": away_team,
+            "home_team": home_team,
+            "away_score": away_score,
+            "home_score": home_score,
+            "innings": innings,
+            "winner": away_team if away_score > home_score else home_team,
+            "run_rule": innings <= 8.0,
         }
         if playoffs:
             results["round"] = game[0]
@@ -423,14 +377,16 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
     return game_results
 
 
-def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
-    """do math to get stats about team performances in the playoffs"""
+def calc_team_team_stats(game_results: List[GameResults]):
+    """do math to get stats about team performances. we get a few things that aren't in the spreadsheet"""
 
-    playoffs_team_stats: List[TeamStats] = []
+    playoffs_team_stats: dict[str, TeamStats] = {}
 
     blank_team_stats_by_game = {
         "innings_pitching": 0,
         "innings_hitting": 0,
+        "wins_by_run_rule": 0,
+        "losses_by_run_rule": 0,
         "ab": 0,
         "r": 0,
         "h": 0,
@@ -454,13 +410,20 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
     league_innings_hitting = 0
 
     # aggregate stats by team by looking at each game
-    for game in playoffs_game_results:
+    for game in game_results:
         away = game["away_team"]
         home = game["home_team"]
         if away not in stats_by_team:
             stats_by_team[away] = blank_team_stats_by_game.copy()
         if home not in stats_by_team:
             stats_by_team[home] = blank_team_stats_by_game.copy()
+
+        if game["winner"] == away and game["run_rule"]:
+            stats_by_team[away]["wins_by_run_rule"] += 1
+            stats_by_team[home]["losses_by_run_rule"] += 1
+        if game["winner"] == home and game["run_rule"]:
+            stats_by_team[home]["wins_by_run_rule"] += 1
+            stats_by_team[away]["losses_by_run_rule"] += 1
 
         if "away_ab" not in game or game["away_ab"] is None:
             # we're missing stats. don't count this game
@@ -619,9 +582,11 @@ def calc_playoffs_team_stats(playoffs_game_results: List[PlayoffsGameResults]):
                 ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
                 / raw_stats["games_played"]
             ),
+            "wins_by_run_rule": raw_stats["wins_by_run_rule"],
+            "losses_by_run_rule": raw_stats["losses_by_run_rule"],
         }
 
-        playoffs_team_stats.append(stats)
+        playoffs_team_stats[team] = stats
 
     return playoffs_team_stats
 
@@ -674,29 +639,28 @@ def collect_playoffs_team_records(results: List[PlayoffsGameResults]):
         records_by_team[away_team]["rounds"][this_round] = away_round_record
         records_by_team[home_team]["rounds"][this_round] = home_round_record
 
-    records = [records_by_team[team] for team in records_by_team.keys()]
-    return records
+    return records_by_team
 
 
 class SeasonStats(TypedDict):
     current_season: int
-    season_team_records: List[SeasonTeamRecord]
-    season_team_stats: List[TeamStats]
+    season_team_records: dict[str, SeasonTeamRecord]
+    season_team_stats: dict[str, TeamStats]
     season_game_results: List[SeasonGameResults]
-    playoffs_team_records: List[PlayoffsTeamRecord]
+    playoffs_team_records: dict[str, PlayoffsTeamRecord]
+    playoffs_team_stats: dict[str, TeamStats]
     playoffs_game_results: List[PlayoffsGameResults]
-    playoffs_team_stats: List[TeamStats]
 
 
 def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonStats:
-    print(f"Running {league}...")
+    print(f"Running season {season} {league}...")
     data: SeasonStats = {
         "current_season": season,
-        "season_team_records": [],
-        "season_team_stats": [],
+        "season_team_records": {},
+        "season_team_stats": {},
         "season_game_results": [],
-        "playoffs_team_records": [],
-        "playoffs_team_stats": [],
+        "playoffs_team_records": {},
+        "playoffs_team_stats": {},
         "playoffs_game_results": [],
     }
 
@@ -715,11 +679,10 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
         raw_data = json.loads(f.read())
         pitching_data = raw_data["values"]
 
-    season_team_records, season_team_stats = collect_team_records_and_stats(
+    season_team_records = collect_team_records(
         league, standings_data, hitting_data, pitching_data
     )
     data["season_team_records"] = season_team_records
-    data["season_team_stats"] = season_team_stats
 
     season_scores_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Box%20Scores.json")) as f:
@@ -728,6 +691,7 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
 
     season_game_results = collect_game_results(False, season_scores_data)
     data["season_game_results"] = season_game_results
+    data["season_team_stats"] = calc_team_team_stats(season_game_results)
 
     playoffs_scores_data = None
     with open(g_sheets_dir.joinpath(f"{league}__Playoffs.json")) as f:
@@ -739,9 +703,150 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
     data["playoffs_team_records"] = collect_playoffs_team_records(playoffs_game_results)
 
     # no spreadsheet has these. we have to run the numbers ourselves
-    data["playoffs_team_stats"] = calc_playoffs_team_stats(playoffs_game_results)
+    data["playoffs_team_stats"] = calc_team_team_stats(playoffs_game_results)
 
     return data
+
+
+class TeamSeason(TypedDict):
+    team_name: str
+    team_abbrev: str
+    league: str
+    season: int
+
+
+class Player(TypedDict):
+    player: str
+    teams: List[TeamSeason]
+
+
+def collect_players(
+    xbl_abbrev_data: List[List[str]],
+    aaa_abbrev_data: List[List[str]],
+    aa_abbrev_data: List[List[str]],
+) -> dict[str, Player]:
+    """Find everyone who ever played in the league and when they played"""
+    players: dict[str, Player] = {}
+
+    for row in xbl_abbrev_data[1:]:
+        season = int(row[0])
+        team_name = row[1]
+        team_abbrev = row[2]
+        player = row[3]
+
+        if player not in players:
+            players[player] = {"player": player, "teams": []}
+
+        players[player]["teams"].append(
+            {
+                "team_name": team_name,
+                "team_abbrev": team_abbrev,
+                "league": "XBL",
+                "season": season,
+            }
+        )
+
+    for row in aaa_abbrev_data[1:]:
+        season = int(row[0])
+        team_name = row[1]
+        team_abbrev = row[2]
+        player = row[3]
+
+        if player not in players:
+            players[player] = {"player": player, "teams": []}
+
+        players[player]["teams"].append(
+            {
+                "team_name": team_name,
+                "team_abbrev": team_abbrev,
+                "league": "AAA",
+                "season": season,
+            }
+        )
+
+    for row in aa_abbrev_data[1:]:
+        season = int(row[0])
+        team_name = row[1]
+        team_abbrev = row[2]
+        player = row[3]
+
+        if player not in players:
+            players[player] = {"player": player, "teams": []}
+
+        players[player]["teams"].append(
+            {
+                "team_name": team_name,
+                "team_abbrev": team_abbrev,
+                "league": "AA",
+                "season": season,
+            }
+        )
+
+    return players
+
+
+class CareerPerformance(TypedDict):
+    player: str
+    by_league: dict[str, TeamStats]
+    all_time: TeamStats
+
+
+class HeadToHead(TypedDict):
+    """player_a and player_z must be in alphabetical order"""
+
+    player_a: str
+    player_z: str
+    player_a_stats: TeamStats
+    player_z_stats: TeamStats
+
+
+class CareerStats(TypedDict):
+    players: dict[str, Player]
+    season_performances: dict[str, CareerPerformance]
+    season_head_to_head: List[HeadToHead]
+    playoffs_performances: dict[str, CareerPerformance]
+    playoffs_head_to_head: List[HeadToHead]
+
+
+def build_career_stats(active_teams: dict[str, List[str]], g_sheets_dir: Path):
+    print(f"Running career stats...")
+    data: CareerStats = {
+        "players": {},
+        "season_performances": {},
+        "season_head_to_head": [],
+        "playoffs_performances": {},
+        "playoffs_head_to_head": [],
+    }
+
+    xbl_abbrev_data = None
+    with open(
+        g_sheets_dir.joinpath("CAREER_STATS__XBL%20Team%20Abbreviations.json")
+    ) as f:
+        raw_data = json.loads(f.read())
+        xbl_abbrev_data = raw_data["values"]
+
+    aaa_abbrev_data = None
+    with open(
+        g_sheets_dir.joinpath("CAREER_STATS__AAA%20Team%20Abbreviations.json")
+    ) as f:
+        raw_data = json.loads(f.read())
+        aaa_abbrev_data = raw_data["values"]
+
+    aa_abbrev_data = None
+    with open(
+        g_sheets_dir.joinpath(f"CAREER_STATS__AA%20Team%20Abbreviations.json")
+    ) as f:
+        raw_data = json.loads(f.read())
+        aa_abbrev_data = raw_data["values"]
+
+    data["players"] = collect_players(xbl_abbrev_data, aaa_abbrev_data, aa_abbrev_data)
+
+    career_stats_data = None
+    with open(
+        g_sheets_dir.joinpath(f"CAREER_STATS__{league}%20Career%20Stats.json")
+    ) as f:
+        raw_data = json.loads(f.read())
+        career_stats_data = raw_data["values"]
 
 
 def main(args: MyNamespace):
@@ -755,13 +860,21 @@ def main(args: MyNamespace):
         for league in LEAGUES
     }
 
-    # write json data
+    all_teams = {
+        {league: season_data[league]["season_team_stats"].keys()} for league in LEAGUES
+    }
+
     for league in LEAGUES:
         season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
         with open(season_json, "w") as f:
             f.write(json.dumps(season_data[league]))
 
         shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
+
+    career_data = build_career_stats(all_teams, args.g_sheets_dir)
+
+    with open("careers.json", "w") as f:
+        f.write(json.dumps(career_data))
 
 
 if __name__ == "__main__":
