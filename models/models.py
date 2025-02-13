@@ -231,17 +231,22 @@ class HeadToHead(TypedDict):
 class CareerStats(TypedDict):
     players: dict[str, Player]
     season_performances: dict[str, CareerSeasonPerformance]
-    season_head_to_head: dict[tuple[str, str], HeadToHead]
+    """look ups should look like: [player_a][player_z] = head_to_head"""
+    season_head_to_head: dict[str, dict[str, HeadToHead]]
     playoffs_performances: dict[str, CareerPlayoffsPerformance]
     playoffs_head_to_head: List[HeadToHead]
 
 
-def main(args):
+def get_schemas():
     season_stats_adapter = pydantic.TypeAdapter(SeasonStats)
     career_stats_adapter = pydantic.TypeAdapter(CareerStats)
 
     print(season_stats_adapter.json_schema())
     print(career_stats_adapter.json_schema())
+
+
+def main(args):
+    get_schemas()
 
 
 if __name__ == "__main__":
