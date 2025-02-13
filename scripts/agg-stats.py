@@ -1,135 +1,59 @@
+"""
+Aggregate all the XBL stats that we can find into a clear, accessible set of high-level statistics. These statistics are at the level that you would want to put in the ticker for a sports broadcast. The script expects that you've already run scripts/get-sheets.py (or you've downloaded the same data with the same filenames some other way).
+
+Usage:
+    python scripts/agg-stats --help
+    python scripts/agg-stats --season 18 # the season number is the current season
+"""
+
 import argparse
 import json
 import math
 from pathlib import Path
 import shutil
-from typing import List, TypedDict
+from typing import List
+
+from .stats_models import *
 
 # TODO keep an old json around per season. lets us show last season's stats at the beginning of next season
 # TODO consistency between "so" and "k"
 
-"""
-careers.json
-{
-    players: [
-        {
-            handle,
-            teams: [
-                {
-                    teamName,
-                    league,
-                    season
-                }
-            ]
-        }
-    ],
-    season_performances: [
-        {
-            player,
-            xbl: {},
-            aaa: {},
-            aa: {
-                ba,
-                ab,
-                h,
-                hr,
-                so,
-                bb,
-                ip,
-                oppba,
-                oppab,
-                opph,
-                opphr,
-                oppso,
-                oppbb,
-            }
-        }
-    ],
-    season_head_to_head: [ # Career Stats / Head to Head
-        {
-            playerA,
-            playerZ,
-            playerA_wins,
-            playerA_runrules,
-            playerA_hrs,
-            playerA_runs,
-            playerA_hits,
-            playerA_rbi,
-            playerA_bb,
-            playerA_so,
-            playerA_r9,
-            playerZ_ ...,
-        }
-    ],
-    playoff_performances: [
-        {
-            player,
-            xbl: {},
-            aaa: {},
-            aa: {
-                ba,
-                ab,
-                h,
-                hr,
-                so,
-                bb,
-                ip,
-                oppba,
-                oppab,
-                opph,
-                opphr,
-                oppso,
-                oppbb,
-            }
-        }
-    ],
-    playoff_head_to_head: [ # Playoff Stats / Head to Head. can also use Playoff Stats / Series Table
-        {
-            playerA,
-            playerZ,
-            playerA_series_wins, # not sure how to get this
-            playerA_wins,
-            playerA_runrules,
-            playerA_hrs,
-            playerA_runs,
-            playerA_hits,
-            playerA_rbi,
-            playerA_bb,
-            playerA_so,
-            playerA_r9,
-            playerZ_ ...,
-        }
-    ]
-}
-"""
-
 LEAGUES = ["XBL", "AAA", "AA"]
 
 
-class MyNamespace(argparse.Namespace):
+class StatsAggNamespace(argparse.Namespace):
     season: int
     g_sheets_dir: Path
     save_dir: Path
+    query: List[str]
 
 
 def arg_parser():
     parser = argparse.ArgumentParser(
-        description="Aggregate XBL stats per-season and for careers"
+        description="Aggregate high-level XBL stats per-season and for careers"
     )
     parser.add_argument("-s", "--season", type=int, help="Current season")
     parser.add_argument(
-        "-g",
         "--g-sheets-dir",
+        "-g",
         type=Path,
         default=Path("public/json/raw"),
         help="Path to where JSON from Google Sheets is stored",
     )
     parser.add_argument(
-        "-S",
         "--save-dir",
+        "-S",
         type=Path,
         default=Path("public/json"),
         help="Path to where parsed JSON should be stored",
+    )
+    parser.add_argument(
+        "--query",
+        "-Q",
+        nargs="+",
+        type=List[str],
+        default=[],
+        help="Perform a query on the resulting data. Enter a list of keys to look up. The first key must be either 'career' or 'season'"
     )
 
     return parser
@@ -150,99 +74,11 @@ def maybe(row: List[str], col: int, type: callable):
     return ret
 
 
-class TeamRecord(TypedDict):
-    """Generic performance of a team in wins and losses"""
-
-    team: str
-    wins: int
-    losses: int
-    remaining: int
-
-
-class SeasonTeamRecord(TeamRecord):
-    """How a team stacks up in a given season"""
-
-    rank: int
-    ego_starting: int
-    ego_current: int
-    gb: float
-    win_pct: float
-    win_pct_vs_500: float
-    sweeps_w: int
-    splits: int
-    sweeps_l: int
-    sos: int
-    elo: int
-
-
-class PlayoffsRound(TeamRecord):
-    round: str
-    opponent: str
-
-
-class PlayoffsTeamRecord(TypedDict):
-    team: str
-    rounds: dict[str, PlayoffsRound]
-
-
-class TeamStats(TypedDict):
-    """Performance stats for a team for a given season/playoffs"""
-
-    team: str
-
-    # hitting
-    hitting_rank: int
-    rs: int
-    rs9: float
-    ba: float
-    ab: int
-    ab9: float
-    h: int
-    h9: float
-    hr: int
-    hr9: float
-    abhr: float
-    so: int
-    so9: float
-    bb: int
-    bb9: float
-    obp: float
-    rc: float  # run conversion
-    babip: float
-
-    # pitching
-    pitching_rank: int
-    ra: int
-    ra9: float
-    oppba: float
-    oppab9: float
-    opph: int
-    opph9: float
-    opphr: int
-    opphr9: float
-    oppabhr: float
-    oppk: int
-    oppk9: float
-    oppbb: int
-    oppbb9: float
-    whip: float
-    lob: float
-    e: int
-    fip: float
-
-    # mixed
-    rd: int
-    rd9: float
-    innings_played: int
-    innings_game: float
-    wins_by_run_rule: int
-    losses_by_run_rule: int
-
-
 def collect_team_records(
     league: str,
     standings_data: List[List[str]],
 ):
+    """cleaned up team wins and losses for the regular season"""
     team_records: dict[str, SeasonTeamRecord] = []
 
     # return a different row for AA
@@ -279,40 +115,6 @@ def collect_team_records(
         )
 
     return team_records
-
-
-class GameResults(TypedDict):
-    home_team: str
-    away_team: str
-    home_score: int
-    away_score: int
-    run_rule: bool
-    winner: str
-    innings: int
-    away_ab: int
-    away_r: int
-    away_hits: int
-    away_hr: int
-    away_rbi: int
-    away_bb: int
-    away_so: int
-    away_e: int
-    home_ab: int
-    home_r: int
-    home_hits: int
-    home_hr: int
-    home_rbi: int
-    home_bb: int
-    home_so: int
-    home_e: int
-
-
-class SeasonGameResults(GameResults):
-    week: int
-
-
-class PlayoffsGameResults(GameResults):
-    round: str
 
 
 def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
@@ -377,12 +179,117 @@ def collect_game_results(playoffs: bool, box_score_data: List[List[str]]):
     return game_results
 
 
+
+def calc_stats_from_all_games(
+    raw_stats: RawStats, league_era: float, team="", player=""
+) -> TeamStats:
+    """given everything a player/team did across all games, calculate stat lines"""
+    per_9_hitting = lambda key: three_digits(
+        (raw_stats[key] / raw_stats["innings_hitting"]) * 9
+    )
+    per_9_pitching = lambda key: three_digits(
+        (raw_stats[key] / raw_stats["innings_pitching"]) * 9
+    )
+
+    stats: TeamStats = {
+        "team": team,
+        "player": player,
+        # hitting
+        "rs": raw_stats["r"],
+        "rs9": per_9_hitting("r"),
+        "ba": three_digits(raw_stats["h"] / raw_stats["ab"]),
+        "ab": raw_stats["ab"],
+        "ab9": per_9_hitting("ab"),
+        "h": raw_stats["h"],
+        "h9": per_9_hitting("h"),
+        "hr": raw_stats["hr"],
+        "hr9": per_9_hitting("hr"),
+        "abhr": (
+            three_digits(raw_stats["ab"] / raw_stats["hr"])
+            if raw_stats["hr"] != 0
+            else math.inf
+        ),
+        "so": raw_stats["so"],
+        "so9": per_9_hitting("so"),
+        "bb": raw_stats["bb"],
+        "bb9": per_9_hitting("bb"),
+        "obp": three_digits(
+            (raw_stats["h"] + raw_stats["bb"]) / (raw_stats["ab"] + raw_stats["bb"])
+        ),
+        "rc": (
+            three_digits(raw_stats["h"] / raw_stats["r"])
+            if raw_stats["r"] != 0
+            else math.inf
+        ),
+        "babip": three_digits(
+            (raw_stats["h"] - raw_stats["hr"])
+            / (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"])
+        ),
+        # pitching
+        "ra": raw_stats["oppr"],
+        "ra9": per_9_pitching("oppr"),
+        "oppba": (
+            three_digits(raw_stats["opph"] / raw_stats["oppab"])
+            if raw_stats["oppab"] != 0
+            else math.inf
+        ),
+        "oppab9": per_9_pitching("oppab"),
+        "opph": raw_stats["opph"],
+        "opph9": per_9_pitching("opph"),
+        "opphr": raw_stats["opphr"],
+        "opphr9": per_9_pitching("opphr"),
+        "oppabhr": (
+            three_digits(raw_stats["ab"] / raw_stats["hr"])
+            if raw_stats["hr"] != 0
+            else math.inf
+        ),
+        "oppk": raw_stats["oppso"],
+        "oppk9": per_9_pitching("oppso"),
+        "oppbb": raw_stats["oppbb"],
+        "oppbb9": per_9_pitching("oppbb"),
+        "whip": three_digits(
+            (raw_stats["opph"] + raw_stats["oppbb"]) / raw_stats["innings_pitching"]
+        ),
+        "lob": three_digits(
+            (raw_stats["opph"] + raw_stats["oppbb"] - raw_stats["oppr"])
+            / (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"])
+        ),
+        "e": None,
+        # TODO is this right?
+        "fip": three_digits(
+            league_era
+            - (
+                (
+                    raw_stats["opphr"] * 13
+                    + 3 * raw_stats["oppbb"]
+                    - 2 * raw_stats["oppso"]
+                )
+                / raw_stats["innings_pitching"]
+            )
+        ),
+        # mixed
+        "rd": raw_stats["r"] - raw_stats["oppr"],
+        # TODO is this right?
+        "rd9": three_digits(per_9_hitting("r") - per_9_pitching("oppr")),
+        "innings_played": (raw_stats["innings_hitting"] + raw_stats["innings_pitching"])
+        / 2,
+        "innings_game": three_digits(
+            ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
+            / raw_stats["games_played"]
+        ),
+        "wins_by_run_rule": raw_stats["wins_by_run_rule"],
+        "losses_by_run_rule": raw_stats["losses_by_run_rule"],
+    }
+
+    return stats
+
+
 def calc_team_team_stats(game_results: List[GameResults]):
-    """do math to get stats about team performances. we get a few things that aren't in the spreadsheet"""
+    """do math to get stats about team performances over the games passed in to this function. we get a few stats that aren't in the spreadsheets"""
 
-    playoffs_team_stats: dict[str, TeamStats] = {}
+    stats_by_team: dict[str, TeamStats] = {}
 
-    blank_team_stats_by_game = {
+    blank_team_stats_by_game: RawStats = {
         "innings_pitching": 0,
         "innings_hitting": 0,
         "wins_by_run_rule": 0,
@@ -404,33 +311,33 @@ def calc_team_team_stats(game_results: List[GameResults]):
         "games_played": 0,
     }
 
-    stats_by_team: dict[str, dict[str, int | float]] = {}
+    raw_stats_by_team: dict[str, dict[str, int | float]] = {}
 
     league_runs = 0
     league_innings_hitting = 0
 
-    # aggregate stats by team by looking at each game
+    # collect stats by team by looking at each game
     for game in game_results:
         away = game["away_team"]
         home = game["home_team"]
-        if away not in stats_by_team:
-            stats_by_team[away] = blank_team_stats_by_game.copy()
-        if home not in stats_by_team:
-            stats_by_team[home] = blank_team_stats_by_game.copy()
+        if away not in raw_stats_by_team:
+            raw_stats_by_team[away] = blank_team_stats_by_game.copy()
+        if home not in raw_stats_by_team:
+            raw_stats_by_team[home] = blank_team_stats_by_game.copy()
 
         if game["winner"] == away and game["run_rule"]:
-            stats_by_team[away]["wins_by_run_rule"] += 1
-            stats_by_team[home]["losses_by_run_rule"] += 1
+            raw_stats_by_team[away]["wins_by_run_rule"] += 1
+            raw_stats_by_team[home]["losses_by_run_rule"] += 1
         if game["winner"] == home and game["run_rule"]:
-            stats_by_team[home]["wins_by_run_rule"] += 1
-            stats_by_team[away]["losses_by_run_rule"] += 1
+            raw_stats_by_team[home]["wins_by_run_rule"] += 1
+            raw_stats_by_team[away]["losses_by_run_rule"] += 1
 
         if "away_ab" not in game or game["away_ab"] is None:
             # we're missing stats. don't count this game
             continue
 
-        away_stats = stats_by_team[away].copy()
-        home_stats = stats_by_team[home].copy()
+        away_stats = raw_stats_by_team[away].copy()
+        home_stats = raw_stats_by_team[home].copy()
 
         away_stats["innings_hitting"] += math.ceil(game["innings"])
         away_stats["innings_pitching"] += math.floor(game["innings"])
@@ -476,119 +383,19 @@ def calc_team_team_stats(game_results: List[GameResults]):
         home_stats["oppbb"] += game["away_bb"]
         home_stats["oppso"] += game["away_so"]
 
-        stats_by_team[away] = away_stats
-        stats_by_team[home] = home_stats
-
-    per_9_hitting = lambda key: three_digits(
-        (raw_stats[key] / raw_stats["innings_hitting"]) * 9
-    )
-    per_9_pitching = lambda key: three_digits(
-        (raw_stats[key] / raw_stats["innings_pitching"]) * 9
-    )
+        raw_stats_by_team[away] = away_stats
+        raw_stats_by_team[home] = home_stats
 
     league_era = three_digits(9 * league_runs / league_innings_hitting)
 
-    # do math to get aggregate playoffs stats
-    for team in stats_by_team.keys():
+    # do math to get aggregate stats
+    for team in raw_stats_by_team.keys():
         raw_stats = stats_by_team[team]
+        stats_by_team[team] = calc_stats_from_all_games(
+            raw_stats, league_era, team=team
+        )
 
-        league_runs += raw_stats["r"]
-        league_innings_hitting += raw_stats["innings_hitting"]
-
-        stats: TeamStats = {
-            "team": team,
-            # hitting
-            "rs": raw_stats["r"],
-            "rs9": per_9_hitting("r"),
-            "ba": three_digits(raw_stats["h"] / raw_stats["ab"]),
-            "ab": raw_stats["ab"],
-            "ab9": per_9_hitting("ab"),
-            "h": raw_stats["h"],
-            "h9": per_9_hitting("h"),
-            "hr": raw_stats["hr"],
-            "hr9": per_9_hitting("hr"),
-            "abhr": (
-                three_digits(raw_stats["ab"] / raw_stats["hr"])
-                if raw_stats["hr"] != 0
-                else math.inf
-            ),
-            "so": raw_stats["so"],
-            "so9": per_9_hitting("so"),
-            "bb": raw_stats["bb"],
-            "bb9": per_9_hitting("bb"),
-            "obp": three_digits(
-                (raw_stats["h"] + raw_stats["bb"]) / (raw_stats["ab"] + raw_stats["bb"])
-            ),
-            "rc": (
-                three_digits(raw_stats["h"] / raw_stats["r"])
-                if raw_stats["r"] != 0
-                else math.inf
-            ),
-            "babip": three_digits(
-                (raw_stats["h"] - raw_stats["hr"])
-                / (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"])
-            ),
-            # pitching
-            "ra": raw_stats["oppr"],
-            "ra9": per_9_pitching("oppr"),
-            "oppba": (
-                three_digits(raw_stats["opph"] / raw_stats["oppab"])
-                if raw_stats["oppab"] != 0
-                else math.inf
-            ),
-            "oppab9": per_9_pitching("oppab"),
-            "opph": raw_stats["opph"],
-            "opph9": per_9_pitching("opph"),
-            "opphr": raw_stats["opphr"],
-            "opphr9": per_9_pitching("opphr"),
-            "oppabhr": (
-                three_digits(raw_stats["ab"] / raw_stats["hr"])
-                if raw_stats["hr"] != 0
-                else math.inf
-            ),
-            "oppk": raw_stats["oppso"],
-            "oppk9": per_9_pitching("oppso"),
-            "oppbb": raw_stats["oppbb"],
-            "oppbb9": per_9_pitching("oppbb"),
-            "whip": three_digits(
-                (raw_stats["opph"] + raw_stats["oppbb"]) / raw_stats["innings_pitching"]
-            ),
-            "lob": three_digits(
-                (raw_stats["opph"] + raw_stats["oppbb"] - raw_stats["oppr"])
-                / (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"])
-            ),
-            "e": None,
-            # TODO is this right?
-            "fip": three_digits(
-                league_era
-                - (
-                    (
-                        raw_stats["opphr"] * 13
-                        + 3 * raw_stats["oppbb"]
-                        - 2 * raw_stats["oppso"]
-                    )
-                    / raw_stats["innings_pitching"]
-                )
-            ),
-            # mixed
-            "rd": raw_stats["r"] - raw_stats["oppr"],
-            # TODO is this right?
-            "rd9": three_digits(per_9_hitting("r") - per_9_pitching("oppr")),
-            "innings_played": (
-                raw_stats["innings_hitting"] + raw_stats["innings_pitching"]
-            )
-            / 2,
-            "innings_game": three_digits(
-                ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
-                / raw_stats["games_played"]
-            ),
-            "wins_by_run_rule": raw_stats["wins_by_run_rule"],
-            "losses_by_run_rule": raw_stats["losses_by_run_rule"],
-        }
-
-        playoffs_team_stats[team] = stats
-
-    return playoffs_team_stats
+    return stats_by_team
 
 
 def collect_playoffs_team_records(results: List[PlayoffsGameResults]):
@@ -642,17 +449,9 @@ def collect_playoffs_team_records(results: List[PlayoffsGameResults]):
     return records_by_team
 
 
-class SeasonStats(TypedDict):
-    current_season: int
-    season_team_records: dict[str, SeasonTeamRecord]
-    season_team_stats: dict[str, TeamStats]
-    season_game_results: List[SeasonGameResults]
-    playoffs_team_records: dict[str, PlayoffsTeamRecord]
-    playoffs_team_stats: dict[str, TeamStats]
-    playoffs_game_results: List[PlayoffsGameResults]
-
-
 def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonStats:
+    """parse JSONs from g sheets and collect season stats"""
+
     print(f"Running season {season} {league}...")
     data: SeasonStats = {
         "current_season": season,
@@ -708,24 +507,12 @@ def build_season_stats(league: str, g_sheets_dir: Path, season: int) -> SeasonSt
     return data
 
 
-class TeamSeason(TypedDict):
-    team_name: str
-    team_abbrev: str
-    league: str
-    season: int
-
-
-class Player(TypedDict):
-    player: str
-    teams: List[TeamSeason]
-
-
 def collect_players(
     xbl_abbrev_data: List[List[str]],
     aaa_abbrev_data: List[List[str]],
     aa_abbrev_data: List[List[str]],
 ) -> dict[str, Player]:
-    """Find everyone who ever played in the league and when they played"""
+    """Find everyone who ever played in any league and when they played"""
     players: dict[str, Player] = {}
 
     for row in xbl_abbrev_data[1:]:
@@ -785,30 +572,277 @@ def collect_players(
     return players
 
 
-class CareerPerformance(TypedDict):
-    player: str
-    by_league: dict[str, TeamStats]
-    all_time: TeamStats
+def get_active_players(players: dict[str, Player], season: int):
+    """get the players (usernames) who are playing this season. assumes a player is only in 1 league per season"""
+
+    active_players: dict[str, List[str]] = {"XBL": [], "AAA": [], "AA": []}
+
+    for player_name in players:
+        for team in players[player_name]["teams"]:
+            if team["season"] == season:
+                active_players[team["league"]].append(player_name)
+                break
+
+    return active_players
 
 
-class HeadToHead(TypedDict):
-    """player_a and player_z must be in alphabetical order"""
+def collect_career_performances_and_head_to_head(
+    playoffs: bool,
+    active_players_by_league: dict[str, List[str]],
+    xbl_head_to_head_data: List[List[str]],
+    aaa_head_to_head_data: List[List[str]],
+    aa_head_to_head_data: List[List[str]],
+) -> List[HeadToHead]:
+    season_performances: dict[str, CareerSeasonPerformance] = {}
+    season_head_to_head: dict[tuple[str, str], HeadToHead] = {}
 
-    player_a: str
-    player_z: str
-    player_a_stats: TeamStats
-    player_z_stats: TeamStats
+    all_game_results = []
+
+    all_active_players = [
+        player
+        for league in active_players_by_league
+        for player in active_players_by_league[league]
+    ]
+
+    for game in [
+        *xbl_head_to_head_data[1:],
+        *aaa_head_to_head_data[1:],
+        *aa_head_to_head_data[1:],
+    ]:
+        away_player = game[2]
+        home_player = game[7]
+
+        if (
+            away_player not in all_active_players
+            and home_player not in all_active_players
+        ):
+            # don't care about games between two inactive players
+            continue
+
+        season = game[0]
+        week_or_round = game[1]
+        away_score = int(game[4])
+        home_score = int(game[5])
+        innings = float(game[10])
+        results = {
+            "season": season,
+            "away_player": away_player,
+            "home_player": home_player,
+            "away_score": away_score,
+            "home_score": home_score,
+            "innings": innings,
+            "winner": away_player if away_score > home_score else home_player,
+            "run_rule": innings <= 8.0,
+        }
+        if playoffs:
+            results["round"] = week_or_round
+        else:
+            results["week"] = int(week_or_round)
+
+        try:
+            extra_stats = {
+                "away_e": None if playoffs else int(game[8]),
+                "home_e": None if playoffs else int(game[9]),
+                # not all of these are always recorded. missing records are probably from disconnects
+                "away_ab": maybe(game, 11, int),
+                "away_r": maybe(game, 12, int),
+                "away_hits": maybe(game, 13, int),
+                "away_hr": maybe(game, 14, int),
+                "away_rbi": maybe(game, 15, int),
+                "away_bb": maybe(game, 16, int),
+                "away_so": maybe(game, 17, int),
+                "home_ab": maybe(game, 18, int),
+                "home_r": maybe(game, 19, int),
+                "home_hits": maybe(game, 20, int),
+                "home_hr": maybe(game, 21, int),
+                "home_rbi": maybe(game, 22, int),
+                "home_bb": maybe(game, 23, int),
+                "home_so": maybe(game, 24, int),
+            }
+
+            results |= extra_stats
+
+        except ValueError as e:
+            # some column is wrong in the extra stats. don't collect them
+            pass
+
+        all_game_results.append(results)
+
+    blank_team_stats_by_game: TeamStats = {
+        "innings_pitching": 0,
+        "innings_hitting": 0,
+        "wins_by_run_rule": 0,
+        "losses_by_run_rule": 0,
+        "ab": 0,
+        "r": 0,
+        "h": 0,
+        "hr": 0,
+        "rbi": 0,
+        "bb": 0,
+        "so": 0,
+        "oppab": 0,
+        "oppr": 0,
+        "opph": 0,
+        "opphr": 0,
+        "opprbi": 0,
+        "oppbb": 0,
+        "oppso": 0,
+        "games_played": 0,
+    }
+
+    league_runs = 0
+    league_innings_hitting = 0
+
+    raw_stats_by_player: dict[str, RawStats] = {}
+
+    # keyed on player names in alphabetical order
+    head_to_head_by_players = {}
+
+    # add games to all-time stats and head-to-head stats in the same loop
+    for game in all_game_results:
+        away_player = game["away_player"]
+        home_player = game["home_player"]
+
+        away_is_active = away_player in all_active_players
+        home_is_active = home_player in all_active_players
+        h2h = away_is_active and home_is_active
+
+        if away_is_active and away_player not in raw_stats_by_player:
+            raw_stats_by_player[away_player] = blank_team_stats_by_game.copy()
+        if home_is_active and home_player not in raw_stats_by_player:
+            raw_stats_by_player[home_player] = blank_team_stats_by_game.copy()
+
+        # alphabetical tuple of player names
+        h2h_key = tuple(sorted((home_player, away_player)))
+        (player_a, player_z) = h2h_key
+
+        # use this to figure out how players in raw_stats and h2h_stats translate
+        player_a_is_away = player_a == away_player
+
+        # where we'll store h2h stats
+        if h2h and key not in head_to_head_by_players:
+            head_to_head_by_players[key] = {
+                "player_a": player_a,
+                "player_z": player_z,
+                "player_a_raw_stats": blank_team_stats_by_game.copy(),
+                "player_z_raw_stats": blank_team_stats_by_game.copy(),
+            }
+
+        def add_to_player_h2h(away: bool, key: str, value: int):
+            """if we need h2h for this matchup, translate home and away into player_a and player_z and record the stat"""
+            if not h2h:
+                return
+            if (away and player_a_is_away) or (not away and not player_a_is_away):
+                head_to_head_by_players[h2h_key]["player_a_raw_stats"][key] += value
+            else:
+                head_to_head_by_players[h2h_key]["player_z_raw_stats"][key] += value
+
+        def add_to_away(key: str, value: int):
+            """record an away team stat if the away player is currently playing"""
+            if not away_is_active:
+                # also means we don't care about h2h, so it's safe to bail
+                return
+            raw_stats_by_player[away_player][key] += value
+            add_to_player_h2h(True, key, value)
+
+        def add_to_home(key: str, value: int):
+            """record a home team stat if the home player is currently playing"""
+            if not home_is_active:
+                # also means we don't care about h2h, so it's safe to bail
+                return
+            raw_stats_by_player[home_player][key] += value
+            add_to_player_h2h(False, key, value)
+
+        if game["run_rule"]:
+            if game["winner"] == away_player:
+                add_to_away("wins_by_run_rule", 1)
+                add_to_home("losses_by_run_rule", 1)
+            if game["winner"] == home_player:
+                add_to_home("wins_by_run_rule", 1)
+                add_to_away("losses_by_run_rule", 1)
+
+        if "away_ab" not in game or game["away_ab"] is None:
+            # we're missing stats. don't count this game
+            continue
+
+        add_to_away("innings_hitting", math.ceil(game["innings"]))
+        add_to_away("innings_pitching", math.floor(game["innings"]))
+        add_to_home("innings_hitting", math.floor(game["innings"]))
+        add_to_home("innings_pitching", math.ceil(game["innings"]))
+
+        # use these to calculate the league ERA
+        # because we aren't using the helper methods to record them, we'll get all-time runs and hitting across EVERY XBL game from all leagues EVER
+        league_runs += game["away_r"]
+        league_runs += game["home_r"]
+        league_innings_hitting += raw_stats_by_player[away_player]["innings_hitting"]
+        league_innings_hitting += raw_stats_by_player[home_player]["innings_hitting"]
+
+        # capture away team stats
+        add_to_away("games_played", 1)
+        add_to_away("ab", game["away_ab"])
+        add_to_away("r", game["away_r"])
+        add_to_away("h", game["away_hits"])
+        add_to_away("hr", game["away_hr"])
+        add_to_away("rbi", game["away_rbi"])
+        add_to_away("bb", game["away_bb"])
+        add_to_away("so", game["away_so"])
+        add_to_away("oppab", game["home_ab"])
+        add_to_away("oppr", game["home_r"])
+        add_to_away("opph", game["home_hits"])
+        add_to_away("opphr", game["home_hr"])
+        add_to_away("opprbi", game["home_rbi"])
+        add_to_away("oppbb", game["home_bb"])
+        add_to_away("oppso", game["home_so"])
+
+        # capture home team stats
+        add_to_home("games_played", 1)
+        add_to_home("ab", game["home_ab"])
+        add_to_home("r", game["home_r"])
+        add_to_home("h", game["home_hits"])
+        add_to_home("hr", game["home_hr"])
+        add_to_home("rbi", game["home_rbi"])
+        add_to_home("bb", game["home_bb"])
+        add_to_home("so", game["home_so"])
+        add_to_home("oppab", game["away_ab"])
+        add_to_home("oppr", game["away_r"])
+        add_to_home("opph", game["away_hits"])
+        add_to_home("opphr", game["away_hr"])
+        add_to_home("opprbi", game["away_rbi"])
+        add_to_home("oppbb", game["away_bb"])
+        add_to_home("oppso", game["away_so"])
+
+    league_era = three_digits(9 * league_runs / league_innings_hitting)
+
+    # do math to get career performance stats
+    for team in raw_stats_by_player.keys():
+        season_performances[team] = calc_stats_from_all_games(
+            raw_stats_by_player[team], league_era, team=team
+        )
+
+    # do math to get head to head stats
+    for key in head_to_head_by_players.keys():
+        raw_stats_a = head_to_head_by_players[key]["player_a_raw_stats"]
+        raw_stats_z = head_to_head_by_players[key]["player_z_raw_stats"]
+        season_head_to_head[(player_a, player_z)] = {
+            "player_a": head_to_head_by_players[key]["player_a"],
+            "player_z": head_to_head_by_players[key]["player_z"],
+            "player_a_stats": calc_stats_from_all_games(
+                raw_stats_a,
+                league_era,
+                player=player_a,
+            ),
+            "player_z_stats": calc_stats_from_all_games(
+                raw_stats_z,
+                league_era,
+                player=player_z,
+            ),
+        }
+
+    return season_performances, season_head_to_head
 
 
-class CareerStats(TypedDict):
-    players: dict[str, Player]
-    season_performances: dict[str, CareerPerformance]
-    season_head_to_head: List[HeadToHead]
-    playoffs_performances: dict[str, CareerPerformance]
-    playoffs_head_to_head: List[HeadToHead]
 
-
-def build_career_stats(active_teams: dict[str, List[str]], g_sheets_dir: Path):
+def build_career_stats(g_sheets_dir: Path, season: int):
     print(f"Running career stats...")
     data: CareerStats = {
         "players": {},
@@ -839,17 +873,53 @@ def build_career_stats(active_teams: dict[str, List[str]], g_sheets_dir: Path):
         raw_data = json.loads(f.read())
         aa_abbrev_data = raw_data["values"]
 
-    data["players"] = collect_players(xbl_abbrev_data, aaa_abbrev_data, aa_abbrev_data)
+    print("Finding who played which season...")
+    players = collect_players(xbl_abbrev_data, aaa_abbrev_data, aa_abbrev_data)
+    data["players"] = players
 
-    career_stats_data = None
-    with open(
-        g_sheets_dir.joinpath(f"CAREER_STATS__{league}%20Career%20Stats.json")
-    ) as f:
+    # TODO maybe we run through all results and do our stat calculations too?
+
+    # career_stats_data = None
+    # with open(
+    #     g_sheets_dir.joinpath(f"CAREER_STATS__{league}%20Career%20Stats.json")
+    # ) as f:
+    #     raw_data = json.loads(f.read())
+    #     career_stats_data = raw_data["values"]
+
+    xbl_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("CAREER_STATS__XBL%20Head%20to%20Head.json")) as f:
         raw_data = json.loads(f.read())
-        career_stats_data = raw_data["values"]
+        xbl_head_to_head_data = raw_data["values"]
+
+    aaa_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("CAREER_STATS__AAA%20Head%20to%20Head.json")) as f:
+        raw_data = json.loads(f.read())
+        aaa_head_to_head_data = raw_data["values"]
+
+    aa_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("CAREER_STATS__AA%20Head%20to%20Head.json")) as f:
+        raw_data = json.loads(f.read())
+        aa_head_to_head_data = raw_data["values"]
+
+    active_players_by_league = get_active_players(players, season)
+
+    season_peformances, season_head_to_head = (
+        collect_career_performances_and_head_to_head(
+            False,
+            active_players_by_league,
+            xbl_head_to_head_data,
+            aaa_head_to_head_data,
+            aa_head_to_head_data,
+        )
+    )
+
+    data["season_performances"] = season_peformances
+    data["season_head_to_head"] = season_head_to_head
+
+    return data
 
 
-def main(args: MyNamespace):
+def main(args: StatsAggNamespace):
     if not args.g_sheets_dir.exists():
         raise Exception(
             "Missing data from Google Sheets. Plesae double check `--g-sheets-dir' or run `scripts/get-sheets.py' first"
@@ -860,10 +930,6 @@ def main(args: MyNamespace):
         for league in LEAGUES
     }
 
-    all_teams = {
-        {league: season_data[league]["season_team_stats"].keys()} for league in LEAGUES
-    }
-
     for league in LEAGUES:
         season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
         with open(season_json, "w") as f:
@@ -871,13 +937,33 @@ def main(args: MyNamespace):
 
         shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
 
-    career_data = build_career_stats(all_teams, args.g_sheets_dir)
+    career_data = build_career_stats(args.g_sheets_dir, args.season)
 
     with open("careers.json", "w") as f:
         f.write(json.dumps(career_data))
 
+    if len(args.query) > 0:
+        try:
+            current = None
+            if args.query[0] == "season":
+                current = season_data
+            elif args.query[0] == "career":
+                current = career_data
+            else:
+                return f"`--query' must begin with either 'season' or 'career'"
+
+            for part in args.query[1:]:
+                current = current.get(part, {})
+            return current
+        except (KeyError, TypeError, IndexError) as e:
+            return f"--query '{", ".join(args.query)}' cannot be found."
+
+    return None
+
 
 if __name__ == "__main__":
     parser = arg_parser()
-    args: MyNamespace = parser.parse_args()
-    main(args)
+    args: StatsAggNamespace = parser.parse_args()
+    err = main(args)
+    if err is not None:
+        parser.error(err)
