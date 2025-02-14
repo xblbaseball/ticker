@@ -29,7 +29,32 @@ G_SHEETS_API_KEY=
 
 You'll need a developer to give you the API key for google sheets
 
-### Testing
+### Collecting Stats
+
+There's a bunch of python in this repo for collecting and parsing stats.
+
+* Python 3.10
+
+Test with
+
+```sh
+python -m unittest discover stats/tests/
+```
+
+Collect and parse stats with
+
+```sh
+python scripts/get-sheets.py
+python stats/main.py --season 18
+```
+
+Get a JSON schema for the data with
+
+```sh
+python stats/models/models.py
+```
+
+### Testing the Ticker
 
 OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
 
