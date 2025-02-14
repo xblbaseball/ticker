@@ -93,8 +93,13 @@ class TeamStats(TypedDict):
     rd9: float
     innings_played: int
     innings_game: float
+    wins: int
+    losses: int
     wins_by_run_rule: int
     losses_by_run_rule: int
+    num_seasons: int
+
+    seasons_played: set
 
 
 class GameResults(TypedDict):

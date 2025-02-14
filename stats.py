@@ -11,6 +11,7 @@ import json
 import math
 from pathlib import Path
 import shutil
+import traceback
 from typing import List
 
 from models import *
@@ -59,7 +60,9 @@ def arg_parser():
     return parser
 
 
-def three_digits(x: int | float) -> int | float:
+def three_digits(x: int | float | None) -> int | float:
+    if x is None:
+        return None
     return round(x, 3)
 
 
@@ -186,12 +189,12 @@ def calc_stats_from_all_games(
     per_9_hitting = lambda key: three_digits(
         (raw_stats[key] / raw_stats["innings_hitting"]) * 9
         if raw_stats["innings_hitting"] > 0
-        else math.inf
+        else None
     )
     per_9_pitching = lambda key: three_digits(
         (raw_stats[key] / raw_stats["innings_pitching"]) * 9
         if raw_stats["innings_pitching"] > 0
-        else math.inf
+        else None
     )
 
     stats: TeamStats = {
@@ -203,7 +206,7 @@ def calc_stats_from_all_games(
         "ba": (
             three_digits(raw_stats["h"] / raw_stats["ab"])
             if raw_stats["ab"] > 0
-            else math.inf
+            else None
         ),
         "ab": raw_stats["ab"],
         "ab9": per_9_hitting("ab"),
@@ -214,7 +217,7 @@ def calc_stats_from_all_games(
         "abhr": (
             three_digits(raw_stats["ab"] / raw_stats["hr"])
             if raw_stats["hr"] > 0
-            else math.inf
+            else None
         ),
         "so": raw_stats["so"],
         "so9": per_9_hitting("so"),
@@ -223,18 +226,18 @@ def calc_stats_from_all_games(
         "obp": three_digits(
             (raw_stats["h"] + raw_stats["bb"]) / (raw_stats["ab"] + raw_stats["bb"])
             if raw_stats["ab"] + raw_stats["bb"] > 0
-            else math.inf
+            else None
         ),
         "rc": (
             three_digits(raw_stats["h"] / raw_stats["r"])
             if raw_stats["r"] > 0
-            else math.inf
+            else None
         ),
         "babip": three_digits(
             (raw_stats["h"] - raw_stats["hr"])
             / (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"])
             if (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"]) > 0
-            else math.inf
+            else None
         ),
         # pitching
         "ra": raw_stats["oppr"],
@@ -242,7 +245,7 @@ def calc_stats_from_all_games(
         "oppba": (
             three_digits(raw_stats["opph"] / raw_stats["oppab"])
             if raw_stats["oppab"] > 0
-            else math.inf
+            else None
         ),
         "oppab9": per_9_pitching("oppab"),
         "opph": raw_stats["opph"],
@@ -252,7 +255,7 @@ def calc_stats_from_all_games(
         "oppabhr": (
             three_digits(raw_stats["ab"] / raw_stats["hr"])
             if raw_stats["hr"] > 0
-            else math.inf
+            else None
         ),
         "oppk": raw_stats["oppso"],
         "oppk9": per_9_pitching("oppso"),
@@ -261,13 +264,13 @@ def calc_stats_from_all_games(
         "whip": three_digits(
             (raw_stats["opph"] + raw_stats["oppbb"]) / raw_stats["innings_pitching"]
             if raw_stats["innings_pitching"] > 0
-            else math.inf
+            else None
         ),
         "lob": three_digits(
             (raw_stats["opph"] + raw_stats["oppbb"] - raw_stats["oppr"])
             / (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"])
             if (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"]) > 0
-            else math.inf
+            else None
         ),
         "e": None,
         # TODO is this right?
@@ -282,23 +285,32 @@ def calc_stats_from_all_games(
                 / raw_stats["innings_pitching"]
             )
             if raw_stats["innings_pitching"] > 0
-            else math.inf
+            else None
         ),
         # mixed
         "rd": raw_stats["r"] - raw_stats["oppr"],
         # TODO is this right?
-        "rd9": three_digits(per_9_hitting("r") - per_9_pitching("oppr")),
+        "rd9": (
+            three_digits(per_9_hitting("r") - per_9_pitching("oppr"))
+            if per_9_hitting("r") is not None and per_9_pitching("oppr") is not None
+            else None
+        ),
         "innings_played": (raw_stats["innings_hitting"] + raw_stats["innings_pitching"])
         / 2,
         "innings_game": three_digits(
             ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
             / raw_stats["games_played"]
             if raw_stats["games_played"] > 0
-            else math.inf
+            else None
         ),
+        "wins": raw_stats["wins"],
+        "losses": raw_stats["losses"],
         "wins_by_run_rule": raw_stats["wins_by_run_rule"],
         "losses_by_run_rule": raw_stats["losses_by_run_rule"],
     }
+
+    if "seasons_played" in raw_stats:
+        stats["num_seasons"] = len(raw_stats["seasons_played"])
 
     return stats
 
@@ -311,6 +323,8 @@ def calc_team_team_stats(game_results: List[GameResults]):
     blank_team_stats_by_game: RawStats = {
         "innings_pitching": 0,
         "innings_hitting": 0,
+        "wins": 0,
+        "losses": 0,
         "wins_by_run_rule": 0,
         "losses_by_run_rule": 0,
         "ab": 0,
@@ -343,6 +357,13 @@ def calc_team_team_stats(game_results: List[GameResults]):
             raw_stats_by_team[away] = blank_team_stats_by_game.copy()
         if home not in raw_stats_by_team:
             raw_stats_by_team[home] = blank_team_stats_by_game.copy()
+
+        if game["winner"] == away:
+            raw_stats_by_team[away]["wins"] += 1
+            raw_stats_by_team[home]["losses"] += 1
+        else:
+            raw_stats_by_team[away]["losses"] += 1
+            raw_stats_by_team[home]["wins"] += 1
 
         if game["winner"] == away and game["run_rule"]:
             raw_stats_by_team[away]["wins_by_run_rule"] += 1
@@ -586,6 +607,8 @@ def collect_players(
             }
         )
 
+    # TODO we could sort each player's teams by season
+
     return players
 
 
@@ -620,6 +643,8 @@ def collect_career_performances_and_head_to_head(
         for league in active_players_by_league
         for player in active_players_by_league[league]
     ]
+
+    # TODO probably need to run these by season too
 
     for game in [
         *xbl_head_to_head_data[1:],
@@ -681,6 +706,7 @@ def collect_career_performances_and_head_to_head(
 
         except ValueError as e:
             # some column is wrong in the extra stats. don't collect them
+            print(e)
             pass
 
         all_game_results.append(results)
@@ -688,6 +714,8 @@ def collect_career_performances_and_head_to_head(
     blank_team_stats_by_game: TeamStats = {
         "innings_pitching": 0,
         "innings_hitting": 0,
+        "wins": 0,
+        "losses": 0,
         "wins_by_run_rule": 0,
         "losses_by_run_rule": 0,
         "ab": 0,
@@ -705,6 +733,8 @@ def collect_career_performances_and_head_to_head(
         "oppbb": 0,
         "oppso": 0,
         "games_played": 0,
+        # not in TeamStats. only used temporarily
+        "seasons_played": set(),
     }
 
     league_runs = 0
@@ -777,6 +807,13 @@ def collect_career_performances_and_head_to_head(
             raw_stats_by_player[home_player][key] += value
             add_to_player_h2h(False, key, value)
 
+        if game["winner"] == away_player:
+            add_to_away("wins", 1)
+            add_to_home("losses", 1)
+        else:
+            add_to_home("wins", 1)
+            add_to_away("losses", 1)
+
         if game["run_rule"]:
             if game["winner"] == away_player:
                 add_to_away("wins_by_run_rule", 1)
@@ -784,6 +821,19 @@ def collect_career_performances_and_head_to_head(
             if game["winner"] == home_player:
                 add_to_home("wins_by_run_rule", 1)
                 add_to_away("losses_by_run_rule", 1)
+
+        # record which seasons were played
+        if home_is_active:
+            raw_stats_by_player[home_player]["seasons_played"].add(game["season"])
+        if away_is_active:
+            raw_stats_by_player[away_player]["seasons_played"].add(game["season"])
+        if h2h:
+            head_to_head_by_players[player_a][player_z]["player_a_raw_stats"][
+                "seasons_played"
+            ].add(game["season"])
+            head_to_head_by_players[player_a][player_z]["player_z_raw_stats"][
+                "seasons_played"
+            ].add(game["season"])
 
         if "away_ab" not in game or game["away_ab"] is None:
             # we're missing stats. don't count this game
@@ -839,9 +889,9 @@ def collect_career_performances_and_head_to_head(
     league_era = three_digits(9 * league_runs / league_innings_hitting)
 
     # do math to get career performance stats
-    for team in raw_stats_by_player.keys():
-        season_performances[team] = calc_stats_from_all_games(
-            raw_stats_by_player[team], league_era, team=team
+    for player in raw_stats_by_player.keys():
+        season_performances[player] = calc_stats_from_all_games(
+            raw_stats_by_player[player], league_era, player=player
         )
 
     # do math to get head to head stats
@@ -857,20 +907,25 @@ def collect_career_performances_and_head_to_head(
                 "player_z_raw_stats"
             ]
 
-            season_head_to_head[player_a][player_z] = {
-                "player_a": player_a,
-                "player_z": player_z,
-                "player_a_stats": calc_stats_from_all_games(
-                    raw_stats_a,
-                    league_era,
-                    player=player_a,
-                ),
-                "player_z_stats": calc_stats_from_all_games(
-                    raw_stats_z,
-                    league_era,
-                    player=player_z,
-                ),
-            }
+            try:
+                season_head_to_head[player_a][player_z] = {
+                    "player_a": player_a,
+                    "player_z": player_z,
+                    "player_a_stats": calc_stats_from_all_games(
+                        raw_stats_a,
+                        league_era,
+                        player=player_a,
+                    ),
+                    "player_z_stats": calc_stats_from_all_games(
+                        raw_stats_z,
+                        league_era,
+                        player=player_z,
+                    ),
+                }
+            except Exception as e:
+                print(player_a, player_z)
+                print(e)
+                traceback.print_exc()
 
     return season_performances, season_head_to_head
 
