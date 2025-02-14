@@ -14,7 +14,8 @@ import shutil
 import traceback
 from typing import List
 
-from models import *
+from stats.models import *
+from stats.utils import *
 
 # TODO keep an old json around per season. lets us show last season's stats at the beginning of next season
 # TODO consistency between "so" and "k"
