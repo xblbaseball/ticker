@@ -194,6 +194,7 @@ def calc_stats_from_all_games(
         (raw_stats[key] / raw_stats["innings_pitching"]) * 9
     )
 
+    # use Nones as blackholes. if any stat turns to None, it stays None without raising any errors
     for key in raw_stats.keys():
         if raw_stats[key] is None or isinstance(raw_stats[key], int):
             raw_stats[key] = SafeNum(raw_stats[key])
@@ -261,11 +262,7 @@ def calc_stats_from_all_games(
         # mixed
         "rd": raw_stats["r"] - raw_stats["oppr"],
         # TODO is this right?
-        "rd9": (
-            three_digits(per_9_hitting("r") - per_9_pitching("oppr"))
-            # if per_9_hitting("r") is not None and per_9_pitching("oppr") is not None
-            # else None
-        ),
+        "rd9": (three_digits(per_9_hitting("r") - per_9_pitching("oppr"))),
         "innings_played": (raw_stats["innings_hitting"] + raw_stats["innings_pitching"])
         / 2,
         "innings_game": three_digits(
@@ -933,15 +930,6 @@ def build_career_stats(g_sheets_dir: Path, season: int):
     players = collect_players(xbl_abbrev_data, aaa_abbrev_data, aa_abbrev_data)
     data["players"] = players
 
-    # TODO maybe we run through all results and do our stat calculations too?
-
-    # career_stats_data = None
-    # with open(
-    #     g_sheets_dir.joinpath(f"CAREER_STATS__{league}%20Career%20Stats.json")
-    # ) as f:
-    #     raw_data = json.loads(f.read())
-    #     career_stats_data = raw_data["values"]
-
     xbl_head_to_head_data = None
     with open(g_sheets_dir.joinpath("CAREER_STATS__XBL%20Head%20to%20Head.json")) as f:
         raw_data = json.loads(f.read())
@@ -959,7 +947,8 @@ def build_career_stats(g_sheets_dir: Path, season: int):
 
     active_players_by_league = get_active_players(players, season)
 
-    season_peformances, season_head_to_head = (
+    print("Tabulating career regular season stats and head to head performances...")
+    season_performances, season_head_to_head = (
         collect_career_performances_and_head_to_head(
             False,
             active_players_by_league,
@@ -969,8 +958,37 @@ def build_career_stats(g_sheets_dir: Path, season: int):
         )
     )
 
-    data["season_performances"] = season_peformances
+    data["season_performances"] = season_performances
     data["season_head_to_head"] = season_head_to_head
+
+    xbl_playoffs_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("PLAYOFF_STATS__XBL%20Head%20to%20Head.json")) as f:
+        raw_data = json.loads(f.read())
+        xbl_playoffs_head_to_head_data = raw_data["values"]
+
+    aaa_playoffs_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("PLAYOFF_STATS__AAA%20Head%20to%20Head.json")) as f:
+        raw_data = json.loads(f.read())
+        aaa_playoffs_head_to_head_data = raw_data["values"]
+
+    aa_playoffs_head_to_head_data = None
+    with open(g_sheets_dir.joinpath("PLAYOFF_STATS__AA%20Head%20to%20Head.json")) as f:
+        raw_data = json.loads(f.read())
+        aa_playoffs_head_to_head_data = raw_data["values"]
+
+    print("Tabulating career playoffs stats and head to head performances...")
+    playoffs_performances, playoffs_head_to_head = (
+        collect_career_performances_and_head_to_head(
+            True,
+            active_players_by_league,
+            xbl_playoffs_head_to_head_data,
+            aaa_playoffs_head_to_head_data,
+            aa_playoffs_head_to_head_data,
+        )
+    )
+
+    data["playoffs_performances"] = playoffs_performances
+    data["playoffs_head_to_head"] = playoffs_head_to_head
 
     return data
 
