@@ -1,7 +1,8 @@
-from typing_extensions import TypedDict
-
+import argparse
+import json
+from pathlib import Path
 import pydantic
-
+from typing_extensions import TypedDict
 from typing import List
 
 
@@ -195,6 +196,8 @@ class Player(TypedDict):
 
 
 class CareerPlayoffsStats(TeamStats):
+    """how someone has performed in the playoffs over their career"""
+
     appearances: int
     wins: int
     losses: int
@@ -205,6 +208,8 @@ class CareerPlayoffsStats(TeamStats):
 
 
 class CareerSeasonStats(TeamStats):
+    """high-level wins, losses for a player over their career"""
+
     wins: int
     losses: int
     sweeps_w: int
@@ -213,12 +218,16 @@ class CareerSeasonStats(TeamStats):
 
 
 class CareerSeasonPerformance(TypedDict):
+    """how someone has performed in the regular season over their career"""
+
     player: str
     by_league: dict[str, CareerSeasonStats]
     all_time: CareerSeasonStats
 
 
 class CareerPlayoffsPerformance(TypedDict):
+    """how someone has performed in the playoffs over their career"""
+
     player: str
     by_league: dict[str, CareerPlayoffsStats]
     all_time: CareerPlayoffsStats
@@ -234,6 +243,8 @@ class HeadToHead(TypedDict):
 
 
 class CareerStats(TypedDict):
+    """all-time stats for all players"""
+
     players: dict[str, Player]
     season_performances: dict[str, CareerSeasonPerformance]
     """look ups should look like: [player_a][player_z] = head_to_head"""
@@ -242,17 +253,41 @@ class CareerStats(TypedDict):
     playoffs_head_to_head: List[HeadToHead]
 
 
+class ModelArgs(argparse.Namespace):
+    out_dir: Path
+
+
+def arg_parser():
+    parser = argparse.ArgumentParser(
+        description="Generate JSON schemas from the models"
+    )
+    parser.add_argument(
+        "--out-dir",
+        "-o",
+        type=Path,
+        default=Path("public/schemas"),
+        help="Where the schemas should be saved",
+    )
+    return parser
+
+
 def get_schemas():
     season_stats_adapter = pydantic.TypeAdapter(SeasonStats)
     career_stats_adapter = pydantic.TypeAdapter(CareerStats)
 
-    print(season_stats_adapter.json_schema())
-    print(career_stats_adapter.json_schema())
+    return (season_stats_adapter.json_schema(), career_stats_adapter.json_schema())
 
 
-def main(args):
-    get_schemas()
+def main(args: ModelArgs):
+    (season_schema, career_schema) = get_schemas()
+
+    with open(args.out_dir.joinpath("season-schema.json"), "w") as f:
+        f.write(json.dumps(season_schema))
+    with open(args.out_dir.joinpath("career-schema.json"), "w") as f:
+        f.write(json.dumps(career_schema))
 
 
 if __name__ == "__main__":
-    main(None)
+    parser = arg_parser()
+    args: ModelArgs = parser.parse_args()
+    main(args)

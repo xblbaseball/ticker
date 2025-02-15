@@ -48,11 +48,16 @@ python scripts/get-sheets.py
 python stats/main.py --season 18
 ```
 
-Get a JSON schema for the data with
+If you change any of the models in `stats/models/models.py`, update the equivalent TS types by doing the following:
 
 ```sh
+# save JSON schemas from the models
 python stats/models/models.py
+# turn the JSON schemas into interfaces
+npm run types
 ```
+
+Then commit the changes.
 
 ### Testing the Ticker
 
