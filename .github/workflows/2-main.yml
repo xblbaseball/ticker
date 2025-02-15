@@ -43,7 +43,7 @@ jobs:
         env:
           G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
       - name: structure and aggregate stats
-        run: python scripts/agg-stats.py --season ${{ vars.SEASON }}
+        run: python stats/main.py --season ${{ vars.SEASON }}
       - name: save results
         uses: actions/upload-artifact@v4
         with:
