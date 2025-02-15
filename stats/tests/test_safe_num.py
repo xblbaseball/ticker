@@ -16,6 +16,7 @@ class TestSafeNumOperations(unittest.TestCase):
         y = SafeNum(2)
 
         self.assertEqual(x + y, 3, "A SafeNum and an int")
+        self.assertIsInstance(x + y, SafeNum, "int + SafeNum = SafeNum")
 
         x = 1.0
         y = SafeNum(2)
@@ -35,6 +36,7 @@ class TestSafeNumOperations(unittest.TestCase):
         x += y
 
         self.assertEqual(x, 3, "+= between an int and SafeNum")
+        self.assertIsInstance(x, SafeNum, "+= between an int and SafeNum is a SafeNum")
 
         x = SafeNum(1)
         y = 2
@@ -42,6 +44,11 @@ class TestSafeNumOperations(unittest.TestCase):
         y += x
 
         self.assertEqual(y, 3, "+= between a SafeNum and an int")
+
+        x = SafeNum(1)
+        y = 2
+
+        self.assertIsInstance(x + y, SafeNum, "SafeNum + int = SafeNum")
 
     def test_subtracting(self):
         x = SafeNum(1)
@@ -79,8 +86,6 @@ class TestSafeNumOperations(unittest.TestCase):
         y -= x
 
         self.assertEqual(y, 1, "-= between a SafeNum and an int")
-
-        # TODO more of these, including JSON serialization
 
     def test_multiplying(self):
         x = SafeNum(3)

@@ -52,7 +52,10 @@ class SafeNum(numbers.Number):
 
     def __neg__(self):
         """negative"""
-        return -1 * self._x
+        if self._x is None:
+            return self
+
+        return self.__mul__(-1)
 
     def __add__(self, other):
         """+"""
@@ -171,6 +174,14 @@ class SafeNum(numbers.Number):
             return SafeNum(None)
 
         self._x = self._x**other
+        return self
+
+    def __round__(self, *args, **kwargs):
+        """round"""
+        if self._x is None:
+            return self
+
+        self._x = round(self._x, *args, **kwargs)
         return self
 
     @property

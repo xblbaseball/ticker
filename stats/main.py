@@ -14,8 +14,8 @@ import shutil
 import traceback
 from typing import List
 
-from stats.models import *
-from stats.utils import *
+from models import *
+from utils import *
 
 # TODO keep an old json around per season. lets us show last season's stats at the beginning of next season
 # TODO consistency between "so" and "k"
@@ -189,14 +189,14 @@ def calc_stats_from_all_games(
     """given everything a player/team did across all games, calculate stat lines"""
     per_9_hitting = lambda key: three_digits(
         (raw_stats[key] / raw_stats["innings_hitting"]) * 9
-        if raw_stats["innings_hitting"] > 0
-        else None
     )
     per_9_pitching = lambda key: three_digits(
         (raw_stats[key] / raw_stats["innings_pitching"]) * 9
-        if raw_stats["innings_pitching"] > 0
-        else None
     )
+
+    for key in raw_stats.keys():
+        if raw_stats[key] is None or isinstance(raw_stats[key], int):
+            raw_stats[key] = SafeNum(raw_stats[key])
 
     stats: TeamStats = {
         "team": team,
@@ -204,79 +204,51 @@ def calc_stats_from_all_games(
         # hitting
         "rs": raw_stats["r"],
         "rs9": per_9_hitting("r"),
-        "ba": (
-            three_digits(raw_stats["h"] / raw_stats["ab"])
-            if raw_stats["ab"] > 0
-            else None
-        ),
+        "ba": (three_digits(raw_stats["h"] / raw_stats["ab"])),
         "ab": raw_stats["ab"],
         "ab9": per_9_hitting("ab"),
         "h": raw_stats["h"],
         "h9": per_9_hitting("h"),
         "hr": raw_stats["hr"],
         "hr9": per_9_hitting("hr"),
-        "abhr": (
-            three_digits(raw_stats["ab"] / raw_stats["hr"])
-            if raw_stats["hr"] > 0
-            else None
-        ),
+        "abhr": (three_digits(raw_stats["ab"] / raw_stats["hr"])),
         "so": raw_stats["so"],
         "so9": per_9_hitting("so"),
         "bb": raw_stats["bb"],
         "bb9": per_9_hitting("bb"),
         "obp": three_digits(
             (raw_stats["h"] + raw_stats["bb"]) / (raw_stats["ab"] + raw_stats["bb"])
-            if raw_stats["ab"] + raw_stats["bb"] > 0
-            else None
         ),
-        "rc": (
-            three_digits(raw_stats["h"] / raw_stats["r"])
-            if raw_stats["r"] > 0
-            else None
-        ),
+        "rc": (three_digits(raw_stats["h"] / raw_stats["r"])),
         "babip": three_digits(
             (raw_stats["h"] - raw_stats["hr"])
             / (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"])
-            if (raw_stats["ab"] - raw_stats["so"] - raw_stats["hr"]) > 0
-            else None
         ),
         # pitching
         "ra": raw_stats["oppr"],
         "ra9": per_9_pitching("oppr"),
-        "oppba": (
-            three_digits(raw_stats["opph"] / raw_stats["oppab"])
-            if raw_stats["oppab"] > 0
-            else None
-        ),
+        "oppba": (three_digits(raw_stats["opph"] / raw_stats["oppab"])),
         "oppab9": per_9_pitching("oppab"),
         "opph": raw_stats["opph"],
         "opph9": per_9_pitching("opph"),
         "opphr": raw_stats["opphr"],
         "opphr9": per_9_pitching("opphr"),
-        "oppabhr": (
-            three_digits(raw_stats["ab"] / raw_stats["hr"])
-            if raw_stats["hr"] > 0
-            else None
-        ),
+        "oppabhr": (three_digits(raw_stats["ab"] / raw_stats["hr"])),
         "oppk": raw_stats["oppso"],
         "oppk9": per_9_pitching("oppso"),
         "oppbb": raw_stats["oppbb"],
         "oppbb9": per_9_pitching("oppbb"),
         "whip": three_digits(
             (raw_stats["opph"] + raw_stats["oppbb"]) / raw_stats["innings_pitching"]
-            if raw_stats["innings_pitching"] > 0
-            else None
         ),
         "lob": three_digits(
             (raw_stats["opph"] + raw_stats["oppbb"] - raw_stats["oppr"])
             / (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"])
-            if (raw_stats["opph"] + raw_stats["oppbb"] - 1.4 * raw_stats["opphr"]) > 0
-            else None
         ),
         "e": None,
         # TODO is this right?
         "fip": three_digits(
-            league_era
+            SafeNum(league_era)
             - (
                 (
                     raw_stats["opphr"] * 13
@@ -285,24 +257,20 @@ def calc_stats_from_all_games(
                 )
                 / raw_stats["innings_pitching"]
             )
-            if raw_stats["innings_pitching"] > 0
-            else None
         ),
         # mixed
         "rd": raw_stats["r"] - raw_stats["oppr"],
         # TODO is this right?
         "rd9": (
             three_digits(per_9_hitting("r") - per_9_pitching("oppr"))
-            if per_9_hitting("r") is not None and per_9_pitching("oppr") is not None
-            else None
+            # if per_9_hitting("r") is not None and per_9_pitching("oppr") is not None
+            # else None
         ),
         "innings_played": (raw_stats["innings_hitting"] + raw_stats["innings_pitching"])
         / 2,
         "innings_game": three_digits(
             ((raw_stats["innings_hitting"] + raw_stats["innings_pitching"]) / 2)
             / raw_stats["games_played"]
-            if raw_stats["games_played"] > 0
-            else None
         ),
         "wins": raw_stats["wins"],
         "losses": raw_stats["losses"],
@@ -707,7 +675,6 @@ def collect_career_performances_and_head_to_head(
 
         except ValueError as e:
             # some column is wrong in the extra stats. don't collect them
-            print(e)
             pass
 
         all_game_results.append(results)
@@ -1022,14 +989,14 @@ def main(args: StatsAggNamespace):
     for league in LEAGUES:
         season_json = args.save_dir.joinpath(f"{league}__s{args.season}.json")
         with open(season_json, "w") as f:
-            f.write(json.dumps(season_data[league]))
+            f.write(json.dumps(season_data[league], cls=SafeEncoder))
 
         shutil.copy(season_json, args.save_dir.joinpath(f"{league}.json"))
 
     career_data = build_career_stats(args.g_sheets_dir, args.season)
 
     with open(args.save_dir.joinpath("careers.json"), "w") as f:
-        f.write(json.dumps(career_data))
+        f.write(json.dumps(career_data, cls=SafeEncoder))
 
     if len(args.query) > 0:
         try:
