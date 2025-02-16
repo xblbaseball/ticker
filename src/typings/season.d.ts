@@ -66,9 +66,12 @@ export type Losses1 = number;
 export type WinsByRunRule = number;
 export type LossesByRunRule = number;
 export type NumSeasons = number;
-export type SeasonsPlayed = unknown[];
+export type Season = number;
+export type League = string;
 export type HomeTeam = string;
 export type AwayTeam = string;
+export type HomePlayer = string;
+export type AwayPlayer = string;
 export type HomeScore = number;
 export type AwayScore = number;
 export type RunRule = boolean;
@@ -99,8 +102,12 @@ export type Losses2 = number;
 export type Remaining1 = number;
 export type Round = string;
 export type Opponent = string;
+export type Season1 = number;
+export type League1 = string;
 export type HomeTeam1 = string;
 export type AwayTeam1 = string;
+export type HomePlayer1 = string;
+export type AwayPlayer1 = string;
 export type HomeScore1 = number;
 export type AwayScore1 = number;
 export type RunRule1 = boolean;
@@ -214,15 +221,18 @@ export interface TeamStats {
   wins_by_run_rule: WinsByRunRule;
   losses_by_run_rule: LossesByRunRule;
   num_seasons: NumSeasons;
-  seasons_played: SeasonsPlayed;
   [k: string]: unknown;
 }
 /**
  * what happened in a regular season game
  */
 export interface SeasonGameResults1 {
+  season: Season;
+  league: League;
   home_team: HomeTeam;
   away_team: AwayTeam;
+  home_player: HomePlayer;
+  away_player: AwayPlayer;
   home_score: HomeScore;
   away_score: AwayScore;
   run_rule: RunRule;
@@ -280,8 +290,12 @@ export interface PlayoffsTeamStats {
  * what happened in a playoff game
  */
 export interface PlayoffsGameResults1 {
+  season: Season1;
+  league: League1;
   home_team: HomeTeam1;
   away_team: AwayTeam1;
+  home_player: HomePlayer1;
+  away_player: AwayPlayer1;
   home_score: HomeScore1;
   away_score: AwayScore1;
   run_rule: RunRule1;

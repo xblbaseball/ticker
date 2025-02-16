@@ -100,14 +100,16 @@ class TeamStats(TypedDict):
     losses_by_run_rule: int
     num_seasons: int
 
-    seasons_played: set
-
 
 class GameResults(TypedDict):
     """what happened in a single game"""
 
+    season: int
+    league: str
     home_team: str
     away_team: str
+    home_player: str
+    away_player: str
     home_score: int
     away_score: int
     run_rule: bool
@@ -199,8 +201,6 @@ class CareerPlayoffsStats(TeamStats):
     """how someone has performed in the playoffs over their career"""
 
     appearances: int
-    wins: int
-    losses: int
     series_wins: int
     series_losses: int
     championship_seasons: List[int]
@@ -210,8 +210,6 @@ class CareerPlayoffsStats(TeamStats):
 class CareerSeasonStats(TeamStats):
     """high-level wins, losses for a player over their career"""
 
-    wins: int
-    losses: int
     sweeps_w: int
     sweeps_l: int
     splits: int

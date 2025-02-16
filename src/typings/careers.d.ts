@@ -57,7 +57,6 @@ export type Losses = number;
 export type WinsByRunRule = number;
 export type LossesByRunRule = number;
 export type NumSeasons = number;
-export type SeasonsPlayed = unknown[];
 export type SweepsW = number;
 export type SweepsL = number;
 export type Splits = number;
@@ -108,7 +107,6 @@ export type Losses1 = number;
 export type WinsByRunRule1 = number;
 export type LossesByRunRule1 = number;
 export type NumSeasons1 = number;
-export type SeasonsPlayed1 = unknown[];
 export type Player5 = string;
 export type Team2 = string;
 export type Player6 = string;
@@ -155,7 +153,6 @@ export type Losses2 = number;
 export type WinsByRunRule2 = number;
 export type LossesByRunRule2 = number;
 export type NumSeasons2 = number;
-export type SeasonsPlayed2 = unknown[];
 export type Appearances = number;
 export type SeriesWins = number;
 export type SeriesLosses = number;
@@ -259,7 +256,6 @@ export interface CareerSeasonStats {
   wins_by_run_rule: WinsByRunRule;
   losses_by_run_rule: LossesByRunRule;
   num_seasons: NumSeasons;
-  seasons_played: SeasonsPlayed;
   sweeps_w: SweepsW;
   sweeps_l: SweepsL;
   splits: Splits;
@@ -329,7 +325,6 @@ export interface TeamStats {
   wins_by_run_rule: WinsByRunRule1;
   losses_by_run_rule: LossesByRunRule1;
   num_seasons: NumSeasons1;
-  seasons_played: SeasonsPlayed1;
   [k: string]: unknown;
 }
 export interface PlayoffsPerformances {
@@ -396,7 +391,6 @@ export interface CareerPlayoffsStats {
   wins_by_run_rule: WinsByRunRule2;
   losses_by_run_rule: LossesByRunRule2;
   num_seasons: NumSeasons2;
-  seasons_played: SeasonsPlayed2;
   appearances: Appearances;
   series_wins: SeriesWins;
   series_losses: SeriesLosses;
