@@ -666,10 +666,6 @@ def get_career_games_results(
     return results
 
 
-def get_player_raw_stats(games: List[GameResults], all_active_players: List[str]):
-    pass
-
-
 def collect_career_performances_and_head_to_head(
     playoffs: bool,
     active_players_by_league: dict[str, List[str]],
@@ -677,6 +673,7 @@ def collect_career_performances_and_head_to_head(
     aaa_head_to_head_data: List[List[str]],
     aa_head_to_head_data: List[List[str]],
 ) -> List[HeadToHead]:
+    """get career stats and head to head stats"""
     season_performances: dict[str, CareerSeasonPerformance] = {}
     season_head_to_head: dict[str, dict[str, HeadToHead]] = {}
 
@@ -686,8 +683,7 @@ def collect_career_performances_and_head_to_head(
         for player in active_players_by_league[league]
     ]
 
-    # TODO probably need to run these by season too
-
+    # get nicely formatted results
     all_xbl_games = [
         results
         for game in xbl_head_to_head_data[1:]
@@ -755,7 +751,6 @@ def collect_career_performances_and_head_to_head(
     aa_league_innings_hitting = 0
 
     # keyed on player names
-    all_raw_stats_by_player: dict[str, RawStats] = {}
     xbl_raw_stats_by_player: dict[str, RawStats] = {}
     aaa_raw_stats_by_player: dict[str, RawStats] = {}
     aa_raw_stats_by_player: dict[str, RawStats] = {}
@@ -763,11 +758,14 @@ def collect_career_performances_and_head_to_head(
     # keyed on player names in alphabetical order
     head_to_head_by_players = {}
 
-    # add games to all-time stats and head-to-head stats in the same loop
+    # sum per games stats to get all-time stats per player and head-to-head stats per matchup in the same loop. we have to:
+    #   * translate game home/away to each player
+    #   * sort stats by league
+    #   * sort stats by matchups
+    #   * collect league ERAs to calculate FIP
+    #
+    # we also skip any games for players who are inactive, or matchups when 1 or both players are inactive
     for game in all_game_results:
-
-        # TODO how can we split these by league? without going crazy...
-
         away_player = game["away_player"]
         home_player = game["home_player"]
         season = game["season"]
@@ -776,9 +774,9 @@ def collect_career_performances_and_head_to_head(
         away_is_active = away_player in all_active_players
         home_is_active = home_player in all_active_players
         h2h = away_is_active and home_is_active
-        is_xbl_game = game["league"] == "XBL"
-        is_aaa_game = game["league"] == "AAA"
-        is_aa_game = game["league"] == "AA"
+        is_xbl_game = league == "XBL"
+        is_aaa_game = league == "AAA"
+        is_aa_game = league == "AA"
 
         if away_is_active:
             if is_xbl_game and away_player not in xbl_raw_stats_by_player:
@@ -872,30 +870,18 @@ def collect_career_performances_and_head_to_head(
         # record which seasons were played
         if home_is_active:
             if is_xbl_game:
-                xbl_raw_stats_by_player[home_player]["seasons_played"].add(
-                    game["season"]
-                )
+                xbl_raw_stats_by_player[home_player]["seasons_played"].add(season)
             if is_aaa_game:
-                aaa_raw_stats_by_player[home_player]["seasons_played"].add(
-                    game["season"]
-                )
+                aaa_raw_stats_by_player[home_player]["seasons_played"].add(season)
             if is_aa_game:
-                aa_raw_stats_by_player[home_player]["seasons_played"].add(
-                    game["season"]
-                )
+                aa_raw_stats_by_player[home_player]["seasons_played"].add(season)
         if away_is_active:
             if is_xbl_game:
-                xbl_raw_stats_by_player[away_player]["seasons_played"].add(
-                    game["season"]
-                )
+                xbl_raw_stats_by_player[away_player]["seasons_played"].add(season)
             if is_aaa_game:
-                aaa_raw_stats_by_player[away_player]["seasons_played"].add(
-                    game["season"]
-                )
+                aaa_raw_stats_by_player[away_player]["seasons_played"].add(season)
             if is_aa_game:
-                aa_raw_stats_by_player[away_player]["seasons_played"].add(
-                    game["season"]
-                )
+                aa_raw_stats_by_player[away_player]["seasons_played"].add(season)
         if h2h:
             head_to_head_by_players[player_a][player_z]["player_a_raw_stats"][
                 "seasons_played"
@@ -1054,7 +1040,7 @@ def collect_career_performances_and_head_to_head(
                 print(e)
                 traceback.print_exc()
 
-    # TODO still need to get player series wins, losses, championships, etc
+    # TODO still need to get playoffs player series wins, losses, championships, etc
 
     return season_performances, season_head_to_head
 
