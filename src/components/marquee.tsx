@@ -6,7 +6,6 @@ import { IndexContext } from "@/store/index.context"
 import { League } from "@/typings/league";
 
 import styles from "./marquee.module.css"
-import TeamRecord from "@/typings/team-record";
 
 function Category(
   { header, children, i }:
