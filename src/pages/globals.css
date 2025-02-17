@@ -1,5 +1,8 @@
 :root {
+  /* --ticker-height: 72px; */
   --ticker-height: 36px;
+  --side-bar-width: 128px;
+
   --league-width: 50px;
   /* works if you want to suffix "Playoffs" on the league logo */
   /* --league-width: 128px; */
@@ -15,6 +18,7 @@
 
   /* the time it takes to complete a right-to-left horizontal scroll in the marquee */
   --marquee-cycle: 20s;
+
 }
 
 body {

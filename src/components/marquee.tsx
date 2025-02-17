@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import _ from "lodash";
 import { useContext } from "react";
 import { IndexContext } from "@/store/index.context"
 import { League } from "@/typings/league";
@@ -8,12 +9,12 @@ import styles from "./marquee.module.css"
 import TeamRecord from "@/typings/team-record";
 
 function Category(
-  {header, children, i}:
-  {
-    header: string;
-    /** 0-th index of the order in which this category is going to show up */
-    i: number
-  } & React.PropsWithChildren
+  { header, children, i }:
+    {
+      header: string;
+      /** 0-th index of the order in which this category is going to show up */
+      i: number
+    } & React.PropsWithChildren
 ) {
   return (
     <div className={`flex ${styles.category}`}>
@@ -26,8 +27,8 @@ function Category(
 }
 
 function LeaderListEntry(
-  {position, teamName, stat}:
-  {position: number; teamName: string; stat: number | string}
+  { position, teamName, stat }:
+    { position: number; teamName: string; stat: number | string }
 ) {
   return (
     <div className={`flex ${styles.listEntry}`}>
@@ -45,8 +46,8 @@ function LeaderListEntry(
 }
 
 function StandingEntry(
-  {position, teamName, record}:
-  {position: number; teamName: string; record: string}
+  { position, teamName, record }:
+    { position: number; teamName: string; record: string }
 ) {
   return (
     <div className={`flex ${styles.listEntry}`}>
@@ -69,64 +70,92 @@ export default function Marquee() {
   const categories = [];
 
   // generate marquee elements. the number of marquees must be divisible by 3!
-   for (const league of ["XBL", "AAA", "AA"] as League[]) {
-      const inPlayoffs = store[league].showPlayoffs;
+  for (const league of ["XBL", "AAA", "AA"] as League[]) {
+    // const inPlayoffs = store.playoffs[league];
 
-      const hrLeaders = store[league].hrLeaders;
-      const kLeaders = store[league].kLeaders;
-      const baLeaders = store[league].baLeaders;
-      const standings: TeamRecord[] = inPlayoffs ? store[league].playoffRecords : store[league].standings;
+    const teamStats = _.values(store.stats[league].season_team_stats);
 
-      const hrMarquee =(
-        <Category header="HR Leaders" i={0}>
-          {hrLeaders.map((entry, i) => (
-            <LeaderListEntry key={`HR_LEADER__${league}_${i}`}
-              position={i+1}
-              teamName={entry.team}
-              stat={entry.value} />
-            )
+    const hrLeaders = _.chain(teamStats)
+      .orderBy('hr', 'desc')
+      .slice(0, 10)
+      .map(team => {
+        return { team: team.team, value: team.hr }
+      })
+      .value();
+
+    const kLeaders = _.chain(teamStats)
+      .orderBy('oppk', 'desc')
+      .slice(0, 10)
+      .map(team => {
+        return { team: team.team, value: team.oppk }
+      })
+      .value();
+
+    const baLeaders = _.chain(teamStats)
+      .orderBy('ba', 'desc')
+      .slice(0, 10)
+      .map(team => {
+        return { team: team.team, value: team.ba }
+      })
+      .value();
+
+
+    const standings = _.sortBy(store.stats[league].season_team_records, 'rank')
+      .map(({ team, wins, losses }) => {
+        return { team, wins, losses }
+      })
+      .slice(0, 10);
+
+    const hrMarquee = (
+      <Category header="HR Leaders" i={0}>
+        {hrLeaders.map((entry, i) => (
+          <LeaderListEntry key={`HR_LEADER__${league}_${i}`}
+            position={i + 1}
+            teamName={entry.team}
+            stat={entry.value} />
+        )
         )}
-        </Category>
-      );
+      </Category>
+    );
 
-      const kMarquee =(
-        <Category header="K Leaders" i={1}>
-          {kLeaders.map((entry, i) => (
-            <LeaderListEntry key={`K_LEADER__${league}_${i}`}
-              position={i+1}
-              teamName={entry.team}
-              stat={entry.value} />
-            )
+    const kMarquee = (
+      <Category header="K Leaders" i={1}>
+        {kLeaders.map((entry, i) => (
+          <LeaderListEntry key={`K_LEADER__${league}_${i}`}
+            position={i + 1}
+            teamName={entry.team}
+            stat={entry.value} />
+        )
         )}
-        </Category>
-      );
+      </Category>
+    );
 
-      const baMarquee =(
-        <Category header="BA Leaders" i={2}>
-          {baLeaders.map((entry, i) => (
-            <LeaderListEntry key={`BA_LEADER__${league}_${i}`}
-              position={i+1}
-              teamName={entry.team}
-              stat={entry.value} />
-            )
+    const baMarquee = (
+      <Category header="BA Leaders" i={2}>
+        {baLeaders.map((entry, i) => (
+          <LeaderListEntry key={`BA_LEADER__${league}_${i}`}
+            position={i + 1}
+            teamName={entry.team}
+            stat={entry.value} />
+        )
         )}
-        </Category>
-      );
+      </Category>
+    );
 
-      const standingsMarquee =(
-        <Category header="Standings" i={3}>
-          {standings.map((entry, i) => (
-            <StandingEntry key={`STANDINGS__${league}_${i}`}
-              position={i+1}
-              teamName={entry.team}
-              record={`${entry.wins}-${entry.losses}`} />
-            )
+    const standingsMarquee = (
+      <Category header="Standings" i={3}>
+        {standings.map((entry, i) => (
+          <StandingEntry key={`STANDINGS__${league}_${i}`}
+            position={i + 1}
+            teamName={entry.team}
+            record={`${entry.wins}-${entry.losses}`} />
+        )
         )}
-        </Category>
-      );
+      </Category>
+    );
 
-      categories.push(hrMarquee, kMarquee, baMarquee, standingsMarquee);
-   }
+    categories.push(hrMarquee, kMarquee, baMarquee, standingsMarquee);
+  }
 
   return <div className={`${styles.container} vertical-scroll-${categories.length}`}>{categories}</div>
 }

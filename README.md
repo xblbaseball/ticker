@@ -57,7 +57,7 @@ python stats/models/models.py
 npm run types
 ```
 
-Then commit the changes.
+Then commit the changes to `public/schemas` and `src/typings`.
 
 ### Testing the Ticker
 
