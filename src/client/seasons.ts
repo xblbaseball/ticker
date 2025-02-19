@@ -1,8 +1,8 @@
 import { League } from '@/typings/league';
-import getLocalJson from './local-json';
 import { SeasonStats } from '@/typings/season';
+import ghStats from './ghStats';
 
-export default function getSeason(league: League) {
-  const data: SeasonStats = getLocalJson(`${league}.json`);
+export default async function getSeason(league: League) {
+  const data = await ghStats<SeasonStats>(`${league}.json`);
   return data;
 }

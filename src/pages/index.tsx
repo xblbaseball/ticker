@@ -37,10 +37,10 @@ export default function Home(props: IndexStore) {
 export async function getStaticProps() {
   const props: IndexStore = {
     stats: {
-      careers: getCareers(),
-      XBL: getSeason("XBL"),
-      AAA: getSeason("AAA"),
-      AA: getSeason("AA"),
+      careers: await getCareers(),
+      XBL: await getSeason("XBL"),
+      AAA: await getSeason("AAA"),
+      AA: await getSeason("AA"),
     },
     playoffs: {
       XBL: false,
