@@ -1,13 +1,13 @@
 import Head from "next/head";
-import { useSearchParams } from 'next/navigation'
-import Ticker from "@/components/ticker";
+import { useSearchParams } from 'next/navigation';
+
+import getCareers from "@/client/careers";
+import getSeason from "@/client/seasons";
+import NewsFrame from "@/components/news-frame";
 import { IndexContext } from "@/store/index.context";
 import { IndexStore } from "@/store/index.reducer";
-import getSeason from "@/client/seasons";
-import { CareerStats } from "@/typings/careers";
 
-/** route: / */
-export default function Home(props: IndexStore) {
+export default function News(props: IndexStore) {
   const searchParams = useSearchParams()
 
   const xblPlayoffs = searchParams.get('xbl-playoffs') === "true";
@@ -20,14 +20,14 @@ export default function Home(props: IndexStore) {
 
   return <>
     <Head>
-      <title>XBL Broadcast Ticker v3</title>
-      <meta name="description" content="XBL scores and more" />
+      <title>XBL Broadcast News</title>
+      <meta name="description" content="XBL scores, stats, and more" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="icon" href="/favicon.ico" />
     </Head>
 
     <IndexContext.Provider value={props}>
-      <Ticker />
+      <NewsFrame />
     </IndexContext.Provider>
   </>
 }
@@ -36,7 +36,7 @@ export default function Home(props: IndexStore) {
 export async function getStaticProps() {
   const props: IndexStore = {
     stats: {
-      careers: {} as CareerStats,
+      careers: await getCareers(),
       XBL: await getSeason("XBL"),
       AAA: await getSeason("AAA"),
       AA: await getSeason("AA"),

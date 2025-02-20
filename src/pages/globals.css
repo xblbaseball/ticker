@@ -1,5 +1,7 @@
 :root {
-  /* --ticker-height: 72px; */
+  --massholes-blue: #323c4d;
+
+  /* TICKER */
   --ticker-height: 36px;
   --side-bar-width: 128px;
 
@@ -18,6 +20,12 @@
 
   /* the time it takes to complete a right-to-left horizontal scroll in the marquee */
   --marquee-cycle: 20s;
+
+  /* NEWS */
+  --news-bottom-bar-height: 72px;
+  --news-bottom-bar-width: 1920px;
+  --news-left-bar-height: calc(1080px - var(--news-bottom-bar-height));
+  --news-left-bar-width: 128px;
 
 }
 
