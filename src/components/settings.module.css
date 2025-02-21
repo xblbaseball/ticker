@@ -1,11 +1,14 @@
 .container {
   width: 1000px;
-
+  height: 700px;
   padding: 8px;
+
+  overflow-y: scroll;
 
   background-color: white;
   border: 1px solid black;
   border-radius: 4px;
 
   font-size: 20px;
+
 }

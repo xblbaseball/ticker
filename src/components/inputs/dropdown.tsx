@@ -1,8 +1,9 @@
 import React from 'react';
 
 export default function Dropdown(
-  { options, selected, onSelect, children }:
+  { optionsLabel = "Select one", options, selected, onSelect, children }:
     {
+      optionsLabel?: string;
       options: string[];
       selected: string;
       onSelect: (option: string) => void
@@ -17,7 +18,7 @@ export default function Dropdown(
       <label>
         <div><em>{children}</em></div>
         <select value={selected} onChange={handleOptionClick}>
-          <option disabled={true}>Select a league</option>
+          <option disabled={true}>{optionsLabel}</option>
           {options.map((option) => (
             <option key={option} value={option}>
               {option}

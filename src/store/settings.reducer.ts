@@ -1,15 +1,75 @@
+import { League } from "@/typings/league";
+import { StatCategory } from "@/typings/stats";
 import _ from "lodash";
+
+const season = parseInt(_.get(process, ['env', 'NEXT_PUBLIC_SEASON'], "0"));
 
 export interface SettingsStore {
   /** are we using localstorage? */
   useLocalStorage: boolean;
   /** logo to show in the top left */
-  leagueLogo: "XBL" | "AAA" | "AA";
+  leagueLogo: League;
   season: number;
+  seasonSubtext: string;
+  showSeries: boolean;
+  awayTeam: string;
+  homeTeam: string;
+  awayWins: number;
+  homeWins: number;
+  seriesName: string;
+  seriesBO: number;
+  statsSameForBothTeams: boolean;
+  awayStatCategories: {
+    first: StatCategory,
+    second: StatCategory,
+    third: StatCategory,
+    fourth: StatCategory,
+    fifth: StatCategory,
+    sixth: StatCategory,
+  };
+  homeStatCategories: {
+    first: StatCategory,
+    second: StatCategory,
+    third: StatCategory,
+    fourth: StatCategory,
+    fifth: StatCategory,
+    sixth: StatCategory,
+  };
 }
 
+export const initialState: SettingsStore = {
+  useLocalStorage: storageAvailable("localStorage"),
+  leagueLogo: "XBL",
+  season,
+  seasonSubtext: "",
+  showSeries: true,
+  awayTeam: "",
+  homeTeam: "",
+  awayWins: 0,
+  homeWins: 0,
+  seriesName: "",
+  seriesBO: 2,
+  statsSameForBothTeams: true,
+  awayStatCategories: {
+    first: {stat: "ba", timeFrame: {season: true}, season},
+    second: {stat: "hr9", timeFrame: {season: true}, season},
+    third: {stat: "babip", timeFrame: {season: true}, season},
+    fourth: {stat: "oppba", timeFrame: {season: true}, season},
+    fifth: {stat: "opphr9", timeFrame: {season: true}, season},
+    sixth: {stat: "whip", timeFrame: {season: true}, season},
+  },
+  homeStatCategories: {
+    first: {stat: "ba", timeFrame: {season: true}, season},
+    second: {stat: "hr9", timeFrame: {season: true}, season},
+    third: {stat: "babip", timeFrame: {season: true}, season},
+    fourth: {stat: "oppba", timeFrame: {season: true}, season},
+    fifth: {stat: "opphr9", timeFrame: {season: true}, season},
+    sixth: {stat: "whip", timeFrame: {season: true}, season},
+  }
+};
+
 export type action = {
-  type: "import" | "load" | "set" | "reset";
+  type: "import" | "load" | "set" | "reset" | "reset-all";
   payload?: {
     path?: string[];
     value?: unknown;
@@ -59,17 +119,11 @@ function readStorage(): SettingsStore {
   return null;
 }
 
-export const initialState: SettingsStore = {
-  useLocalStorage: storageAvailable("localStorage"),
-  leagueLogo: "XBL",
-  season: 19,
-};
-
 export default function settingsReducer(
   store: SettingsStore,
   action: action
 ) {
-  const updated = {};
+  const updated = { ...store };
   let newStore: SettingsStore;
 
   switch (action.type) {
@@ -81,6 +135,7 @@ export default function settingsReducer(
       return store;
 
     case "import":
+      updateStorage(action.payload.store);
       return action.payload.store;
 
     case "set":
@@ -94,6 +149,10 @@ export default function settingsReducer(
       newStore = { ...store, ...updated };
       updateStorage(newStore);
       return newStore;
+
+    case "reset-all":
+      updateStorage(initialState);
+      return initialState;
 
     default:
       console.error(action);
