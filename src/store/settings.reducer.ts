@@ -9,10 +9,11 @@ export interface SettingsStore {
 }
 
 export type action = {
-  type: "load" | "set" | "reset";
+  type: "import" | "load" | "set" | "reset";
   payload?: {
-    path: string[];
+    path?: string[];
     value?: unknown;
+    store?: SettingsStore;
   }
 }
 
@@ -78,6 +79,9 @@ export default function settingsReducer(
         return {...initialState, ...newStore};
       }
       return store;
+
+    case "import":
+      return action.payload.store;
 
     case "set":
       _.set(updated, action.payload.path, action.payload.value);

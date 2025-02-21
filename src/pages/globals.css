@@ -62,3 +62,9 @@ body {
 .space-between {
   justify-content: space-between;
 }
+
+input,
+option,
+select {
+  font-size: 20px;
+}
