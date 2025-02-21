@@ -1,12 +1,9 @@
-from dotenv import load_dotenv
 import io
 import json
 import os
 from pathlib import Path
 from PIL import Image
 import urllib.request
-
-load_dotenv()
 
 
 def main():
@@ -55,21 +52,31 @@ def main():
 
     print(f"Found {len(logos_to_download)} teams+league logos")
 
+    thumbnail_res = (72, 72)
+
     for team_name, url in logos_to_download:
         suffix = Path(url).suffix
-        logo_path = logos_dir.joinpath(team_name).with_suffix(suffix)
+        full_size_logo_path = logos_dir.joinpath(team_name).with_suffix(suffix)
+        thumbnail_logo_path = logos_dir.joinpath(
+            f"{team_name}-{'x'.join(map(str, thumbnail_res))}"
+        ).with_suffix(suffix)
 
         # pretend to be curl
         req = urllib.request.Request(url)
         req.add_header("user-agent", "curl/7.84.0")
         req.add_header("accept", "*/*")
 
-        with urllib.request.urlopen(req) as logo_req, open(logo_path, "wb") as f:
+        with urllib.request.urlopen(req) as logo_req, open(
+            full_size_logo_path, "wb"
+        ) as f, open(thumbnail_logo_path, "wb") as thumb_f:
             data = logo_req.read()
             image = Image.open(io.BytesIO(data))
-            image.thumbnail(size=(72, 72), resample=Image.Resampling.LANCZOS)
             image.save(f)
-            print(f"saved {logo_path}")
+            print(f"saved {full_size_logo_path}")
+
+            image.thumbnail(size=thumbnail_res, resample=Image.Resampling.LANCZOS)
+            image.save(thumb_f)
+            print(f"saved {thumbnail_logo_path}")
 
 
 if __name__ == "__main__":
