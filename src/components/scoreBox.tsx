@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import { useContext } from "react";
 import Matchup from "@/components/matchup";
-import { IndexContext } from "@/store/stats.context"
+import { StatsContext } from "@/store/stats.context"
 import { League } from "@/typings/league";
 
 import styles from "./scoreBox.module.css"
 
 export default function ScoreBox() {
-   const store = useContext(IndexContext);
+   const store = useContext(StatsContext);
 
    const matchups = [];
    for (const league of ["XBL", "AAA", "AA"] as League[]) {

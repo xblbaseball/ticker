@@ -2,7 +2,7 @@
 
 import _ from "lodash";
 import { useContext } from "react";
-import { IndexContext } from "@/store/stats.context"
+import { StatsContext } from "@/store/stats.context"
 import { League } from "@/typings/league";
 import { PlayoffsGameResults1, PlayoffsTeamRecord, SeasonGameResults1, SeasonTeamRecord } from "@/typings/season";
 
@@ -13,7 +13,7 @@ function Team(
   { league, teamName, score, winner, away }:
     { league: League, teamName: string, score: number; winner: boolean; away: boolean }
 ) {
-  const store = useContext(IndexContext);
+  const store = useContext(StatsContext);
   const inPlayoffs = store.playoffs[league];
 
   let wins = 0;

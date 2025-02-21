@@ -9,6 +9,7 @@ import { SettingsContext, SettingsDispatchContext } from "@/store/settings.conte
 import settingsReducer, { initialState as settingsInitialState } from "@/store/settings.reducer";
 
 import styles from "./news-frame.module.css";
+import LeagueLogo from "./league-logo";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -66,7 +67,9 @@ export default function NewsFrame() {
             }
 
             <div className={oswald.className}>
-              <div className={`flex column ${styles.container} ${styles.leftBar}`}>left</div>
+              <div className={`flex column ${styles.container} ${styles.leftBar}`}>
+                <LeagueLogo league={settingsStore.leagueLogo} />
+              </div>
               <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
             </div>
 

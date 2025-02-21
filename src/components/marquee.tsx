@@ -2,7 +2,7 @@
 
 import _ from "lodash";
 import { useContext } from "react";
-import { IndexContext } from "@/store/stats.context"
+import { StatsContext } from "@/store/stats.context"
 import { League } from "@/typings/league";
 
 import styles from "./marquee.module.css"
@@ -64,7 +64,7 @@ function StandingEntry(
 }
 
 export default function Marquee() {
-  const store = useContext(IndexContext);
+  const store = useContext(StatsContext);
 
   const categories = [];
 
