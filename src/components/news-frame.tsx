@@ -4,7 +4,9 @@ import { Oswald } from "next/font/google";
 import Modal from "@/components/modal";
 import Settings from "@/components/settings";
 import { ModalContext, ModalDispatchContext } from "@/store/modal.context";
-import modalReducer, { initialState } from "@/store/modal.reducer";
+import modalReducer, { initialState as modalInitialState } from "@/store/modal.reducer";
+import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
+import settingsReducer, { initialState as settingsInitialState } from "@/store/settings.reducer";
 
 import styles from "./news-frame.module.css";
 
@@ -14,15 +16,16 @@ const oswald = Oswald({
 });
 
 export default function NewsFrame() {
-  const [store, dispatch] = useReducer(modalReducer, initialState);
+  const [modalStore, modalDispatch] = useReducer(modalReducer, modalInitialState);
+  const [settingsStore, settingsDispatch] = useReducer(settingsReducer, settingsInitialState);
 
   const handleBodyClick = useCallback(() => {
-    if (store.modals.length > 0) {
+    if (modalStore.modals.length > 0) {
       // only ever need one settings modal
-      return;
+      modalDispatch({ type: "popped-modal" });
     }
 
-    dispatch({
+    modalDispatch({
       type: "pushed-modal", payload: {
         modal: (
           <Modal centered={true}>
@@ -31,7 +34,7 @@ export default function NewsFrame() {
         )
       }
     });
-  }, [store.modals]);
+  }, [modalStore.modals]);
 
   useEffect(() => {
     window.addEventListener('click', handleBodyClick);
@@ -42,29 +45,30 @@ export default function NewsFrame() {
   }, [handleBodyClick]);
 
   return <>
-    <ModalContext.Provider value={store}>
-      <ModalDispatchContext.Provider value={dispatch}>
-        {
-          store.modals.length > 0 && (
-            <div>
-              {store.modals.map((modal, i) => (
-                <div
-                  key={`MODAL__${i}`}
-                  onClick={() => dispatch({ type: "popped-modal" })}
-                >
-                  {modal}
+    <SettingsContext.Provider value={settingsStore}>
+      <SettingsDispatchContext.Provider value={settingsDispatch}>
+        <ModalContext.Provider value={modalStore}>
+          <ModalDispatchContext.Provider value={modalDispatch}>
+            {
+              modalStore.modals.length > 0 && (
+                <div>
+                  {modalStore.modals.map((modal, i) => (
+                    <div key={`MODAL__${i}`}>
+                      {modal}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )
+            }
+
+            <div className={oswald.className}>
+              <div className={`flex column ${styles.container} ${styles.leftBar}`}>left</div>
+              <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
             </div>
-          )
-        }
 
-        <div className={oswald.className}>
-          <div className={`flex column ${styles.container} ${styles.leftBar}`}>left</div>
-          <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
-        </div>
-
-      </ModalDispatchContext.Provider>
-    </ModalContext.Provider>
+          </ModalDispatchContext.Provider>
+        </ModalContext.Provider>
+      </SettingsDispatchContext.Provider>
+    </SettingsContext.Provider>
   </>
 }

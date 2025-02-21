@@ -2,7 +2,7 @@
 
 import _ from "lodash";
 import { useContext } from "react";
-import { IndexContext } from "@/store/index.context"
+import { IndexContext } from "@/store/stats.context"
 import { League } from "@/typings/league";
 import { PlayoffsGameResults1, PlayoffsTeamRecord, SeasonGameResults1, SeasonTeamRecord } from "@/typings/season";
 

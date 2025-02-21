@@ -4,10 +4,10 @@ import { useSearchParams } from 'next/navigation';
 import getCareers from "@/client/careers";
 import getSeason from "@/client/seasons";
 import NewsFrame from "@/components/news-frame";
-import { IndexContext } from "@/store/index.context";
-import { IndexStore } from "@/store/index.reducer";
+import { StatsContext } from "@/store/stats.context";
+import { StatsStore } from "@/store/stats.reducer";
 
-export default function News(props: IndexStore) {
+export default function News(props: StatsStore) {
   const searchParams = useSearchParams()
 
   const xblPlayoffs = searchParams.get('xbl-playoffs') === "true";
@@ -26,15 +26,15 @@ export default function News(props: IndexStore) {
       <link rel="icon" href="/favicon.ico" />
     </Head>
 
-    <IndexContext.Provider value={props}>
+    <StatsContext.Provider value={props}>
       <NewsFrame />
-    </IndexContext.Provider>
+    </StatsContext.Provider>
   </>
 }
 
 /** at build time, parse all the data from sheets and inject it into the page */
 export async function getStaticProps() {
-  const props: IndexStore = {
+  const props: StatsStore = {
     stats: {
       careers: await getCareers(),
       XBL: await getSeason("XBL"),

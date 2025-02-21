@@ -20,6 +20,7 @@ export default function modalReducer(
   store: ModalStore,
   action: action
 ) {
+  console.log(action)
   switch (action.type) {
     case "pushed-modal":
       const modal = _.get(action, ['payload', 'modal'], null);

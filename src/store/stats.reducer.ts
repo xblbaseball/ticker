@@ -1,10 +1,8 @@
 import { CareerStats } from "@/typings/careers";
 import { SeasonStats } from "@/typings/season";
 
-// TODO might need like a doScroll flag that controls whether or not animations are applied
-
 /** all the data */
-export interface IndexStore {
+export interface StatsStore {
   stats: {
     careers: CareerStats;
     XBL: SeasonStats;
@@ -18,7 +16,7 @@ export interface IndexStore {
   }
 }
 
-export const initialState: IndexStore = {
+export const initialState: StatsStore = {
   stats: {
     careers: {} as CareerStats,
     XBL: {} as SeasonStats,
