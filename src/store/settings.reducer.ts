@@ -35,6 +35,7 @@ export interface SettingsStore {
     fifth: StatCategory,
     sixth: StatCategory,
   };
+  headlines: string;
 }
 
 export const initialState: SettingsStore = {
@@ -65,7 +66,8 @@ export const initialState: SettingsStore = {
     fourth: {stat: "oppba", timeFrame: {season: true}, season},
     fifth: {stat: "opphr9", timeFrame: {season: true}, season},
     sixth: {stat: "whip", timeFrame: {season: true}, season},
-  }
+  },
+  headlines: ""
 };
 
 export type action = {

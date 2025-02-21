@@ -71,8 +71,6 @@ export default function Settings() {
       It might be easier to play with settings in your browser and then copy them here.
     </TextArea>
 
-    <h3>Left Bar</h3>
-
     <Dropdown
       options={["XBL", "AAA", "AA"]}
       selected={settingsStore.leagueLogo}
@@ -352,10 +350,32 @@ export default function Settings() {
       </>
     }
 
+    <h3>Headlines</h3>
+
+    <em>Each line in the next text box is a separate headline that will be scrolled in the marquee in the bottom bar. Each headline should follow this format:</em>
+
+    <pre>Category|Text to scroll</pre>
+
+    <em>Example:</em>
+
+    <pre>XBL News|Spokesmen def. Holograms to move on to XBL World Series. Coverage starts Monday</pre>
+    <pre>AAA News|Mystery Men win it all! The caster extraordinaire finally walks away with hardware.
+    </pre>
+
+    <TextArea
+      onChange={(value) => {
+        settingsDispatch({
+          type: "set",
+          payload: { path: ["headlines"], value }
+        })
+      }}
+    >
+      Headlines
+    </TextArea>
 
     <h3>Current Settings</h3>
     <em>Copy this if you want to share your settings with someone else, or just paste them into the ticker settings in the OBS browser.</em>
-    <pre>{JSON.stringify(settingsStore)}</pre>
+    <pre className="pre-wrap">{JSON.stringify(settingsStore)}</pre>
 
     <button style={{ cursor: 'pointer', width: "10em" }} onClick={() => settingsDispatch({ type: "reset-all" })}>Reset settings</button>
   </div >;
