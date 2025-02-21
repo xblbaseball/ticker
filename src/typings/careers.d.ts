@@ -56,7 +56,7 @@ export type Wins = number;
 export type Losses = number;
 export type WinsByRunRule = number;
 export type LossesByRunRule = number;
-export type NumSeasons = number;
+export type Seasons = number[];
 export type SweepsW = number;
 export type SweepsL = number;
 export type Splits = number;
@@ -106,7 +106,7 @@ export type Wins1 = number;
 export type Losses1 = number;
 export type WinsByRunRule1 = number;
 export type LossesByRunRule1 = number;
-export type NumSeasons1 = number;
+export type Seasons1 = number[];
 export type Player5 = string;
 export type Team2 = string;
 export type Player6 = string;
@@ -152,7 +152,7 @@ export type Wins2 = number;
 export type Losses2 = number;
 export type WinsByRunRule2 = number;
 export type LossesByRunRule2 = number;
-export type NumSeasons2 = number;
+export type Seasons2 = number[];
 export type Appearances = number;
 export type SeriesWins = number;
 export type SeriesLosses = number;
@@ -164,14 +164,15 @@ export type PlayoffsHeadToHead = HeadToHead[];
  * all-time stats for all players
  */
 export interface CareerStats {
-  players: Players;
+  all_players: AllPlayers;
+  active_players: ActivePlayers;
   season_performances: SeasonPerformances;
   season_head_to_head: SeasonHeadToHead;
   playoffs_performances: PlayoffsPerformances;
   playoffs_head_to_head: PlayoffsHeadToHead;
   [k: string]: unknown;
 }
-export interface Players {
+export interface AllPlayers {
   [k: string]: Player;
 }
 /**
@@ -191,6 +192,9 @@ export interface TeamSeason {
   league: League;
   season: Season;
   [k: string]: unknown;
+}
+export interface ActivePlayers {
+  [k: string]: string[];
 }
 export interface SeasonPerformances {
   [k: string]: CareerSeasonPerformance;
@@ -255,7 +259,7 @@ export interface CareerSeasonStats {
   losses: Losses;
   wins_by_run_rule: WinsByRunRule;
   losses_by_run_rule: LossesByRunRule;
-  num_seasons: NumSeasons;
+  seasons: Seasons;
   sweeps_w: SweepsW;
   sweeps_l: SweepsL;
   splits: Splits;
@@ -324,7 +328,7 @@ export interface TeamStats {
   losses: Losses1;
   wins_by_run_rule: WinsByRunRule1;
   losses_by_run_rule: LossesByRunRule1;
-  num_seasons: NumSeasons1;
+  seasons: Seasons1;
   [k: string]: unknown;
 }
 export interface PlayoffsPerformances {
@@ -390,7 +394,7 @@ export interface CareerPlayoffsStats {
   losses: Losses2;
   wins_by_run_rule: WinsByRunRule2;
   losses_by_run_rule: LossesByRunRule2;
-  num_seasons: NumSeasons2;
+  seasons: Seasons2;
   appearances: Appearances;
   series_wins: SeriesWins;
   series_losses: SeriesLosses;

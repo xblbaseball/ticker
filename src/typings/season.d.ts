@@ -65,7 +65,7 @@ export type Wins1 = number;
 export type Losses1 = number;
 export type WinsByRunRule = number;
 export type LossesByRunRule = number;
-export type NumSeasons = number;
+export type Seasons = number[];
 export type Season = number;
 export type League = string;
 export type HomeTeam = string;
@@ -220,7 +220,7 @@ export interface TeamStats {
   losses: Losses1;
   wins_by_run_rule: WinsByRunRule;
   losses_by_run_rule: LossesByRunRule;
-  num_seasons: NumSeasons;
+  seasons: Seasons;
   [k: string]: unknown;
 }
 /**
