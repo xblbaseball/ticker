@@ -61,7 +61,7 @@ function readStorage(): SettingsStore {
 export const initialState: SettingsStore = {
   useLocalStorage: storageAvailable("localStorage"),
   leagueLogo: "XBL",
-  season: 18,
+  season: 19,
 };
 
 export default function settingsReducer(
@@ -73,10 +73,9 @@ export default function settingsReducer(
 
   switch (action.type) {
     case "load":
-      console.log("loadingJ")
       newStore = readStorage();
       if (!_.isNull(newStore)) {
-        return newStore;
+        return {...initialState, ...newStore};
       }
       return store;
 

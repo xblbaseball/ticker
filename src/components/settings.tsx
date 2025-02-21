@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
 import Dropdown from "@/components/inputs/dropdown";
+import Input from "@/components/inputs/input";
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
 import { action as settingsAction } from "@/store/settings.reducer";
-import { League } from '@/typings/league';
 
 import styles from "./settings.module.css";
 
@@ -30,18 +30,20 @@ export default function Settings() {
     </div>
 
     <h3>Left Bar</h3>
-    <em>Which logo do you want to show in the top left?</em>
+
     <Dropdown
       options={["XBL", "AAA", "AA"]}
       selected={settingsStore.leagueLogo}
       onSelect={(league) => updateSetting(["leagueLogo"], league)}
-    />
-    <em>Season</em>
-    <Dropdown
-      options={["XBL", "AAA", "AA"]}
-      selected={settingsStore.leagueLogo}
-      onSelect={(league) => updateSetting(["season"], league)}
-    />
+    >
+      Which logo do you want to show in the top left?
+    </Dropdown>
+    <Input
+      value={`${settingsStore.season || ""}`}
+      onChange={(season) => updateSetting(["season"], _.parseInt(season as string))}
+    >
+      Season
+    </Input>
     {JSON.stringify(settingsStore)}
   </div>;
 }
