@@ -2,7 +2,7 @@
 
 import { League } from "@/typings/league";
 
-const basePath = process.env.NEXT_PUBLIC_BASEPATH || ""
+const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
 
 export default function LeagueLogo({ league }: { league: League }) {

@@ -24,14 +24,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # see https://github.com/actions/starter-workflows/blob/main/pages/nextjs.yml
-  build:
-    name: Build static site
+  collect-logos:
+    name: Collect logoss
     runs-on: ubuntu-latest
     environment: production
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: 'pip'
+      - name: install python deps
+        run: pip install -r requirements.txt
+      - name: copy latest from sheets
+        run: python scripts/download-logos.py
+        env:
+          G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
+      - name: save logos
+        uses: actions/upload-artifact@v4
+        with:
+          name: logos
+          path: public/logos
+
+  # see https://github.com/actions/starter-workflows/blob/main/pages/nextjs.yml
+  build:
+    name: Build static site
+    runs-on: ubuntu-latest
+    environment: production
+    needs: collect-logos
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: Download logos
+        uses: actions/download-artifact@v4
+        with:
+          name: logos
+          path: public/logos
       - name: Detect package manager
         id: detect-package-manager
         run: |

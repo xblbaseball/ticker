@@ -25,3 +25,10 @@
   height: var(--news-bottom-bar-height);
   width: var(--news-bottom-bar-width);
 }
+
+.season {
+  font-size: 32px;
+  text-align: center;
+  line-height: 1.25em;
+  text-transform: capitalize;
+}

@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { useCallback, useEffect, useReducer } from "react";
 import { Oswald } from "next/font/google";
 
@@ -67,9 +68,19 @@ export default function NewsFrame() {
             }
 
             <div className={oswald.className}>
+
               <div className={`flex column ${styles.container} ${styles.leftBar}`}>
-                <LeagueLogo league={settingsStore.leagueLogo} />
+                <div style={{ marginLeft: "4px" }}>
+                  <LeagueLogo league={settingsStore.leagueLogo} />
+                </div>
+                <div className={`flex column ${styles.title}`}>
+                  <div className={styles.season}>
+                    Season {settingsStore.season}
+                    {!_.isEmpty(settingsStore.seasonSubtext) && <><br />{settingsStore.seasonSubtext}</>}
+                  </div>
+                </div>
               </div>
+
               <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
             </div>
 
