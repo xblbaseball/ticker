@@ -32,11 +32,6 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
-      - name: Download sheets data
-        uses: actions/download-artifact@v4
-        with:
-          name: json_all
-          path: public/json
       - name: Detect package manager
         id: detect-package-manager
         run: |

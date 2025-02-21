@@ -46,6 +46,7 @@ export default function NewsFrame() {
       <ModalDispatchContext.Provider value={dispatch}>
 
         <div className={oswald.className}>
+
           {
             store.modals.length > 0 && (
               <div>
