@@ -24,36 +24,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  collect-stats:
-    name: Collect data from sheets
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: 'pip'
-      - name: install python deps
-        run: pip install -r requirements.txt
-      - name: copy latest from sheets
-        run: python scripts/get-sheets.py
-        env:
-          G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
-      - name: structure and aggregate stats
-        run: python stats/main.py --season ${{ vars.SEASON }}
-      - name: save results
-        uses: actions/upload-artifact@v4
-        with:
-          name: json_all
-          path: public/json
-
   # see https://github.com/actions/starter-workflows/blob/main/pages/nextjs.yml
   build:
     name: Build static site
-    needs: collect-stats
     runs-on: ubuntu-latest
     environment: production
     steps:
