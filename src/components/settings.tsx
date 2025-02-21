@@ -155,7 +155,9 @@ export default function Settings() {
       Show same stats for away and home teams
     </Checkbox>
 
-    {settingsStore.statsSameForBothTeams && <>
+    <em>If &quot;Career&quot; is selected, show all-time stats. If &quot;League&quot; is selected, show all-time stats for a given league. If &quot;Season&quot; is selected, show stats for the season. If &quot;Head to Head&quot; is selected, show stats against the other team.</em>
+
+    {settingsStore.statsSameForBothTeams ? <>
       <StatCategory
         name={"all-1"}
         statCategory={settingsStore.awayStatCategories.first}
@@ -222,7 +224,134 @@ export default function Settings() {
         Stat category 6
       </StatCategory>
     </>
+      :
+      <>
+        <h4>Away</h4>
+
+        <StatCategory
+          name={"away-1"}
+          statCategory={settingsStore.awayStatCategories.first}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "first"], newCategory)
+          }}
+        >
+          Away stat category 1
+        </StatCategory>
+
+        <StatCategory
+          name={"away-2"}
+          statCategory={settingsStore.awayStatCategories.second}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "second"], newCategory)
+          }}
+        >
+          Away stat category 2
+        </StatCategory>
+
+        <StatCategory
+          name={"away-3"}
+          statCategory={settingsStore.awayStatCategories.third}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "third"], newCategory)
+          }}
+        >
+          Away stat category 3
+        </StatCategory>
+
+        <StatCategory
+          name={"away-4"}
+          statCategory={settingsStore.awayStatCategories.fourth}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "fourth"], newCategory)
+          }}
+        >
+          Away stat category 4
+        </StatCategory>
+
+        <StatCategory
+          name={"away-5"}
+          statCategory={settingsStore.awayStatCategories.fifth}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "fifth"], newCategory)
+          }}
+        >
+          Away stat category 5
+        </StatCategory>
+
+        <StatCategory
+          name={"away-6"}
+          statCategory={settingsStore.awayStatCategories.sixth}
+          onChange={(newCategory) => {
+            updateSetting(["awayStatCategories", "sixth"], newCategory)
+          }}
+        >
+          Away stat category 6
+        </StatCategory>
+
+        <h4>Home</h4>
+
+        <StatCategory
+          name={"home-1"}
+          statCategory={settingsStore.homeStatCategories.first}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "first"], newCategory)
+          }}
+        >
+          Home stat category 1
+        </StatCategory>
+
+        <StatCategory
+          name={"home-2"}
+          statCategory={settingsStore.homeStatCategories.second}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "second"], newCategory)
+          }}
+        >
+          Home stat category 2
+        </StatCategory>
+
+        <StatCategory
+          name={"home-3"}
+          statCategory={settingsStore.homeStatCategories.third}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "third"], newCategory)
+          }}
+        >
+          Home stat category 3
+        </StatCategory>
+
+        <StatCategory
+          name={"home-4"}
+          statCategory={settingsStore.homeStatCategories.fourth}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "fourth"], newCategory)
+          }}
+        >
+          Home stat category 4
+        </StatCategory>
+
+        <StatCategory
+          name={"home-5"}
+          statCategory={settingsStore.homeStatCategories.fifth}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "fifth"], newCategory)
+          }}
+        >
+          Home stat category 5
+        </StatCategory>
+
+        <StatCategory
+          name={"home-6"}
+          statCategory={settingsStore.homeStatCategories.sixth}
+          onChange={(newCategory) => {
+            updateSetting(["homeStatCategories", "sixth"], newCategory)
+          }}
+        >
+          Home stat category 6
+        </StatCategory>
+      </>
     }
+
 
     <h3>Current Settings</h3>
     <em>Copy this if you want to share your settings with someone else, or just paste them into the ticker settings in the OBS browser.</em>

@@ -1,8 +1,8 @@
+import _ from "lodash";
 import { League } from "@/typings/league";
 import { StatCategory } from "@/typings/stats";
-import _ from "lodash";
 
-const season = parseInt(_.get(process, ['env', 'NEXT_PUBLIC_SEASON'], "0"));
+const season = parseInt(process.env.NEXT_PUBLIC_SEASON);
 
 export interface SettingsStore {
   /** are we using localstorage? */

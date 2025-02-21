@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
 import { StatCategory } from '@/typings/stats';
+import { stat } from 'node:fs/promises';
+import { League } from '@/typings/league';
 
 const STATS = [
   "rs",
@@ -94,6 +96,12 @@ export default function StatSelector(
         newStatCategory.timeFrame.headToHead = false;
         newStatCategory.timeFrame.league = true;
         break;
+      case "none":
+        newStatCategory.timeFrame.career = false;
+        newStatCategory.timeFrame.season = false;
+        newStatCategory.timeFrame.headToHead = false;
+        newStatCategory.timeFrame.league = false;
+        break;
       default:
         console.error("Don't now how we got here");
         break;
@@ -104,6 +112,16 @@ export default function StatSelector(
 
   const handleCategoryChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
     const newStatCategory = { ...statCategory, ...{ stat: e.target.value } }
+    onChange(newStatCategory);
+  };
+
+  const handleSeasonChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const newStatCategory = { ...statCategory, ...{ season: parseInt(e.target.value) || null } }
+    onChange(newStatCategory);
+  }
+
+  const handleLeagueChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const newStatCategory = { ...statCategory, ...{ league: e.target.value as League } }
     onChange(newStatCategory);
   };
 
@@ -156,10 +174,41 @@ export default function StatSelector(
         </label>
         <label>| None
           <input
+            value="none"
             onChange={handleTimeframeChange}
             type="radio"
             name={name} />
         </label>
+
+        {statCategory?.timeFrame.season && (
+          <label>|&nbsp;&nbsp;Season: <input value={statCategory?.season || ""} onChange={handleSeasonChange} /> </label>
+        )}
+
+        {statCategory?.timeFrame.league && (
+          <>|&nbsp;&nbsp;Pick League:&nbsp;
+            <label>XBL
+              <input
+                value="XBL"
+                onChange={handleLeagueChange}
+                type="radio"
+                name={name + "-league"} />
+            </label>
+            <label>AAA
+              <input
+                value="AAA"
+                onChange={handleLeagueChange}
+                type="radio"
+                name={name + "-league"} />
+            </label>
+            <label>AA
+              <input
+                value="AA"
+                onChange={handleLeagueChange}
+                type="radio"
+                name={name + "-league"} />
+            </label>
+          </>
+        )}
       </div>
     </div>
   );
