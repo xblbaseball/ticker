@@ -5,15 +5,18 @@ export interface SettingsStore {
   useLocalStorage: boolean;
   /** logo to show in the top left */
   leagueLogo: "XBL" | "AAA" | "AA";
+  season: number;
 }
 
 export type action = {
-  type: "set" | "reset";
+  type: "load" | "set" | "reset";
   payload?: {
     path: string[];
     value?: unknown;
   }
 }
+
+const STORAGE_KEY = "__XBL_TICKER_SETTINGS__";
 
 /** check whether we have localStorage */
 function storageAvailable(type: string) {
@@ -36,10 +39,29 @@ function storageAvailable(type: string) {
   }
 }
 
+function updateStorage(store: SettingsStore) {
+  if (storageAvailable('localStorage')) {
+    const stringified = JSON.stringify(store)
+    window.localStorage.setItem(STORAGE_KEY, stringified);
+  } else {
+    console.info("local storage not available");
+  }
+}
+
+function readStorage(): SettingsStore {
+  if (storageAvailable('localStorage')) {
+    const data = window.localStorage.getItem(STORAGE_KEY);
+    return JSON.parse(data);
+  }
+
+  console.info("local storage not available");
+  return null;
+}
 
 export const initialState: SettingsStore = {
   useLocalStorage: storageAvailable("localStorage"),
-  leagueLogo: "XBL"
+  leagueLogo: "XBL",
+  season: 18,
 };
 
 export default function settingsReducer(
@@ -47,15 +69,28 @@ export default function settingsReducer(
   action: action
 ) {
   const updated = {};
+  let newStore: SettingsStore;
 
   switch (action.type) {
+    case "load":
+      console.log("loadingJ")
+      newStore = readStorage();
+      if (!_.isNull(newStore)) {
+        return newStore;
+      }
+      return store;
+
     case "set":
       _.set(updated, action.payload.path, action.payload.value);
-      return { ...store, ...updated }
+      newStore = { ...store, ...updated }
+      updateStorage(newStore);
+      return newStore;
 
     case "reset":
       _.set(updated, action.payload.path, _.get(initialState, action.payload.path));
-      return { ...store, ...updated };
+      newStore = { ...store, ...updated };
+      updateStorage(newStore);
+      return newStore;
 
     default:
       console.error(action);

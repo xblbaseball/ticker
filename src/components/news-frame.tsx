@@ -44,6 +44,10 @@ export default function NewsFrame() {
     };
   }, [handleBodyClick]);
 
+  useEffect(() => {
+    settingsDispatch({ type: "load" })
+  }, []);
+
   return <>
     <SettingsContext.Provider value={settingsStore}>
       <SettingsDispatchContext.Provider value={settingsDispatch}>

@@ -20,18 +20,27 @@ export default function Settings() {
     settingsDispatch({ type: "set", payload: { path, value } })
   }
 
-  return <div
-    className={`flex column ${styles.container}`}
-  // onClick={() => modalDispatch({ type: "popped-modal" })}
-  >
-    Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.
+  return <div className={`flex column ${styles.container}`}>
+    <div className={`flex space-between`}>
+      <div><em>Changes are saved as you make them. Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.</em></div>
 
-    <h3>League Logo</h3>
-    <em>Which logo do you want to show in the top left</em>
+      <div>
+        <button style={{ cursor: 'pointer' }} onClick={() => modalDispatch({ type: "destroyed-modals" })}>Close</button>
+      </div>
+    </div>
+
+    <h3>Left Bar</h3>
+    <em>Which logo do you want to show in the top left?</em>
     <Dropdown
       options={["XBL", "AAA", "AA"]}
       selected={settingsStore.leagueLogo}
       onSelect={(league) => updateSetting(["leagueLogo"], league)}
+    />
+    <em>Season</em>
+    <Dropdown
+      options={["XBL", "AAA", "AA"]}
+      selected={settingsStore.leagueLogo}
+      onSelect={(league) => updateSetting(["season"], league)}
     />
     {JSON.stringify(settingsStore)}
   </div>;
