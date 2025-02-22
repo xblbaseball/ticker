@@ -4,6 +4,7 @@ import { ActionDispatch, useContext } from "react";
 import Checkbox from '@/components/inputs/checkbox';
 import Dropdown from "@/components/inputs/dropdown";
 import Input from "@/components/inputs/input";
+import Radio from '@/components/inputs/radio';
 import StatCategory from '@/components/inputs/stat-selector';
 import TextArea from '@/components/inputs/textarea';
 import { ModalDispatchContext } from "@/store/modal.context";
@@ -81,6 +82,17 @@ export default function Settings() {
 
     return thisTeam.team_abbrev;
   }
+
+  const statsTimeFrames = [
+    ["Regular Season", "regularSeason"],
+    ["Playoffs", "playoffs"],
+    ["Career Regular Season", "careerRegularSeason"],
+    ["Career Playoffs", "careerPlayoffs"],
+    ["League Regular Season", "leagueRegularSeason"],
+    ["League Playoffs", "leaguePlayoffs"],
+    ["Head-to-Head Regular Season", "h2hRegularSeason"],
+    ["Head-to-Head Playoffs", "h2hPlayoffs"],
+  ]
 
   return <div className={`flex column ${styles.container}`}>
     <div className={`flex space-between`}>
@@ -250,16 +262,71 @@ export default function Settings() {
       Right side under the series. Could be the number of games (e.g., &quot;BO7&quot;)
     </Input>
 
+    <h3>Stats in the side bar</h3>
+
+    The time frames below correspond to which games were used to generate stats.
+
+    <ul>
+      <li><strong>Regular Season</strong>: a specific regular season (defaults to the current season)</li>
+      <li><strong>Playoffs</strong>: a specific playoff campaign (defaults to the current season)</li>
+      <li><strong>Career Regular Season</strong>: all-time regular season performance</li>
+      <li><strong>Career Playoffs</strong>: all-time playoffs performance</li>
+      <li><strong>League Regular Season</strong>: all-time performance in a specific league&apos;s regular season games</li>
+      <li><strong>League Playoffs</strong>: all-time performance in a specific league&apos;s playoff games</li>
+      <li><strong>Regular Season Head-to-Head</strong>: all-time regular season performances against the other team</li>
+      <li><strong>Playoffs Head-to-Head</strong>: all-time performances in every playoff matchup against the other team</li>
+    </ul>
+
     <Checkbox
-      checked={settingsStore.statsSameForBothTeams}
-      onChange={(doShow) => updateSetting(["statsSameForBothTeams"], doShow)}
+      checked={settingsStore.statTimeFramesSameForBothTeams}
+      onChange={(doShow) => updateSetting(["statTimeFramesSameForBothTeams"], doShow)}
     >
-      Show same stats for away and home teams
+      Show same stat time frames for away and home teams
     </Checkbox>
 
-    <em>If &quot;Career&quot; is selected, show all-time stats. If &quot;League&quot; is selected, show all-time stats for a given league. If &quot;Season&quot; is selected, show stats for the season. If &quot;Head to Head&quot; is selected, show stats against the other team.</em>
+    {settingsStore.statTimeFramesSameForBothTeams ? <>
+      <Radio
+        selected={settingsStore.awayStatsTimeFrame}
+        options={statsTimeFrames}
+        onChange={(timeFrame) => {
+          updateSetting(["awayStatsTimeFrame"], timeFrame);
+          updateSetting(["homeStatsTimeFrame"], timeFrame);
+        }}
+      >
+        Stats time frame. See above
+      </Radio>
+    </> : <>
+      <h4>Away</h4>
+      <Radio
+        selected={settingsStore.awayStatsTimeFrame}
+        options={statsTimeFrames}
+        onChange={(timeFrame) => {
+          updateSetting(["awayStatsTimeFrame"], timeFrame);
+        }}
+      >
+        Away team stats time frame. See above
+      </Radio>
 
-    {settingsStore.statsSameForBothTeams ? <>
+      <h4>Home</h4>
+      <Radio
+        selected={settingsStore.awayStatsTimeFrame}
+        options={statsTimeFrames}
+        onChange={(timeFrame) => {
+          updateSetting(["awayStatsTimeFrame"], timeFrame);
+        }}
+      >
+        Home team stats time frame. See above
+      </Radio>
+    </>}
+
+    <Checkbox
+      checked={settingsStore.statCategoriesSameForBothTeams}
+      onChange={(doShow) => updateSetting(["statCategoriesSameForBothTeams"], doShow)}
+    >
+      Show same stat categories for away and home teams
+    </Checkbox>
+
+    {settingsStore.statCategoriesSameForBothTeams ? <>
       <StatCategory
         name={"all-1"}
         statCategory={settingsStore.awayStatCategories.first}
