@@ -1,3 +1,21 @@
 .container {
   margin-top: 8px;
+  font-size: 22px;
+}
+
+.categories {
+  width: 100%;
+  text-align: left;
+  margin-left: 8px;
+  max-width: 64px;
+  overflow-x: hidden;
+  line-height: 32px;
+  dominant-baseline: text-bottom;
+}
+
+.values {
+  width: 100%;
+  text-align: right;
+  margin-right: 8px;
+  line-height: 32px;
 }

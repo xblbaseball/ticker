@@ -9,7 +9,7 @@ export default function TeamLogo(
   return <>
     <img src={`${basePath}/logos/${team}${small ? "-72x72" : ""}.png`}
       alt={`${team} logo`}
-      style={{ width }}
+      style={{ width, height: "auto" }}
     />
   </>
 }

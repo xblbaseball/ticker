@@ -25,3 +25,13 @@
   text-align: right;
   margin-right: 4px;
 }
+
+.shortName {
+  margin-left: 4px;
+  font-size: 24px;
+}
+
+.bestOf {
+  margin-right: 4px;
+  font-size: 24px;
+}

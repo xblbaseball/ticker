@@ -26,8 +26,8 @@ export interface SettingsStore {
   homeAbbrev: string;
   awayWins: number;
   homeWins: number;
-  seriesName: string;
-  seriesBO: number;
+  seriesLeft: string;
+  seriesRight: string;
   statsSameForBothTeams: boolean;
   awayStatCategories: {
     first: StatCategory,
@@ -67,8 +67,8 @@ export const initialState: SettingsStore = {
   homeAbbrev: "",
   awayWins: 0,
   homeWins: 0,
-  seriesName: "",
-  seriesBO: 2,
+  seriesLeft: "",
+  seriesRight: "",
   statsSameForBothTeams: true,
   awayStatCategories: {
     first: {stat: "ba", timeFrame: {regularSeason: true}, season},

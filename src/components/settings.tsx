@@ -237,17 +237,17 @@ export default function Settings() {
     </Input>
 
     <Input
-      value={settingsStore.seriesName}
-      onChange={(seriesName) => updateSetting(["seriesName"], seriesName)}
+      value={settingsStore.seriesLeft}
+      onChange={(seriesLeft) => updateSetting(["seriesLeft"], seriesLeft)}
     >
-      Short name for series (e.g., the playoff round like &quot;RD2&quot;)
+      Left side under the series. Could be a short name for series (e.g., the playoff round like &quot;RD2&quot;)
     </Input>
 
     <Input
-      value={settingsStore.seriesBO}
-      onChange={(games) => updateSetting(["seriesBO"], parseInt(games as string))}
+      value={settingsStore.seriesRight}
+      onChange={(seriesRight) => updateSetting(["seriesRight"], seriesRight)}
     >
-      Max number of games in series
+      Right side under the series. Could be the number of games (e.g., &quot;BO7&quot;)
     </Input>
 
     <Checkbox

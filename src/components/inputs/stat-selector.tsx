@@ -125,7 +125,7 @@ export default function StatSelector(
             name={name}
             checked={statCategory?.timeFrame.careerPlayoffs} />
         </label>
-        <label>| League
+        <label>| Career Regular Season in League
           <input
             value="league"
             onChange={handleTimeframeChange}
