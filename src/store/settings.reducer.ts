@@ -14,6 +14,10 @@ export interface SettingsStore {
   showSeries: boolean;
   awayTeam: string;
   homeTeam: string;
+  awayPlayer: string;
+  homePlayer: string;
+  awayAbbrev: string;
+  homeAbbrev: string;
   awayWins: number;
   homeWins: number;
   seriesName: string;
@@ -46,6 +50,10 @@ export const initialState: SettingsStore = {
   showSeries: true,
   awayTeam: "",
   homeTeam: "",
+  awayPlayer: "",
+  homePlayer: "",
+  awayAbbrev: "",
+  homeAbbrev: "",
   awayWins: 0,
   homeWins: 0,
   seriesName: "",

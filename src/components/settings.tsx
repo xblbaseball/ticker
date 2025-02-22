@@ -13,6 +13,7 @@ import styles from "./settings.module.css";
 import TextArea from './inputs/textarea';
 import Checkbox from './inputs/checkbox';
 import StatCategory from './inputs/stat-selector';
+import { TeamSeason } from '@/typings/careers';
 
 function isJSON(e: unknown) {
   try {
@@ -34,13 +35,50 @@ export default function Settings() {
     settingsDispatch({ type: "set", payload: { path, value } })
   }
 
-  const allTeams = _.keys(statsStore.stats.careers.players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+  const allTeams = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
 
-  const allTeamsBut = (team = "") => {
-    if (team === "") {
+  const allPlayersBut = (player = "") => {
+    if (player === "") {
       return allTeams;
     }
-    return _.filter(allTeams, (otherTeam) => otherTeam !== team);
+    return _.filter(allTeams, (otherPlayer) => otherPlayer !== player);
+  }
+
+  const teamsForPlayer = (player: string) => {
+    if (player === "") {
+      return [];
+    }
+
+    const teams: TeamSeason[] = _.get(
+      statsStore,
+      ["stats", "careers", "all_players", player, "teams"],
+      []
+    );
+
+    // use a set to avoid duplicates
+    return Array.from(new Set(teams.map((teamSeason) => teamSeason.team_name)));
+  }
+
+  const getAbbrevFromTeam = (player: string, team: string) => {
+    if (player === "") {
+      return "";
+    }
+
+    if (team === "") {
+      return "";
+    }
+
+    const teams: TeamSeason[] = _.get(
+      statsStore,
+      ["stats", "careers", "all_players", player, "teams"],
+      []
+    );
+    const thisTeam = teams.find(teamSeason => team === teamSeason.team_name);
+    if (_.isNil(thisTeam)) {
+      return "";
+    }
+
+    return thisTeam.team_abbrev;
   }
 
   return <div className={`flex column ${styles.container}`}>
@@ -94,22 +132,60 @@ export default function Settings() {
     </Input>
 
     <Dropdown
-      options={allTeamsBut(settingsStore.homeTeam)}
+      options={allPlayersBut(settingsStore.homePlayer)}
+      optionsLabel={"Select a player"}
+      selected={settingsStore.awayPlayer}
+      onSelect={(player) => updateSetting(["awayPlayer"], player)}
+    >
+      Away Player
+    </Dropdown>
+
+    <Dropdown
+      options={teamsForPlayer(settingsStore.awayPlayer)}
       optionsLabel={"Select a team"}
       selected={settingsStore.awayTeam}
-      onSelect={(team) => updateSetting(["awayTeam"], team)}
+      onSelect={(team) => {
+        updateSetting(["awayTeam"], team);
+        updateSetting(["awayAbbrev"], getAbbrevFromTeam(settingsStore.awayPlayer, team));
+      }}
     >
       Away Team
     </Dropdown>
 
+    <Input
+      value={settingsStore.awayAbbrev}
+      onChange={(abbrev) => updateSetting(["awayAbbrev"], abbrev)}
+    >
+      Away Abbreviation
+    </Input>
+
     <Dropdown
-      options={allTeamsBut(settingsStore.awayTeam)}
+      options={allPlayersBut(settingsStore.awayPlayer)}
+      optionsLabel={"Select a player"}
+      selected={settingsStore.homePlayer}
+      onSelect={(player) => updateSetting(["homePlayer"], player)}
+    >
+      Home Player
+    </Dropdown>
+
+    <Dropdown
+      options={teamsForPlayer(settingsStore.homePlayer)}
       optionsLabel={"Select a team"}
       selected={settingsStore.homeTeam}
-      onSelect={(team) => updateSetting(["homeTeam"], team)}
+      onSelect={(team) => {
+        updateSetting(["homeTeam"], team);
+        updateSetting(["homeAbbrev"], getAbbrevFromTeam(settingsStore.homePlayer, team));
+      }}
     >
       Home Team
     </Dropdown>
+
+    <Input
+      value={settingsStore.homeAbbrev}
+      onChange={(abbrev) => updateSetting(["homeAbbrev"], abbrev)}
+    >
+      Home Abbreviation
+    </Input>
 
     <Checkbox
       checked={settingsStore.showSeries}

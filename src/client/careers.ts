@@ -6,5 +6,7 @@ export default async function getCareers() {
 
   // TODO maybe we cut this down to just stats we care about for active players?
 
+  // TODO get active teams
+
   return data;
 }

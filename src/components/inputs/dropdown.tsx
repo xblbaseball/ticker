@@ -1,5 +1,7 @@
 import React from 'react';
 
+const DEFAULT = "__NONE__";
+
 export default function Dropdown(
   { optionsLabel = "Select one", options, selected, onSelect, children }:
     {
@@ -17,8 +19,8 @@ export default function Dropdown(
     <div>
       <label>
         <div><em>{children}</em></div>
-        <select value={selected} onChange={handleOptionClick}>
-          <option disabled={true}>{optionsLabel}</option>
+        <select value={selected} onChange={handleOptionClick} defaultValue={DEFAULT}>
+          <option value={DEFAULT}>{optionsLabel}</option>
           {options.map((option) => (
             <option key={option} value={option}>
               {option}

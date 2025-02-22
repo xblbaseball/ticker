@@ -2,7 +2,9 @@ import _ from "lodash";
 import { useCallback, useEffect, useReducer } from "react";
 import { Oswald } from "next/font/google";
 
+import LeagueLogo from "@/components/league-logo";
 import Modal from "@/components/modal";
+import Series from "@/components/series";
 import Settings from "@/components/settings";
 import { ModalContext, ModalDispatchContext } from "@/store/modal.context";
 import modalReducer, { initialState as modalInitialState } from "@/store/modal.reducer";
@@ -10,7 +12,6 @@ import { SettingsContext, SettingsDispatchContext } from "@/store/settings.conte
 import settingsReducer, { initialState as settingsInitialState } from "@/store/settings.reducer";
 
 import styles from "./news-frame.module.css";
-import LeagueLogo from "./league-logo";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -70,15 +71,20 @@ export default function NewsFrame() {
             <div className={oswald.className}>
 
               <div className={`flex column ${styles.container} ${styles.leftBar}`}>
+
                 <div style={{ marginLeft: "4px" }}>
                   <LeagueLogo league={settingsStore.leagueLogo} />
                 </div>
+
                 <div className={`flex column ${styles.title}`}>
                   <div className={styles.season}>
                     Season {settingsStore.season}
                     {!_.isEmpty(settingsStore.seasonSubtext) && <><br />{settingsStore.seasonSubtext}</>}
                   </div>
                 </div>
+
+                {settingsStore.showSeries && <Series />}
+
               </div>
 
               <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
