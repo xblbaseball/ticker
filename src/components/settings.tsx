@@ -5,7 +5,7 @@ import Checkbox from '@/components/inputs/checkbox';
 import Dropdown from "@/components/inputs/dropdown";
 import Input from "@/components/inputs/input";
 import Radio from '@/components/inputs/radio';
-import StatCategory from '@/components/inputs/stat-selector';
+import StatSelector from '@/components/inputs/stat-selector';
 import TextArea from '@/components/inputs/textarea';
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
@@ -83,6 +83,7 @@ export default function Settings() {
     return thisTeam.team_abbrev;
   }
 
+  /** used to select which games to use for left bar stats */
   const statsTimeFrames = [
     ["Regular Season", "regularSeason"],
     ["Playoffs", "playoffs"],
@@ -264,7 +265,7 @@ export default function Settings() {
 
     <h3>Stats in the side bar</h3>
 
-    The time frames below correspond to which games were used to generate stats.
+    The timeframes below correspond to which games were used to generate stats.
 
     <ul>
       <li><strong>Regular Season</strong>: a specific regular season (defaults to the current season)</li>
@@ -279,43 +280,43 @@ export default function Settings() {
 
     <Checkbox
       checked={settingsStore.statTimeFramesSameForBothTeams}
-      onChange={(doShow) => updateSetting(["statTimeFramesSameForBothTeams"], doShow)}
+      onChange={(doShow) => updateSetting(["statTimeframesSameForBothTeams"], doShow)}
     >
-      Show same stat time frames for away and home teams
+      Show same stat timeframes for away and home teams
     </Checkbox>
 
     {settingsStore.statTimeFramesSameForBothTeams ? <>
       <Radio
-        selected={settingsStore.awayStatsTimeFrame}
+        selected={settingsStore.awayStatsTimeframe}
         options={statsTimeFrames}
-        onChange={(timeFrame) => {
-          updateSetting(["awayStatsTimeFrame"], timeFrame);
-          updateSetting(["homeStatsTimeFrame"], timeFrame);
+        onChange={(timeframe) => {
+          updateSetting(["awayStatsTimeframe"], timeframe);
+          updateSetting(["homeStatsTimeframe"], timeframe);
         }}
       >
-        Stats time frame. See above
+        Stats timeframe. See above
       </Radio>
     </> : <>
       <h4>Away</h4>
       <Radio
-        selected={settingsStore.awayStatsTimeFrame}
+        selected={settingsStore.awayStatsTimeframe}
         options={statsTimeFrames}
-        onChange={(timeFrame) => {
-          updateSetting(["awayStatsTimeFrame"], timeFrame);
+        onChange={(timeframe) => {
+          updateSetting(["awayStatsTimeframe"], timeframe);
         }}
       >
-        Away team stats time frame. See above
+        Away team stats timeframe. See above
       </Radio>
 
       <h4>Home</h4>
       <Radio
-        selected={settingsStore.awayStatsTimeFrame}
+        selected={settingsStore.awayStatsTimeframe}
         options={statsTimeFrames}
-        onChange={(timeFrame) => {
-          updateSetting(["awayStatsTimeFrame"], timeFrame);
+        onChange={(timeframe) => {
+          updateSetting(["homeStatsTimeframe"], timeframe);
         }}
       >
-        Home team stats time frame. See above
+        Home team stats timeframe. See above
       </Radio>
     </>}
 
@@ -327,197 +328,179 @@ export default function Settings() {
     </Checkbox>
 
     {settingsStore.statCategoriesSameForBothTeams ? <>
-      <StatCategory
-        name={"all-1"}
-        statCategory={settingsStore.awayStatCategories.first}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "first"], newCategory)
-          updateSetting(["homeStatCategories", "first"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.first}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "first"], stat)
+          updateSetting(["homeStatCategories", "first"], stat)
         }}
       >
         Stat category 1
-      </StatCategory>
+      </StatSelector>
 
-      <StatCategory
-        name={"all-2"}
-        statCategory={settingsStore.awayStatCategories.second}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "second"], newCategory)
-          updateSetting(["homeStatCategories", "second"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.second}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "second"], stat)
+          updateSetting(["homeStatCategories", "second"], stat)
         }}
       >
         Stat category 2
-      </StatCategory>
+      </StatSelector>
 
-      <StatCategory
-        name={"all-3"}
-        statCategory={settingsStore.awayStatCategories.third}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "third"], newCategory)
-          updateSetting(["homeStatCategories", "third"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.third}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "third"], stat)
+          updateSetting(["homeStatCategories", "third"], stat)
         }}
       >
         Stat category 3
-      </StatCategory>
+      </StatSelector>
 
-      <StatCategory
-        name={"all-4"}
-        statCategory={settingsStore.awayStatCategories.fourth}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "fourth"], newCategory)
-          updateSetting(["homeStatCategories", "fourth"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.fourth}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "fourth"], stat)
+          updateSetting(["homeStatCategories", "fourth"], stat)
         }}
       >
         Stat category 4
-      </StatCategory>
+      </StatSelector>
 
-      <StatCategory
-        name={"all-5"}
-        statCategory={settingsStore.awayStatCategories.fifth}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "fifth"], newCategory)
-          updateSetting(["homeStatCategories", "fifth"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.fifth}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "fifth"], stat)
+          updateSetting(["homeStatCategories", "fifth"], stat)
         }}
       >
         Stat category 5
-      </StatCategory>
+      </StatSelector>
 
-      <StatCategory
-        name={"all-6"}
-        statCategory={settingsStore.awayStatCategories.sixth}
-        onChange={(newCategory) => {
-          updateSetting(["awayStatCategories", "sixth"], newCategory)
-          updateSetting(["homeStatCategories", "sixth"], newCategory)
+      <StatSelector
+        stat={settingsStore.awayStatCategories.sixth}
+        onChange={(stat) => {
+          updateSetting(["awayStatCategories", "sixth"], stat)
+          updateSetting(["homeStatCategories", "sixth"], stat)
         }}
       >
         Stat category 6
-      </StatCategory>
+      </StatSelector>
     </>
       :
       <>
         <h4>Away</h4>
 
-        <StatCategory
-          name={"away-1"}
-          statCategory={settingsStore.awayStatCategories.first}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "first"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.first}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "first"], stat)
           }}
         >
           Away stat category 1
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"away-2"}
-          statCategory={settingsStore.awayStatCategories.second}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "second"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.second}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "second"], stat)
           }}
         >
           Away stat category 2
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"away-3"}
-          statCategory={settingsStore.awayStatCategories.third}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "third"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.third}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "third"], stat)
           }}
         >
           Away stat category 3
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"away-4"}
-          statCategory={settingsStore.awayStatCategories.fourth}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "fourth"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.fourth}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "fourth"], stat)
           }}
         >
           Away stat category 4
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"away-5"}
-          statCategory={settingsStore.awayStatCategories.fifth}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "fifth"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.fifth}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "fifth"], stat)
           }}
         >
           Away stat category 5
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"away-6"}
-          statCategory={settingsStore.awayStatCategories.sixth}
-          onChange={(newCategory) => {
-            updateSetting(["awayStatCategories", "sixth"], newCategory)
+        <StatSelector
+          stat={settingsStore.awayStatCategories.sixth}
+          onChange={(stat) => {
+            updateSetting(["awayStatCategories", "sixth"], stat)
           }}
         >
           Away stat category 6
-        </StatCategory>
+        </StatSelector>
 
         <h4>Home</h4>
 
-        <StatCategory
-          name={"home-1"}
-          statCategory={settingsStore.homeStatCategories.first}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "first"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.first}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "first"], stat)
           }}
         >
           Home stat category 1
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"home-2"}
-          statCategory={settingsStore.homeStatCategories.second}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "second"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.second}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "second"], stat)
           }}
         >
           Home stat category 2
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"home-3"}
-          statCategory={settingsStore.homeStatCategories.third}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "third"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.third}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "third"], stat)
           }}
         >
           Home stat category 3
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"home-4"}
-          statCategory={settingsStore.homeStatCategories.fourth}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "fourth"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.fourth}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "fourth"], stat)
           }}
         >
           Home stat category 4
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"home-5"}
-          statCategory={settingsStore.homeStatCategories.fifth}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "fifth"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.fifth}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "fifth"], stat)
           }}
         >
           Home stat category 5
-        </StatCategory>
+        </StatSelector>
 
-        <StatCategory
-          name={"home-6"}
-          statCategory={settingsStore.homeStatCategories.sixth}
-          onChange={(newCategory) => {
-            updateSetting(["homeStatCategories", "sixth"], newCategory)
+        <StatSelector
+          stat={settingsStore.homeStatCategories.sixth}
+          onChange={(stat) => {
+            updateSetting(["homeStatCategories", "sixth"], stat)
           }}
         >
           Home stat category 6
-        </StatCategory>
+        </StatSelector>
       </>
     }
 

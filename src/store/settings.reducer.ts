@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { League } from "@/typings/league";
-import { StatCategory } from "@/typings/stats";
+import { string } from "@/typings/stats";
 
 const season = parseInt(process.env.NEXT_PUBLIC_SEASON);
 
@@ -48,28 +48,28 @@ export interface SettingsStore {
   /** use the same stat time frames for both teams */
   statTimeFramesSameForBothTeams: boolean;
   /** games to use to pull away stats */
-  awayStatsTimeFrame: TimeFrame,
+  awayStatsTimeframe: TimeFrame,
   /** games to use to pull home stats */
-  homeStatsTimeFrame: TimeFrame,
+  homeStatsTimeframe: TimeFrame,
   /** if applicable, what season do we want to use for away stats */
   awayStatsSeason: number;
   /** if applicable, what season do we want to use for home stats */
   homeStatsSeason: number;
   awayStatCategories: {
-    first: StatCategory,
-    second: StatCategory,
-    third: StatCategory,
-    fourth: StatCategory,
-    fifth: StatCategory,
-    sixth: StatCategory,
+    first: string,
+    second: string,
+    third: string,
+    fourth: string,
+    fifth: string,
+    sixth: string,
   };
   homeStatCategories: {
-    first: StatCategory,
-    second: StatCategory,
-    third: StatCategory,
-    fourth: StatCategory,
-    fifth: StatCategory,
-    sixth: StatCategory,
+    first: string,
+    second: string,
+    third: string,
+    fourth: string,
+    fifth: string,
+    sixth: string,
   };
   /** marquees in the format of "AAA News | This is text I want to scroll" */
   headlines: string;
@@ -98,25 +98,25 @@ export const initialState: SettingsStore = {
   seriesRight: "",
   statCategoriesSameForBothTeams: true,
   statTimeFramesSameForBothTeams: true,
-  awayStatsTimeFrame: "regularSeason",
-  homeStatsTimeFrame: "regularSeason",
+  awayStatsTimeframe: "regularSeason",
+  homeStatsTimeframe: "regularSeason",
   awayStatsSeason: season,
   homeStatsSeason: season,
   awayStatCategories: {
-    first: {stat: "ba", timeFrame: {regularSeason: true}, season},
-    second: {stat: "hr9", timeFrame: {regularSeason: true}, season},
-    third: {stat: "babip", timeFrame: {regularSeason: true}, season},
-    fourth: {stat: "oppba", timeFrame: {regularSeason: true}, season},
-    fifth: {stat: "opphr9", timeFrame: {regularSeason: true}, season},
-    sixth: {stat: "whip", timeFrame: {regularSeason: true}, season},
+    first: "ba",
+    second: "hr9",
+    third: "babip",
+    fourth: "oppba",
+    fifth: "opphr9",
+    sixth: "whip",
   },
   homeStatCategories: {
-    first: {stat: "ba", timeFrame: {regularSeason: true}, season},
-    second: {stat: "hr9", timeFrame: {regularSeason: true}, season},
-    third: {stat: "babip", timeFrame: {regularSeason: true}, season},
-    fourth: {stat: "oppba", timeFrame: {regularSeason: true}, season},
-    fifth: {stat: "opphr9", timeFrame: {regularSeason: true}, season},
-    sixth: {stat: "whip", timeFrame: {regularSeason: true}, season},
+    first: "ba",
+    second: "hr9",
+    third: "babip",
+    fourth: "oppba",
+    fifth: "opphr9",
+    sixth: "whip",
   },
   headlines: ""
 };

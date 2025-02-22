@@ -3,7 +3,6 @@ import { useContext } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
-import { Rounds } from "@/typings/season";
 
 import styles from "./sidebar-player-stats.module.css";
 import { StatCategory } from "@/typings/stats";
@@ -14,6 +13,10 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     homePlayer,
     awayTeam,
     homeTeam,
+    awayStatsTimeframe,
+    homeStatsTimeframe,
+    awayStatsSeason,
+    homeStatsSeason,
     awayStatCategories,
     homeStatCategories,
     league,
@@ -33,11 +36,14 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   }
 
   const statCategories = away ? awayStatCategories : homeStatCategories;
+  const statsTimeframe = away ? awayStatsTimeframe : homeStatsTimeframe;
+  const statsSeason = away ? awayStatsSeason : homeStatsSeason;
 
   const showPlayoffRecord = _.get(playoffs, [league]);
   console.log(league, showPlayoffRecord);
 
   let recordOrSeed = "(0-0)";
+
   if (showPlayoffRecord) {
     // we're in the playoffs. show seed instead of rank
     const { rank } = _.get(
@@ -76,24 +82,43 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     )
   }
 
-  const statLookup = (statCategory: StatCategory) => {
-    const { stat, timeFrame } = statCategory;
-
+  /** lookup a stat for the timeframe */
+  const statLookup = (stat: string) => {
     let lookupPath: string[] = [];
-    if (timeFrame.career) {
-      lookupPath = ['stats', 'careers', 'season_performances', player, 'all_time', stat];
-    } else if (timeFrame.careerPlayoffs) {
-      lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'all_time', stat];
-    } else if (timeFrame.league) {
-      lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'by_league', league, stat];
-    } else if (timeFrame.regularSeason) {
-      lookupPath = ['stats', league, 'season_team_stats', team, stat];
-    } else if (timeFrame.playoffs) {
-      lookupPath = ['stats', league, 'playoffs_team_stats', team, stat];
-    } else if (timeFrame.headToHead) {
-      const [playerA, playerZ] = [homePlayer, awayPlayer].sort()
-      const isPlayerA = playerA === player;
-      lookupPath = ['stats', 'stats', 'careers', 'season_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+
+    switch (statsTimeframe) {
+      case "regularSeason":
+        lookupPath = ['stats', league, 'season_team_stats', team, stat];
+        break;
+      case "playoffs":
+        lookupPath = ['stats', league, 'playoffs_team_stats', team, stat];
+        break;
+      case "careerRegularSeason":
+        lookupPath = ['stats', 'careers', 'season_performances', player, 'all_time', stat];
+        break;
+      case "careerPlayoffs":
+        lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'all_time', stat];
+        break;
+      case "leagueRegularSeason":
+        lookupPath = ['stats', 'careers', 'season_performances', player, 'by_league', league, stat];
+        break;
+      case "leaguePlayoffs":
+        lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'by_league', league, stat];
+        break;
+      case "h2hRegularSeason":
+        let [playerA, playerZ] = [homePlayer, awayPlayer].sort()
+        let isPlayerA = playerA === player;
+        lookupPath = ['stats', 'stats', 'careers', 'season_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+        break;
+      case "h2hPlayoffs":
+        [playerA, playerZ] = [homePlayer, awayPlayer].sort()
+        isPlayerA = playerA === player;
+        lookupPath = ['stats', 'stats', 'careers', 'playoffs_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+        break;
+
+      default:
+        console.error("I don't know how we got here");
+        break;
     }
 
     const rawValue: number | string = _.get(statsStore, lookupPath, "-");
@@ -111,12 +136,12 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     </div>
     <div className="flex">
       <div className={`flex column ${styles.categories}`}>
-        <StatCategory stat={statCategories.first.stat} />
-        <StatCategory stat={statCategories.second.stat} />
-        <StatCategory stat={statCategories.third.stat} />
-        <StatCategory stat={statCategories.fourth.stat} />
-        <StatCategory stat={statCategories.fifth.stat} />
-        <StatCategory stat={statCategories.sixth.stat} />
+        <StatCategory stat={statCategories.first} />
+        <StatCategory stat={statCategories.second} />
+        <StatCategory stat={statCategories.third} />
+        <StatCategory stat={statCategories.fourth} />
+        <StatCategory stat={statCategories.fifth} />
+        <StatCategory stat={statCategories.sixth} />
       </div>
       <div className={`flex column ${styles.values}`}>
         <div>{statLookup(statCategories.first)}</div>
@@ -127,5 +152,6 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
         <div>{statLookup(statCategories.sixth)}</div>
       </div>
     </div>
+    {/* include the timeframe too */}
   </div >;
 }
