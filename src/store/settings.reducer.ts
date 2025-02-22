@@ -7,8 +7,14 @@ const season = parseInt(process.env.NEXT_PUBLIC_SEASON);
 export interface SettingsStore {
   /** are we using localstorage? */
   useLocalStorage: boolean;
+  /** who's in the playoffs */
+  playoffs: {
+    XBL: boolean;
+    AAA: boolean;
+    AA: boolean;
+  }
   /** logo to show in the top left */
-  leagueLogo: League;
+  league: League;
   season: number;
   seasonSubtext: string;
   showSeries: boolean;
@@ -44,7 +50,12 @@ export interface SettingsStore {
 
 export const initialState: SettingsStore = {
   useLocalStorage: storageAvailable("localStorage"),
-  leagueLogo: "XBL",
+  playoffs: {
+    XBL: false,
+    AAA: false,
+    AA: false,
+  },
+  league: "XBL",
   season,
   seasonSubtext: "",
   showSeries: true,

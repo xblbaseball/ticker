@@ -1,19 +1,20 @@
 import _ from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
+import Checkbox from '@/components/inputs/checkbox';
 import Dropdown from "@/components/inputs/dropdown";
 import Input from "@/components/inputs/input";
+import StatCategory from '@/components/inputs/stat-selector';
+import TextArea from '@/components/inputs/textarea';
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
 import { action as settingsAction, SettingsStore } from "@/store/settings.reducer";
 import { StatsContext } from '@/store/stats.context';
 
-import styles from "./settings.module.css";
-import TextArea from './inputs/textarea';
-import Checkbox from './inputs/checkbox';
-import StatCategory from './inputs/stat-selector';
 import { TeamSeason } from '@/typings/careers';
+
+import styles from "./settings.module.css";
 
 function isJSON(e: unknown) {
   try {
@@ -83,7 +84,7 @@ export default function Settings() {
 
   return <div className={`flex column ${styles.container}`}>
     <div className={`flex space-between`}>
-      <div><em>Changes are saved as you make them. Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.</em></div>
+      <div>Changes are saved as you make them. Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.</div>
 
       <div>
         <button style={{ cursor: 'pointer' }} onClick={() => modalDispatch({ type: "destroyed-modals" })}>Close</button>
@@ -109,14 +110,39 @@ export default function Settings() {
       It might be easier to play with settings in your browser and then copy them here.
     </TextArea>
 
-    <h3>Settings</h3>
+    <h3>Playoffs</h3>
+
+    These are used to control which scores and records are shown.
+
+    <Checkbox
+      checked={settingsStore.playoffs.XBL}
+      onChange={(checked) => updateSetting(["playoffs", "XBL"], checked)}
+    >
+      XBL in playoffs
+    </Checkbox>
+
+    <Checkbox
+      checked={settingsStore.playoffs.AAA}
+      onChange={(checked) => updateSetting(["playoffs", "AAA"], checked)}
+    >
+      AAA in playoffs
+    </Checkbox>
+
+    <Checkbox
+      checked={settingsStore.playoffs.AA}
+      onChange={(checked) => updateSetting(["playoffs", "AA"], checked)}
+    >
+      AA in playoffs
+    </Checkbox>
+
+    <h3>Left Bar</h3>
 
     <Dropdown
       options={["XBL", "AAA", "AA"]}
-      selected={settingsStore.leagueLogo}
-      onSelect={(league) => updateSetting(["leagueLogo"], league)}
+      selected={settingsStore.league}
+      onSelect={(league) => updateSetting(["league"], league)}
     >
-      Which logo do you want to show in the top left?
+      Which league is playing? Controls the logo in the top left and some scores and records.
     </Dropdown>
 
     <Input
@@ -430,11 +456,11 @@ export default function Settings() {
 
     <h3>Headlines</h3>
 
-    <em>Each line in the next text box is a separate headline that will be scrolled in the marquee in the bottom bar. Each headline should follow this format:</em>
+    <p>Each line in the next text box is a separate headline that will be scrolled in the marquee in the bottom bar. Each headline should follow this format:</p>
 
     <pre>Category|Text to scroll</pre>
 
-    <em>Example:</em>
+    <p>Example:</p>
 
     <pre>XBL News|Spokesmen def. Holograms to move on to XBL World Series. Coverage starts Monday</pre>
     <pre>AAA News|Mystery Men win it all! The caster extraordinaire finally walks away with hardware.
@@ -452,7 +478,7 @@ export default function Settings() {
     </TextArea>
 
     <h3>Current Settings</h3>
-    <em>Copy this if you want to share your settings with someone else, or just paste them into the ticker settings in the OBS browser.</em>
+    Copy this if you want to share your settings with someone else, or just paste them into the ticker settings in the OBS browser.
     <pre className="pre-wrap">{JSON.stringify(settingsStore)}</pre>
 
     <button style={{ cursor: 'pointer', width: "10em" }} onClick={() => settingsDispatch({ type: "reset-all" })}>Reset settings</button>
