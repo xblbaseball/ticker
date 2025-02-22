@@ -109,6 +109,8 @@ export default function Settings() {
       It might be easier to play with settings in your browser and then copy them here.
     </TextArea>
 
+    <h3>Settings</h3>
+
     <Dropdown
       options={["XBL", "AAA", "AA"]}
       selected={settingsStore.leagueLogo}

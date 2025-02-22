@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { StatCategory } from '@/typings/stats';
-import { stat } from 'node:fs/promises';
 import { League } from '@/typings/league';
 
 const STATS = [
@@ -71,40 +70,10 @@ export default function StatSelector(
         league: null,
       }, ...statCategory
     }
-    switch (e.target.value) {
-      case "career":
-        newStatCategory.timeFrame.career = true;
-        newStatCategory.timeFrame.season = false;
-        newStatCategory.timeFrame.headToHead = false;
-        newStatCategory.timeFrame.league = false;
-        break;
-      case "season":
-        newStatCategory.timeFrame.career = false;
-        newStatCategory.timeFrame.season = true;
-        newStatCategory.timeFrame.headToHead = false;
-        newStatCategory.timeFrame.league = false;
-        break;
-      case "headToHead":
-        newStatCategory.timeFrame.career = false;
-        newStatCategory.timeFrame.season = false;
-        newStatCategory.timeFrame.headToHead = true;
-        newStatCategory.timeFrame.league = false;
-        break;
-      case "league":
-        newStatCategory.timeFrame.career = false;
-        newStatCategory.timeFrame.season = false;
-        newStatCategory.timeFrame.headToHead = false;
-        newStatCategory.timeFrame.league = true;
-        break;
-      case "none":
-        newStatCategory.timeFrame.career = false;
-        newStatCategory.timeFrame.season = false;
-        newStatCategory.timeFrame.headToHead = false;
-        newStatCategory.timeFrame.league = false;
-        break;
-      default:
-        console.error("Don't now how we got here");
-        break;
+
+    const timeFrames = ['career', 'careerPlayoffs', 'regularSeason', 'playoffs', 'league', 'headToHead'];
+    for (const timeFrame of timeFrames) {
+      _.set(newStatCategory, ['timeFrame', timeFrame], timeFrame === e.target.value);
     }
 
     onChange(newStatCategory);
@@ -140,13 +109,21 @@ export default function StatSelector(
         </select>
       </label>
       <div>
-        <label>Career
+        <label>Career Regular Season
           <input
             value="career"
             onChange={handleTimeframeChange}
             type="radio"
             name={name}
             checked={statCategory?.timeFrame.career} />
+        </label>
+        <label>| Career Playoffs
+          <input
+            value="careerPlayoffs"
+            onChange={handleTimeframeChange}
+            type="radio"
+            name={name}
+            checked={statCategory?.timeFrame.careerPlayoffs} />
         </label>
         <label>| League
           <input
@@ -156,13 +133,21 @@ export default function StatSelector(
             name={name}
             checked={statCategory?.timeFrame.league} />
         </label>
-        <label>| Season
+        <label>| Regular Season
           <input
-            value="season"
+            value="regularSeason"
             onChange={handleTimeframeChange}
             type="radio"
             name={name}
-            checked={statCategory?.timeFrame.season} />
+            checked={statCategory?.timeFrame.regularSeason} />
+        </label>
+        <label>| Playoffs
+          <input
+            value="playoffs"
+            onChange={handleTimeframeChange}
+            type="radio"
+            name={name}
+            checked={statCategory?.timeFrame.playoffs} />
         </label>
         <label>| Head to Head
           <input
@@ -180,7 +165,7 @@ export default function StatSelector(
             name={name} />
         </label>
 
-        {statCategory?.timeFrame.season && (
+        {(statCategory?.timeFrame.regularSeason || statCategory?.timeFrame.playoffs) && (
           <label>|&nbsp;&nbsp;Season: <input value={statCategory?.season || ""} onChange={handleSeasonChange} /> </label>
         )}
 
