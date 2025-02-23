@@ -5,7 +5,6 @@ import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
 
 import styles from "./sidebar-player-stats.module.css";
-import { StatCategory } from "@/typings/stats";
 
 export default function SidebarPlayerStats({ away }: { away: boolean }) {
   const {
@@ -17,6 +16,8 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     homeStatsTimeframe,
     awayStatsSeason,
     homeStatsSeason,
+    awayStatsLeague,
+    homeStatsLeague,
     awayStatCategories,
     homeStatCategories,
     league,
@@ -38,6 +39,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   const statCategories = away ? awayStatCategories : homeStatCategories;
   const statsTimeframe = away ? awayStatsTimeframe : homeStatsTimeframe;
   const statsSeason = away ? awayStatsSeason : homeStatsSeason;
+  const statsLeague = away ? awayStatsLeague : homeStatsLeague;
 
   const showPlayoffRecord = _.get(playoffs, [league]);
   // console.log(league, showPlayoffRecord);
@@ -85,18 +87,20 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   /** lookup a stat for the timeframe */
   const statLookup = (stat: string) => {
     let lookupPath: string[] = [];
+    let isPlayerA: boolean;
 
     switch (statsTimeframe) {
       case "regularSeason":
         if (statsSeason === parseInt(process.env.NEXT_PUBLIC_SEASON)) {
+          // not guaranteed that all current season games have been recorded in careers
           lookupPath = ['stats', league, 'season_team_stats', team, stat];
         } else {
-          console.log(Object.keys(statsStore.stats.careers.regular_season[player].by_season))
           lookupPath = ['stats', 'careers', 'regular_season', player, 'by_season', `season_${statsSeason}`, stat]
         }
         break;
       case "playoffs":
         if (statsSeason === parseInt(process.env.NEXT_PUBLIC_SEASON)) {
+          // not guaranteed that all current season games have been recorded in careers
           lookupPath = ['stats', league, 'playoffs_team_stats', team, stat];
         } else {
           lookupPath = ['stats', 'careers', 'playoffs', player, 'by_season', `season_${statsSeason}`, stat]
@@ -109,20 +113,30 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
         lookupPath = ['stats', 'careers', 'playoffs', player, 'all_time', stat];
         break;
       case "leagueRegularSeason":
-        lookupPath = ['stats', 'careers', 'regular_season', player, 'by_league', league, stat];
+        lookupPath = ['stats', 'careers', 'regular_season', player, 'by_league', statsLeague, stat];
         break;
       case "leaguePlayoffs":
-        lookupPath = ['stats', 'careers', 'playoffs', player, 'by_league', league, stat];
+        lookupPath = ['stats', 'careers', 'playoffs', player, 'by_league', statsLeague, stat];
         break;
       case "h2hRegularSeason":
-        let [playerA, playerZ] = [homePlayer, awayPlayer].sort()
-        let isPlayerA = playerA === player;
-        lookupPath = ['stats', 'stats', 'careers', 'regular_season_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+        // can't show head to head if we don't have both teams selected
+        if (awayPlayer === "" || homePlayer === "") {
+          break;
+        }
+
+        const [playerA_rs, playerZ_rs] = [homePlayer, awayPlayer].sort()
+        isPlayerA = playerA_rs === player;
+        lookupPath = ['stats', 'careers', 'regular_season_head_to_head', playerA_rs, playerZ_rs, isPlayerA ? 'player_a_stats' : 'player_z_stats', stat];
         break;
       case "h2hPlayoffs":
-        [playerA, playerZ] = [homePlayer, awayPlayer].sort()
-        isPlayerA = playerA === player;
-        lookupPath = ['stats', 'stats', 'careers', 'playoffs_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+        // can't show head to head if we don't have both teams selected
+        if (awayPlayer === "" || homePlayer === "") {
+          break;
+        }
+
+        const [playerA_p, playerZ_p] = [homePlayer, awayPlayer].sort()
+        isPlayerA = playerA_p === player;
+        lookupPath = ['stats', 'careers', 'playoffs_head_to_head', playerA_p, playerZ_p, isPlayerA ? 'player_a_stats' : 'player_z_stats', stat];
         break;
 
       default:
@@ -131,6 +145,9 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     }
 
     const rawValue: number | string = _.get(statsStore, lookupPath, "-");
+    if (_.isNumber(rawValue) && !Number.isInteger(rawValue)) {
+      return `${rawValue.toFixed(3)}`;
+    }
     return `${rawValue}`;
   }
 

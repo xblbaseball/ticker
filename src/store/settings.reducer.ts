@@ -54,6 +54,10 @@ export interface SettingsStore {
   awayStatsSeason: number;
   /** if applicable, what season do we want to use for home stats */
   homeStatsSeason: number;
+  /** if applicable, what league do we want to use for away stats */
+  awayStatsLeague: League,
+  /** if applicable, what league do we want to use for home stats */
+  homeStatsLeague: League,
   awayStatCategories: {
     first: string,
     second: string,
@@ -101,6 +105,8 @@ export const initialState: SettingsStore = {
   homeStatsTimeframe: "regularSeason",
   awayStatsSeason: currentSeason,
   homeStatsSeason: currentSeason,
+  awayStatsLeague: "XBL",
+  homeStatsLeague: "XBL",
   awayStatCategories: {
     first: "ba",
     second: "hr9",

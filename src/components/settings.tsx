@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
 import Checkbox from '@/components/inputs/checkbox';
@@ -309,6 +309,20 @@ export default function Settings() {
           Season
         </Input>
       }
+
+      {
+        (settingsStore.awayStatsTimeframe === "leagueRegularSeason" || settingsStore.awayStatsTimeframe === "leaguePlayoffs") &&
+        <Radio
+          options={[["XBL", "XBL"], ["AAA", "AAA"], ["AA", "AA"]]}
+          selected={settingsStore.awayStatsLeague}
+          onChange={(league) => {
+            updateSetting(['awayStatsLeague'], league);
+            updateSetting(['homeStatsLeague'], league);
+          }}
+        >
+          League
+        </Radio>
+      }
     </> : <>
       <h4>Away</h4>
       <Radio
@@ -331,7 +345,19 @@ export default function Settings() {
         >
           Season
         </Input>
+      }
 
+      {
+        (settingsStore.awayStatsTimeframe === "leagueRegularSeason" || settingsStore.awayStatsTimeframe === "leaguePlayoffs") &&
+        <Radio
+          options={[["XBL", "XBL"], ["AAA", "AAA"], ["AA", "AA"]]}
+          selected={settingsStore.awayStatsLeague}
+          onChange={(league) => {
+            updateSetting(['awayStatsLeague'], league);
+          }}
+        >
+          League
+        </Radio>
       }
 
       <h4>Home</h4>
@@ -356,6 +382,19 @@ export default function Settings() {
           Season
         </Input>
 
+      }
+
+      {
+        (settingsStore.homeStatsTimeframe === "leagueRegularSeason" || settingsStore.homeStatsTimeframe === "leaguePlayoffs") &&
+        <Radio
+          options={[["XBL", "XBL"], ["AAA", "AAA"], ["AA", "AA"]]}
+          selected={settingsStore.homeStatsLeague}
+          onChange={(league) => {
+            updateSetting(['homeStatsLeague'], league);
+          }}
+        >
+          League
+        </Radio>
       }
     </>}
 
