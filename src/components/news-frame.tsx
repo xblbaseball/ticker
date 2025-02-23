@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import _ from "lodash";
 import { useCallback, useEffect, useReducer } from "react";
 import { Oswald } from "next/font/google";
@@ -18,6 +20,8 @@ const oswald = Oswald({
   variable: "--font-oswald",
   subsets: ["latin"]
 });
+
+const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
 export default function NewsFrame() {
   const [modalStore, modalDispatch] = useReducer(modalReducer, modalInitialState);
@@ -91,7 +95,21 @@ export default function NewsFrame() {
 
               </div>
 
-              <div className={`flex ${styles.container} ${styles.bottomBar}`}>bottom</div>
+              <div className={`flex ${styles.container} ${styles.bottomBar}`}>
+                <div className={`flex column ${styles.url}`}>
+                  <div className="flex space-around"><div>xblbaseball.com</div></div>
+                  <div className="flex space-around">
+                    <div>
+                      <img
+                        src={`${basePath}/images/discord-72x72.png`}
+                        alt="Discord logo"
+                        style={{ width: "36px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
           </ModalDispatchContext.Provider>

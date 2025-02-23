@@ -32,3 +32,9 @@
   line-height: 1.25em;
   text-transform: capitalize;
 }
+
+.url {
+  width: 128px;
+  margin-top: 4px;
+  font-size: 18px;
+}
