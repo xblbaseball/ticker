@@ -3,6 +3,10 @@
   font-size: 22px;
 }
 
+.first {
+  margin-bottom: 16px;
+}
+
 .categories {
   width: 100%;
   text-align: left;
@@ -18,4 +22,8 @@
   text-align: right;
   margin-right: 8px;
   line-height: 32px;
+}
+
+.timeframe {
+  font-size: 18px;
 }

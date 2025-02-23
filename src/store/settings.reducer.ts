@@ -46,6 +46,8 @@ export interface SettingsStore {
   statCategoriesSameForBothTeams: boolean;
   /** use the same stat time frames for both teams */
   statTimeFramesSameForBothTeams: boolean;
+  /** render the timeframes under left bar stats */
+  showStatTimeframes: boolean;
   /** games to use to pull away stats */
   awayStatsTimeframe: TimeFrame,
   /** games to use to pull home stats */
@@ -101,6 +103,7 @@ export const initialState: SettingsStore = {
   seriesRight: "",
   statCategoriesSameForBothTeams: true,
   statTimeFramesSameForBothTeams: true,
+  showStatTimeframes: true,
   awayStatsTimeframe: "regularSeason",
   homeStatsTimeframe: "regularSeason",
   awayStatsSeason: currentSeason,

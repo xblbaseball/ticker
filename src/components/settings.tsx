@@ -309,6 +309,13 @@ export default function Settings() {
       Show same stat timeframes for away and home teams
     </Checkbox>
 
+    <Checkbox
+      checked={settingsStore.showStatTimeframes}
+      onChange={(doShow) => updateSetting(["showStatTimeframes"], doShow)}
+    >
+      Render the timeframe under each team&apos; stats
+    </Checkbox>
+
     {settingsStore.statTimeFramesSameForBothTeams ? <>
       <Radio
         selected={settingsStore.awayStatsTimeframe}

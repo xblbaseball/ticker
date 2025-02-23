@@ -14,6 +14,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     homeTeam,
     awayStatsTimeframe,
     homeStatsTimeframe,
+    showStatTimeframes,
     awayStatsSeason,
     homeStatsSeason,
     awayStatsLeague,
@@ -29,6 +30,8 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   if (player === "") {
     return <div>no player selected</div>;
   }
+
+  const otherPlayer = away ? homePlayer : awayPlayer;
 
   const team = away ? awayTeam : homeTeam;
 
@@ -84,8 +87,42 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     )
   }
 
+  const RenderTimeframe = () => {
+    if (statsTimeframe === "regularSeason") {
+      return `Season ${statsSeason}`;
+    }
+
+    if (statsTimeframe === "playoffs") {
+      return `S${statsSeason} Playoffs`
+    }
+
+    if (statsTimeframe === "careerRegularSeason") {
+      return "Career"
+    }
+
+    if (statsTimeframe === "careerPlayoffs") {
+      return "Career Playoffs"
+    }
+
+    if (statsTimeframe === "leagueRegularSeason") {
+      return `Career ${statsLeague}`
+    }
+
+    if (statsTimeframe === "leaguePlayoffs") {
+      return `${statsLeague} Playoffs`
+    }
+
+    if (statsTimeframe === "h2hRegularSeason") {
+      return `vs ${otherPlayer}`;
+    }
+
+    if (statsTimeframe === "h2hPlayoffs") {
+      return `vs ${otherPlayer}`;
+    }
+  }
+
   /** lookup a stat for the timeframe */
-  const statLookup = (stat: string) => {
+  const RenderStat = (stat: string) => {
     let lookupPath: string[] = [];
     let isPlayerA: boolean;
 
@@ -151,7 +188,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     return `${rawValue}`;
   }
 
-  return <div className={`flex column ${styles.container}`}>
+  return <div className={`flex column ${styles.container} ${away && styles.first}`}>
     <div className={`flex space-around`}>
       <div style={{ width: "54px" }}>
         <TeamLogo team={team} small={true} width="54px" />
@@ -170,14 +207,16 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
         <StatCategory stat={statCategories.sixth} />
       </div>
       <div className={`flex column ${styles.values}`}>
-        <div>{statLookup(statCategories.first)}</div>
-        <div>{statLookup(statCategories.second)}</div>
-        <div>{statLookup(statCategories.third)}</div>
-        <div>{statLookup(statCategories.fourth)}</div>
-        <div>{statLookup(statCategories.fifth)}</div>
-        <div>{statLookup(statCategories.sixth)}</div>
+        <div>{RenderStat(statCategories.first)}</div>
+        <div>{RenderStat(statCategories.second)}</div>
+        <div>{RenderStat(statCategories.third)}</div>
+        <div>{RenderStat(statCategories.fourth)}</div>
+        <div>{RenderStat(statCategories.fifth)}</div>
+        <div>{RenderStat(statCategories.sixth)}</div>
       </div>
     </div>
-    {/* include the timeframe too */}
+    {showStatTimeframes && <div className={`flex space-around`}>
+      <div className={styles.timeframe}><em>{RenderTimeframe()}</em></div>
+    </div>}
   </div >;
 }
