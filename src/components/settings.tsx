@@ -123,6 +123,14 @@ export default function Settings() {
       It might be easier to play with settings in your browser and then copy them here.
     </TextArea>
 
+    <Dropdown
+      options={["XBL", "AAA", "AA"]}
+      selected={settingsStore.league}
+      onSelect={(league) => updateSetting(["league"], league)}
+    >
+      Which league is playing? Controls the logo in the top left and some scores and records.
+    </Dropdown>
+
     <h3>Playoffs</h3>
 
     These are used to control which scores and records are shown.
@@ -149,14 +157,6 @@ export default function Settings() {
     </Checkbox>
 
     <h3>Left Bar</h3>
-
-    <Dropdown
-      options={["XBL", "AAA", "AA"]}
-      selected={settingsStore.league}
-      onSelect={(league) => updateSetting(["league"], league)}
-    >
-      Which league is playing? Controls the logo in the top left and some scores and records.
-    </Dropdown>
 
     <Input
       value={`${settingsStore.season || ""}`}
@@ -280,7 +280,7 @@ export default function Settings() {
 
     <Checkbox
       checked={settingsStore.statTimeFramesSameForBothTeams}
-      onChange={(doShow) => updateSetting(["statTimeframesSameForBothTeams"], doShow)}
+      onChange={(doShow) => updateSetting(["statTimeFramesSameForBothTeams"], doShow)}
     >
       Show same stat timeframes for away and home teams
     </Checkbox>
@@ -296,6 +296,19 @@ export default function Settings() {
       >
         Stats timeframe. See above
       </Radio>
+
+      {
+        (settingsStore.awayStatsTimeframe === "regularSeason" || settingsStore.awayStatsTimeframe === "playoffs") &&
+        <Input
+          value={settingsStore.awayStatsSeason}
+          onChange={(season) => {
+            updateSetting(["awayStatsSeason"], season);
+            updateSetting(["homeStatsSeason"], season);
+          }}
+        >
+          Season
+        </Input>
+      }
     </> : <>
       <h4>Away</h4>
       <Radio
@@ -308,9 +321,22 @@ export default function Settings() {
         Away team stats timeframe. See above
       </Radio>
 
+      {
+        (settingsStore.awayStatsTimeframe === "regularSeason" || settingsStore.awayStatsTimeframe === "playoffs") &&
+        <Input
+          value={settingsStore.awayStatsSeason}
+          onChange={(season) => {
+            updateSetting(["awayStatsSeason"], season);
+          }}
+        >
+          Season
+        </Input>
+
+      }
+
       <h4>Home</h4>
       <Radio
-        selected={settingsStore.awayStatsTimeframe}
+        selected={settingsStore.homeStatsTimeframe}
         options={statsTimeFrames}
         onChange={(timeframe) => {
           updateSetting(["homeStatsTimeframe"], timeframe);
@@ -318,6 +344,19 @@ export default function Settings() {
       >
         Home team stats timeframe. See above
       </Radio>
+
+      {
+        (settingsStore.homeStatsTimeframe === "regularSeason" || settingsStore.homeStatsTimeframe === "playoffs") &&
+        <Input
+          value={settingsStore.homeStatsSeason}
+          onChange={(season) => {
+            updateSetting(["homeStatsSeason"], season);
+          }}
+        >
+          Season
+        </Input>
+
+      }
     </>}
 
     <Checkbox

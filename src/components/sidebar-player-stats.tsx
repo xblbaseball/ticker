@@ -26,13 +26,13 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
   const player = away ? awayPlayer : homePlayer;
   if (player === "") {
-    return <>no player</>;
+    return <div>no player selected</div>;
   }
 
   const team = away ? awayTeam : homeTeam;
 
   if (team === "") {
-    return <>no team</>
+    return <div>no team selected</div>;
   }
 
   const statCategories = away ? awayStatCategories : homeStatCategories;
@@ -40,7 +40,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   const statsSeason = away ? awayStatsSeason : homeStatsSeason;
 
   const showPlayoffRecord = _.get(playoffs, [league]);
-  console.log(league, showPlayoffRecord);
+  // console.log(league, showPlayoffRecord);
 
   let recordOrSeed = "(0-0)";
 
@@ -88,27 +88,36 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
     switch (statsTimeframe) {
       case "regularSeason":
-        lookupPath = ['stats', league, 'season_team_stats', team, stat];
+        if (statsSeason === parseInt(process.env.NEXT_PUBLIC_SEASON)) {
+          lookupPath = ['stats', league, 'season_team_stats', team, stat];
+        } else {
+          console.log(Object.keys(statsStore.stats.careers.regular_season[player].by_season))
+          lookupPath = ['stats', 'careers', 'regular_season', player, 'by_season', `season_${statsSeason}`, stat]
+        }
         break;
       case "playoffs":
-        lookupPath = ['stats', league, 'playoffs_team_stats', team, stat];
+        if (statsSeason === parseInt(process.env.NEXT_PUBLIC_SEASON)) {
+          lookupPath = ['stats', league, 'playoffs_team_stats', team, stat];
+        } else {
+          lookupPath = ['stats', 'careers', 'playoffs', player, 'by_season', `season_${statsSeason}`, stat]
+        }
         break;
       case "careerRegularSeason":
-        lookupPath = ['stats', 'careers', 'season_performances', player, 'all_time', stat];
+        lookupPath = ['stats', 'careers', 'regular_season', player, 'all_time', stat];
         break;
       case "careerPlayoffs":
-        lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'all_time', stat];
+        lookupPath = ['stats', 'careers', 'playoffs', player, 'all_time', stat];
         break;
       case "leagueRegularSeason":
-        lookupPath = ['stats', 'careers', 'season_performances', player, 'by_league', league, stat];
+        lookupPath = ['stats', 'careers', 'regular_season', player, 'by_league', league, stat];
         break;
       case "leaguePlayoffs":
-        lookupPath = ['stats', 'careers', 'playoffs_performances', player, 'by_league', league, stat];
+        lookupPath = ['stats', 'careers', 'playoffs', player, 'by_league', league, stat];
         break;
       case "h2hRegularSeason":
         let [playerA, playerZ] = [homePlayer, awayPlayer].sort()
         let isPlayerA = playerA === player;
-        lookupPath = ['stats', 'stats', 'careers', 'season_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
+        lookupPath = ['stats', 'stats', 'careers', 'regular_season_head_to_head', playerA, playerZ, isPlayerA ? 'player_a' : 'player_z', stat];
         break;
       case "h2hPlayoffs":
         [playerA, playerZ] = [homePlayer, awayPlayer].sort()

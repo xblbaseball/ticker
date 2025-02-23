@@ -166,9 +166,9 @@ export type PlayoffsHeadToHead = HeadToHead[];
 export interface CareerStats {
   all_players: AllPlayers;
   active_players: ActivePlayers;
-  season_performances: SeasonPerformances;
-  season_head_to_head: SeasonHeadToHead;
-  playoffs_performances: PlayoffsPerformances;
+  regular_season: RegularSeason;
+  regular_season_head_to_head: RegularSeasonHeadToHead;
+  playoffs: Playoffs;
   playoffs_head_to_head: PlayoffsHeadToHead;
   [k: string]: unknown;
 }
@@ -196,7 +196,7 @@ export interface TeamSeason {
 export interface ActivePlayers {
   [k: string]: string[];
 }
-export interface SeasonPerformances {
+export interface RegularSeason {
   [k: string]: CareerSeasonPerformance;
 }
 /**
@@ -205,6 +205,7 @@ export interface SeasonPerformances {
 export interface CareerSeasonPerformance {
   player: Player2;
   by_league: ByLeague;
+  by_season: BySeason;
   all_time: CareerSeasonStats;
   [k: string]: unknown;
 }
@@ -265,7 +266,10 @@ export interface CareerSeasonStats {
   splits: Splits;
   [k: string]: unknown;
 }
-export interface SeasonHeadToHead {
+export interface BySeason {
+  [k: string]: CareerSeasonStats;
+}
+export interface RegularSeasonHeadToHead {
   [k: string]: {
     [k: string]: HeadToHead;
   };
@@ -331,7 +335,7 @@ export interface TeamStats {
   seasons: Seasons1;
   [k: string]: unknown;
 }
-export interface PlayoffsPerformances {
+export interface Playoffs {
   [k: string]: CareerPlayoffsPerformance;
 }
 /**

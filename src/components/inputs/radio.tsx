@@ -6,7 +6,7 @@ export default function Radio(
       selected: string,
       /** list of [display, value] lists */
       options: string[][],
-      onChange: (selcted: string) => void
+      onChange: (selected: string) => void
     } & React.PropsWithChildren
 ) {
   const name = useId();
@@ -14,17 +14,18 @@ export default function Radio(
   return <div>
     <div><em>{children}</em></div>
     {options.map(([display, value], i) => {
-      return <>
-        <br />
-        <label key={`RADIO__${value}__${i}`}>
+      return <div key={`RADIO__${name}__${i}`}>
+        <label>
           {display}
           <input
             value={value}
             type="radio"
             name={name}
+            checked={selected === value}
+            onChange={(e) => onChange(e.target.value)}
           />
         </label>
-      </>
+      </div>
     })}
   </div>
 }

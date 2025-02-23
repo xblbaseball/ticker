@@ -1,8 +1,7 @@
 import _ from "lodash";
 import { League } from "@/typings/league";
-import { string } from "@/typings/stats";
 
-const season = parseInt(process.env.NEXT_PUBLIC_SEASON);
+const currentSeason = parseInt(process.env.NEXT_PUBLIC_SEASON);
 
 export type TimeFrame =  "regularSeason" | "playoffs" | "careerRegularSeason" | "careerPlayoffs" | "leagueRegularSeason" | "leaguePlayoffs" | "h2hRegularSeason" | "h2hPlayoffs";
 
@@ -83,7 +82,7 @@ export const initialState: SettingsStore = {
     AA: false,
   },
   league: "XBL",
-  season,
+  season: currentSeason,
   seasonSubtext: "",
   showSeries: true,
   awayTeam: "",
@@ -100,8 +99,8 @@ export const initialState: SettingsStore = {
   statTimeFramesSameForBothTeams: true,
   awayStatsTimeframe: "regularSeason",
   homeStatsTimeframe: "regularSeason",
-  awayStatsSeason: season,
-  homeStatsSeason: season,
+  awayStatsSeason: currentSeason,
+  homeStatsSeason: currentSeason,
   awayStatCategories: {
     first: "ba",
     second: "hr9",
