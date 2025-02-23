@@ -126,7 +126,13 @@ export default function Settings() {
     <Dropdown
       options={["XBL", "AAA", "AA"]}
       selected={settingsStore.league}
-      onSelect={(league) => updateSetting(["league"], league)}
+      onSelect={(league) => {
+        updateSetting(["league"], league);
+        if (_.get(settingsStore, ['playoffs', league], false)) {
+          // write in 'Playoffs' under the season
+          updateSetting(['seasonSubtext'], 'Playoffs');
+        }
+      }}
     >
       Which league is playing? Controls the logo in the top left and some scores and records.
     </Dropdown>
@@ -137,21 +143,39 @@ export default function Settings() {
 
     <Checkbox
       checked={settingsStore.playoffs.XBL}
-      onChange={(checked) => updateSetting(["playoffs", "XBL"], checked)}
+      onChange={(checked) => {
+        updateSetting(["playoffs", "XBL"], checked);
+        // write in "Playoffs" under the season
+        if (settingsStore.league === "XBL") {
+          updateSetting(["seasonSubtext"], "Playoffs");
+        }
+      }}
     >
       XBL in playoffs
     </Checkbox>
 
     <Checkbox
       checked={settingsStore.playoffs.AAA}
-      onChange={(checked) => updateSetting(["playoffs", "AAA"], checked)}
+      onChange={(checked) => {
+        updateSetting(["playoffs", "AAA"], checked);
+        // write in "Playoffs" under the season
+        if (settingsStore.league === "AAA") {
+          updateSetting(["seasonSubtext"], "Playoffs");
+        }
+      }}
     >
       AAA in playoffs
     </Checkbox>
 
     <Checkbox
       checked={settingsStore.playoffs.AA}
-      onChange={(checked) => updateSetting(["playoffs", "AA"], checked)}
+      onChange={(checked) => {
+        updateSetting(["playoffs", "AA"], checked);
+        // write in "Playoffs" under the season
+        if (settingsStore.league === "AA") {
+          updateSetting(["seasonSubtext"], "Playoffs");
+        }
+      }}
     >
       AA in playoffs
     </Checkbox>
