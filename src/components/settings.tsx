@@ -33,12 +33,15 @@ export default function Settings() {
   const settingsStore = useContext(SettingsContext);
   const statsStore = useContext(StatsContext);
 
+  /** dispatch an update to a setting in the store */
   const updateSetting = (path: string[], value: unknown) => {
     settingsDispatch({ type: "set", payload: { path, value } })
   }
 
+  /** all teams who have ever played */
   const allTeams = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
 
+  /** list of all players except one */
   const allPlayersBut = (player = "") => {
     if (player === "") {
       return allTeams;
@@ -46,6 +49,7 @@ export default function Settings() {
     return _.filter(allTeams, (otherPlayer) => otherPlayer !== player);
   }
 
+  /** given a player, get a list of the teams they've fielded */
   const teamsForPlayer = (player: string) => {
     if (player === "") {
       return [];
@@ -61,6 +65,7 @@ export default function Settings() {
     return Array.from(new Set(teams.map((teamSeason) => teamSeason.team_name)));
   }
 
+  /** given a team name for a player, look up the team's abbreviation */
   const getAbbrevFromTeam = (player: string, team: string) => {
     if (player === "") {
       return "";
@@ -75,7 +80,8 @@ export default function Settings() {
       ["stats", "careers", "all_players", player, "teams"],
       []
     );
-    const thisTeam = teams.find(teamSeason => team === teamSeason.team_name);
+    // teams are stored in ascending season order. go backwards to make sure we have the team's latest abbreviation (in case they changed abbreviations at some point)
+    const thisTeam = teams.reverse().find(teamSeason => team === teamSeason.team_name);
     if (_.isNil(thisTeam)) {
       return "";
     }
