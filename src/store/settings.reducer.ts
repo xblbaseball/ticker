@@ -78,6 +78,8 @@ export interface SettingsStore {
   };
   /** marquees in the format of "AAA News | This is text I want to scroll" */
   headlines: string;
+  /** how many games to rotate through the box scores */
+  maxBoxScores: number;
 }
 
 export const initialState: SettingsStore = {
@@ -126,7 +128,8 @@ export const initialState: SettingsStore = {
     fifth: "opphr9",
     sixth: "whip",
   },
-  headlines: ""
+  headlines: "",
+  maxBoxScores: 24
 };
 
 export type action = {

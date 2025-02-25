@@ -15,6 +15,7 @@ import settingsReducer, { initialState as settingsInitialState } from "@/store/s
 
 import styles from "./news-frame.module.css";
 import SidebarPlayerStats from "./sidebar-player-stats";
+import ScoresPlus from "./scores-plus";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -75,6 +76,7 @@ export default function NewsFrame() {
 
             <div className={oswald.className}>
 
+              {/* LEFT BAR */}
               <div className={`flex column ${styles.container} ${styles.leftBar}`}>
 
                 <div style={{ marginLeft: "4px" }}>
@@ -92,10 +94,12 @@ export default function NewsFrame() {
 
                 <SidebarPlayerStats away={true} />
                 <SidebarPlayerStats away={false} />
-
               </div>
 
+              {/* BOTTOM BAR */}
               <div className={`flex ${styles.container} ${styles.bottomBar}`}>
+
+                {/* logo and URL in the corner */}
                 <div className={`flex column ${styles.url}`}>
                   <div className="flex space-around"><div>xblbaseball.com</div></div>
                   <div className="flex space-around">
@@ -109,6 +113,7 @@ export default function NewsFrame() {
                   </div>
                 </div>
 
+                <ScoresPlus />
               </div>
             </div>
 

@@ -57,6 +57,7 @@ def main():
     for team_name, url in logos_to_download:
         suffix = Path(url).suffix
         # TODO Myst Inc. with the period at the end breaks with_suffix...
+        # TODO RiseNFall is also messed up? oh it's just the pirates...
         full_size_logo_path = logos_dir.joinpath(team_name).with_suffix(suffix)
         thumbnail_logo_path = logos_dir.joinpath(
             f"{team_name}-{'x'.join(map(str, thumbnail_res))}"

@@ -1,4 +1,4 @@
-import _, { update } from 'lodash';
+import _ from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
 import Checkbox from '@/components/inputs/checkbox';
@@ -190,7 +190,7 @@ export default function Settings() {
 
     <Input
       value={`${settingsStore.season || ""}`}
-      onChange={(season) => updateSetting(["season"], _.parseInt(season as string))}
+      onChange={(season) => updateSetting(["season"], parseInt(season as string))}
     >
       Season
     </Input>
@@ -266,14 +266,14 @@ export default function Settings() {
     </Checkbox>
 
     <Input
-      value={settingsStore.awayWins}
+      value={settingsStore.awayWins || ""}
       onChange={(wins) => updateSetting(["awayWins"], parseInt(wins as string))}
     >
       Away Wins (if showing series record)
     </Input>
 
     <Input
-      value={settingsStore.homeWins}
+      value={settingsStore.homeWins || ""}
       onChange={(wins) => updateSetting(["homeWins"], parseInt(wins as string))}
     >
       Home Wins (if showing series record)
@@ -641,6 +641,15 @@ export default function Settings() {
     >
       Headlines
     </TextArea>
+
+    <h3>Bottom Bar</h3>
+
+    <Input
+      value={settingsStore.maxBoxScores || ""}
+      onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
+    >
+      How many box scores should we rotate through? If you change this, you'll need to reload the page for the changes to take effect.
+    </Input>
 
     <h3>Current Settings</h3>
     Copy this if you want to share your settings with someone else, or just paste them into the ticker settings in the OBS browser.
