@@ -6,14 +6,15 @@
  */
 
 export type Player1 = string;
+export type Player2 = string;
 export type TeamName = string;
 export type TeamAbbrev = string;
 export type League = string;
 export type Season = number;
 export type Teams = TeamSeason[];
-export type Player2 = string;
-export type Team = string;
 export type Player3 = string;
+export type Team = string;
+export type Player4 = string;
 export type Rs = number;
 export type Rs9 = number;
 export type Ba = number;
@@ -63,7 +64,7 @@ export type Splits = number;
 export type PlayerA = string;
 export type PlayerZ = string;
 export type Team1 = string;
-export type Player4 = string;
+export type Player5 = string;
 export type Rs1 = number;
 export type Rs91 = number;
 export type Ba1 = number;
@@ -107,9 +108,9 @@ export type Losses1 = number;
 export type WinsByRunRule1 = number;
 export type LossesByRunRule1 = number;
 export type Seasons1 = number[];
-export type Player5 = string;
-export type Team2 = string;
 export type Player6 = string;
+export type Team2 = string;
+export type Player7 = string;
 export type Rs2 = number;
 export type Rs92 = number;
 export type Ba2 = number;
@@ -187,6 +188,7 @@ export interface Player {
  * pairing between a person and a season in XBL
  */
 export interface TeamSeason {
+  player: Player2;
   team_name: TeamName;
   team_abbrev: TeamAbbrev;
   league: League;
@@ -194,7 +196,7 @@ export interface TeamSeason {
   [k: string]: unknown;
 }
 export interface ActivePlayers {
-  [k: string]: string[];
+  [k: string]: TeamSeason[];
 }
 export interface RegularSeason {
   [k: string]: CareerSeasonPerformance;
@@ -203,7 +205,7 @@ export interface RegularSeason {
  * how someone has performed in the regular season over their career
  */
 export interface CareerSeasonPerformance {
-  player: Player2;
+  player: Player3;
   by_league: ByLeague;
   by_season: BySeason;
   all_time: CareerSeasonStats;
@@ -217,7 +219,7 @@ export interface ByLeague {
  */
 export interface CareerSeasonStats {
   team: Team;
-  player: Player3;
+  player: Player4;
   rs: Rs;
   rs9: Rs9;
   ba: Ba;
@@ -289,7 +291,7 @@ export interface HeadToHead {
  */
 export interface TeamStats {
   team: Team1;
-  player: Player4;
+  player: Player5;
   rs: Rs1;
   rs9: Rs91;
   ba: Ba1;
@@ -342,7 +344,7 @@ export interface Playoffs {
  * how someone has performed in the playoffs over their career
  */
 export interface CareerPlayoffsPerformance {
-  player: Player5;
+  player: Player6;
   by_league: ByLeague1;
   all_time: CareerPlayoffsStats;
   [k: string]: unknown;
@@ -355,7 +357,7 @@ export interface ByLeague1 {
  */
 export interface CareerPlayoffsStats {
   team: Team2;
-  player: Player6;
+  player: Player7;
   rs: Rs2;
   rs9: Rs92;
   ba: Ba2;

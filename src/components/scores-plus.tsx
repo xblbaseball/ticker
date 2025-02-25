@@ -10,8 +10,10 @@ import {
   PlayoffsGameResults,
   PlayoffsGameResults1,
   SeasonGameResults,
-  SeasonGameResults1
+  SeasonGameResults1,
+  SeasonTeamRecord
 } from "@/typings/season";
+import { HeadToHead, TeamSeason } from "@/typings/careers";
 
 const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
@@ -59,6 +61,91 @@ function TopLine(
   </div>
 }
 
+/** render the lower line in the box score */
+function BottomLine(
+  { awayTeam, homeTeam, week, round, league }:
+    { awayTeam: string; homeTeam: string; league: string; week?: string; round?: string }
+) {
+  const statsStore = useContext(StatsContext);
+
+  // look up the abbreviation, player names for the away and home teams
+  // default the abbreviations to the first 4 letters of the team name
+  let awayTeamAbbrev = awayTeam.slice(0, 4).toUpperCase();
+  let homeTeamAbbrev = homeTeam.slice(0, 4).toUpperCase();
+
+  const teamsForLeague: TeamSeason[] = _.get(statsStore,
+    ["stats", "careers", "active_players", league],
+    []
+  );
+
+  const awayTeamInfo = teamsForLeague.find(teamSeason => teamSeason.team_name === awayTeam);
+  const homeTeamInfo = teamsForLeague.find(teamSeason => teamSeason.team_name === homeTeam);
+
+  const awayPlayer = awayTeamInfo?.player;
+  const homePlayer = homeTeamInfo?.player;
+  // for h2h lookups later
+  const [playerA, playerZ] = [awayPlayer, homePlayer].sort();
+
+  if (!_.isNil(awayTeamInfo)) {
+    awayTeamAbbrev = awayTeamInfo.team_abbrev;
+  }
+  if (!_.isNil(homeTeamInfo)) {
+    homeTeamAbbrev = homeTeamInfo.team_abbrev;
+  }
+
+  let playoffsGame = false;
+  let weekOrRound = "";
+  if (!_.isNil(week)) {
+    weekOrRound = `Week ${week},`;
+  }
+  if (!_.isNil(round)) {
+    playoffsGame = true;
+    weekOrRound = `${league} Playoffs RD${round.slice(1, 2)},`;
+  }
+
+  // where we'll be able to find head-to-head stats
+  let h2hLookupPath = [];
+
+  let winsAndLosses = "";
+  if (playoffsGame) {
+    h2hLookupPath = ["stats", "careers", "playoffs_head_to_head", playerA, playerZ];
+
+    // look up the series from playoffs table
+    const awayTeamRoundRecord = _.get(statsStore, ["stats", league, "playoffs_team_records", awayTeam, "rounds", round], null);
+    if (!_.isNil(awayTeamRoundRecord)) {
+      const awayWins = awayTeamRoundRecord.wins;
+      const awayLosses = awayTeamRoundRecord.losses;
+      winsAndLosses = `${awayTeamAbbrev} ${awayWins} - ${awayLosses} ${homeTeamAbbrev}.`;
+    }
+  } else {
+    h2hLookupPath = ["stats", "careers", "regular_season_head_to_head", playerA, playerZ];
+
+    const awayTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", awayTeam], null);
+    const homeTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", homeTeam], null);
+
+    const awayTeamWins = awayTeamRecords?.wins;
+    const awayTeamLosses = awayTeamRecords?.losses;
+    const awayTeamRecord = !_.isNil(awayTeamWins) ? `(${awayTeamWins}-${awayTeamLosses})` : "";
+    const homeTeamWins = homeTeamRecords?.wins;
+    const homeTeamLosses = homeTeamRecords?.losses;
+    const homeTeamRecord = !_.isNil(homeTeamWins) ? `(${homeTeamWins}-${homeTeamLosses})` : "";
+
+    winsAndLosses = `${awayTeamAbbrev} ${awayTeamRecord} ${homeTeamAbbrev} ${homeTeamRecord}.`
+  }
+
+  let message = "";
+
+  const h2h: HeadToHead = _.get(
+    statsStore,
+    h2hLookupPath,
+    null
+  );
+
+  const fullLine = `${weekOrRound} ${winsAndLosses} ${message}`.trim();
+
+  return <div>{fullLine}</div>
+}
+
 /** render box scores. prefer playoff games when available */
 export default function ScoresPlus() {
   const { maxBoxScores } = useContext(SettingsContext);
@@ -78,7 +165,10 @@ export default function ScoresPlus() {
   const recentGames: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
 
   for (const path of playoffsScoresPaths) {
-    const eightGames: PlayoffsGameResults = _.get(statsStore, path, []).slice(-8).reverse();
+    // slice with a negative number and reverse to get the last 8 games in descending chronological order
+    const eightGames: PlayoffsGameResults = _.get(
+      statsStore, path, []
+    ).slice(-8).reverse();
     recentGames.push(...eightGames);
   }
 
@@ -92,39 +182,52 @@ export default function ScoresPlus() {
     const numAAA = -1 * _.round(thirdRemaining); // rounds up if thirdRemaining is .6 repeating, down if .3 repeating
     const numAA = -1 * _.floor(thirdRemaining);
 
-    const xblGames: SeasonGameResults = _.get(statsStore, regularSeasonScoresPaths[0], []).slice(numXBL).reverse();
-    const aaaGames: SeasonGameResults = _.get(statsStore, regularSeasonScoresPaths[1], []).slice(numAAA).reverse();
-    const aaGames: SeasonGameResults = _.get(statsStore, regularSeasonScoresPaths[2], []).slice(numAA).reverse();
+    const xblGames: SeasonGameResults = _.get(
+      statsStore,
+      regularSeasonScoresPaths[0],
+      []
+    ).slice(numXBL).reverse();
+    const aaaGames: SeasonGameResults = _.get(
+      statsStore,
+      regularSeasonScoresPaths[1],
+      []
+    ).slice(numAAA).reverse();
+    const aaGames: SeasonGameResults = _.get(
+      statsStore,
+      regularSeasonScoresPaths[2],
+      []
+    ).slice(numAA).reverse();
 
     recentGames.push(...xblGames);
     recentGames.push(...aaaGames);
     recentGames.push(...aaGames);
   }
 
+  // TODO Need like a useState and a timer for the fadeIn and fadeOut
+  const game = recentGames[0];
+
   return <div className={`flex column space-around ${styles.container}`}>
     <div className={`flex column space-around ${styles.innerContainer}`}>
       <div className={styles.content}>
         <TopLine
-          awayTeam={recentGames[0].away_team}
-          homeTeam={recentGames[0].home_team}
-          awayScore={recentGames[0].away_score}
-          homeScore={recentGames[0].home_score}
-          innings={recentGames[0].innings}
+          awayTeam={game.away_team}
+          homeTeam={game.home_team}
+          awayScore={game.away_score}
+          homeScore={game.home_score}
+          innings={game.innings}
           fadeIn={false}
           fadeOut={false}
         />
       </div>
-      {/* <div className={styles.content}>
-        <TopLine
-          awayTeam={recentGames[0].away_team}
-          homeTeam={recentGames[0].home_team}
-          awayScore={recentGames[0].away_score}
-          homeScore={recentGames[0].home_score}
-          innings={recentGames[0].innings}
-          fadeIn={false}
-          fadeOut={false}
+      <div className={styles.content}>
+        <BottomLine
+          awayTeam={game.away_team}
+          homeTeam={game.home_team}
+          week={game.week as string}
+          round={game.round as string}
+          league={game.league}
         />
-      </div> */}
+      </div>
     </div>
   </div>
 }
