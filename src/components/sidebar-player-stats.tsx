@@ -68,7 +68,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   }
 
   /** uppercase but make "opp" be "Opp" */
-  const fixCasing = (stat: string) => {
+  const fixStyling = (stat: string) => {
     const opp: RegExp = /opp/i;
     return stat.toUpperCase().replace(opp, "Opp");
   }
@@ -82,7 +82,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
     return (
       <div style={style}>
-        {fixCasing(stat)}
+        {fixStyling(stat)}
       </div>
     )
   }
@@ -183,7 +183,12 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
     const rawValue: number | string = _.get(statsStore, lookupPath, "-");
     if (_.isNumber(rawValue) && !Number.isInteger(rawValue)) {
-      return `${rawValue.toFixed(3)}`;
+      let num = `${rawValue.toFixed(3)}`;
+      if (rawValue < 1) {
+        // cut the leading 0 off numbers like 0.123 to make them render as .123
+        num = num.slice(1);
+      }
+      return num;
     }
     return `${rawValue}`;
   }
