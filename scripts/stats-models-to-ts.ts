@@ -21,7 +21,7 @@ async function ghStats(filepath: string | string[]) {
 
 async function main() {
   const seasonSchema = await ghStats(["schemas", "season-schema.json"]);
-  const careerSchema = await ghStats(["schemas", "career-schema.json"]);
+  const careerSchema = await ghStats(["schemas", "careers-schema.json"]);
 
   compile(seasonSchema, 'Season').then(
     (ts) => {
