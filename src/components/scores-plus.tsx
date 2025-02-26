@@ -85,6 +85,7 @@ function BottomLine(
   const homePlayer = homeTeamInfo?.player;
   // for h2h lookups later
   const [playerA, playerZ] = [awayPlayer, homePlayer].sort();
+  const awayIsPlayerA = awayPlayer === playerA;
 
   if (!_.isNil(awayTeamInfo)) {
     awayTeamAbbrev = awayTeamInfo.team_abbrev;
@@ -104,21 +105,25 @@ function BottomLine(
   }
 
   // where we'll be able to find head-to-head stats
-  let h2hLookupPath = [];
+  // let h2hLookupPath = [];
 
   let winsAndLosses = "";
   if (playoffsGame) {
-    h2hLookupPath = ["stats", "careers", "playoffs_head_to_head", playerA, playerZ];
+    // h2hLookupPath = ["stats", "careers", "playoffs_head_to_head", playerA, playerZ];
 
     // look up the series from playoffs table
-    const awayTeamRoundRecord = _.get(statsStore, ["stats", league, "playoffs_team_records", awayTeam, "rounds", round], null);
+    const awayTeamRoundRecord = _.get(
+      statsStore,
+      ["stats", league, "playoffs_team_records", awayTeam, "rounds", round],
+      null
+    );
     if (!_.isNil(awayTeamRoundRecord)) {
       const awayWins = awayTeamRoundRecord.wins;
       const awayLosses = awayTeamRoundRecord.losses;
       winsAndLosses = `${awayTeamAbbrev} ${awayWins} - ${awayLosses} ${homeTeamAbbrev}.`;
     }
   } else {
-    h2hLookupPath = ["stats", "careers", "regular_season_head_to_head", playerA, playerZ];
+    // h2hLookupPath = ["stats", "careers", "regular_season_head_to_head", playerA, playerZ];
 
     const awayTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", awayTeam], null);
     const homeTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", homeTeam], null);
@@ -133,15 +138,7 @@ function BottomLine(
     winsAndLosses = `${awayTeamAbbrev} ${awayTeamRecord} ${homeTeamAbbrev} ${homeTeamRecord}.`
   }
 
-  let message = "";
-
-  const h2h: HeadToHead = _.get(
-    statsStore,
-    h2hLookupPath,
-    null
-  );
-
-  const fullLine = `${weekOrRound} ${winsAndLosses} ${message}`.trim();
+  const fullLine = `${weekOrRound} ${winsAndLosses}`.trim();
 
   return <div>{fullLine}</div>
 }
