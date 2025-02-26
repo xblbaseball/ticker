@@ -3,7 +3,7 @@ import { League } from "@/typings/league";
 
 const currentSeason = parseInt(process.env.NEXT_PUBLIC_SEASON);
 
-export type TimeFrame =  "regularSeason" | "playoffs" | "careerRegularSeason" | "careerPlayoffs" | "leagueRegularSeason" | "leaguePlayoffs" | "h2hRegularSeason" | "h2hPlayoffs";
+export type TimeFrame = "regularSeason" | "playoffs" | "careerRegularSeason" | "careerPlayoffs" | "leagueRegularSeason" | "leaguePlayoffs" | "h2hRegularSeason" | "h2hPlayoffs";
 
 export interface SettingsStore {
   /** are we using localstorage? */
@@ -141,6 +141,39 @@ export type action = {
   }
 }
 
+/** has someone tried to a valid store? */
+export function isValidStore(maybeStore: object, root: string[] = null) {
+  let path: string[] = [];
+
+  if (!_.isNull(root)) {
+    path = [...root];
+  }
+
+  for (const key of _.keys(_.get(initialState, path))) {
+    const fullpath = [...path, key];
+
+    if (!_.has(maybeStore, fullpath)) {
+      console.error(`Imported store is missing key ${fullpath}`)
+      return false;
+    }
+
+    if (
+      typeof _.get(initialState, fullpath) !== typeof _.get(maybeStore, fullpath)
+    ) {
+      console.error(`Imported store has wrong value for key ${key}: ${_.get(maybeStore, [key])}`)
+      return false;
+    }
+
+    if (typeof _.get(initialState, fullpath) === "object") {
+      if (!isValidStore(_.get(maybeStore, fullpath), fullpath)) {
+        return false
+      }
+    }
+  }
+
+  return true;
+}
+
 const STORAGE_KEY = "__XBL_TICKER_SETTINGS__";
 
 /** check whether we have localStorage */
@@ -194,7 +227,7 @@ export default function settingsReducer(
     case "load":
       newStore = readStorage();
       if (!_.isNull(newStore)) {
-        return {...initialState, ...newStore};
+        return { ...initialState, ...newStore };
       }
       return store;
 

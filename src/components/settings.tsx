@@ -10,7 +10,7 @@ import TextArea from '@/components/inputs/textarea';
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
-import { action as settingsAction, SettingsStore } from "@/store/settings.reducer";
+import { isValidStore, action as settingsAction, SettingsStore } from "@/store/settings.reducer";
 import { StatsContext } from '@/store/stats.context';
 
 import { TeamSeason } from '@/typings/careers';
@@ -21,8 +21,8 @@ function isJSON(e: unknown) {
   try {
     JSON.parse(e as string);
     return true;
-  } catch (e) {
-    console.error(e);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
     return false;
   }
 }
@@ -113,6 +113,7 @@ export default function Settings() {
     <h3>Import</h3>
 
     <TextArea
+      value={null}
       onChange={(maybeJSON) => {
         if (!isJSON(maybeJSON)) {
           return;
@@ -120,11 +121,17 @@ export default function Settings() {
 
         const importedStore: SettingsStore = JSON.parse(maybeJSON);
 
+        if (!isValidStore(importedStore)) {
+          return;
+        }
+
         settingsDispatch({
           type: "import",
           payload: { store: importedStore }
         })
       }}
+      cols={20}
+      rows={5}
     >
       It might be easier to play with settings in your browser and then copy them here.
     </TextArea>

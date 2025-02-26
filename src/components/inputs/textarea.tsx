@@ -1,10 +1,12 @@
 import React from 'react';
 
 export default function TextArea(
-  { value, onChange, children }:
+  { value, onChange, children, cols = 80, rows = 20 }:
     {
       value: string;
-      onChange: (value: string) => void
+      onChange: (value: string) => void;
+      cols?: number;
+      rows?: number;
     } & React.PropsWithChildren
 ) {
   const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
@@ -18,8 +20,8 @@ export default function TextArea(
         <textarea
           value={value}
           onChange={handleChange}
-          cols={80}
-          rows={10}
+          cols={cols}
+          rows={rows}
           style={{ fontSize: "20px" }}
         />
       </label>

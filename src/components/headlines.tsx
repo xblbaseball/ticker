@@ -36,8 +36,8 @@ export default function Headlines() {
 
   return <div className={`flex column headlines-fade ${styles.container}`}>
     <div className={styles.title}>{title}</div>
-    <div className={needToScrollText && styles.fade}>
-      <div className={`${needToScrollText && "headlines-scroll"} ${styles.content}`}>{body}</div>
+    <div className={needToScrollText ? styles.fade : undefined}>
+      <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
     </div>
   </div>
 }
