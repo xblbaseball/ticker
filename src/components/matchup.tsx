@@ -8,6 +8,8 @@ import { PlayoffsGameResults1, PlayoffsTeamRecord, SeasonGameResults1, SeasonTea
 
 import styles from "./matchup.module.css"
 
+const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
+
 /** Render a team in the scorebox */
 function Team(
   { league, teamName, score, winner, away }:
@@ -46,7 +48,7 @@ function Team(
   return <div className={classes.join(" ")}>
     <div className="flex flex-start">
       <div className={styles.teamLogo}>
-        <img src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
+        <img src={`${basePath}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           style={{ maxWidth: "28px" }} />
       </div>

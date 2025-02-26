@@ -7,6 +7,8 @@ import { League } from "@/typings/league";
 
 import styles from "./marquee.module.css"
 
+const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
+
 function Category(
   { header, children, i }:
     {
@@ -34,7 +36,7 @@ function LeaderListEntry(
       <div className={`flex column flex-end ${styles.position}`}>{position}.</div>
       <div className={styles.listEntryLogo}>
         <img
-          src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
+          src={`${basePath}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           className={styles.logo}
         />
@@ -53,7 +55,7 @@ function StandingEntry(
       <div className={`flex column flex-end ${styles.position}`}>{position}.</div>
       <div className={styles.listEntryLogo}>
         <img
-          src={`${process.env.NEXT_PUBLIC_BASEPATH}/logos/${teamName}.png`}
+          src={`${basePath}/logos/${teamName}.png`}
           alt={`${teamName} logo`}
           className={styles.logo}
         />
