@@ -1,5 +1,10 @@
 :root {
+  --massholes-blue: #323c4d;
+
+  /* TICKER */
   --ticker-height: 36px;
+  --side-bar-width: 128px;
+
   --league-width: 50px;
   /* works if you want to suffix "Playoffs" on the league logo */
   /* --league-width: 128px; */
@@ -15,12 +20,38 @@
 
   /* the time it takes to complete a right-to-left horizontal scroll in the marquee */
   --marquee-cycle: 20s;
+
+  /* NEWS */
+  --news-bottom-bar-height: 72px;
+  --news-bottom-bar-width: 1920px;
+  --news-left-bar-height: calc(1080px - var(--news-bottom-bar-height));
+  --news-left-bar-width: 128px;
+
 }
 
 body {
   background-color: #00ff00;
   margin: 0;
   box-sizing: border-box;
+}
+
+input,
+option,
+select {
+  font-size: 20px;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
+  /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap;
+  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;
+  /* Opera 4-6 */
+  white-space: -o-pre-wrap;
+  /* Opera 7 */
+  word-wrap: break-word;
+  /* Internet Explorer 5.5+ */
 }
 
 .border-left {
@@ -49,4 +80,8 @@ body {
 
 .space-between {
   justify-content: space-between;
+}
+
+.space-around {
+  justify-content: space-around;
 }

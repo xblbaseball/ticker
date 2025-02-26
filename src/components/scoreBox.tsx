@@ -1,18 +1,23 @@
+import _ from 'lodash';
 import { useContext } from "react";
 import Matchup from "@/components/matchup";
-import { IndexContext } from "@/store/index.context"
+import { StatsContext } from "@/store/stats.context"
 import { League } from "@/typings/league";
 
 import styles from "./scoreBox.module.css"
 
 export default function ScoreBox() {
-   const store = useContext(IndexContext);
+   const store = useContext(StatsContext);
 
    const matchups = [];
    for (const league of ["XBL", "AAA", "AA"] as League[]) {
-      const inPlayoffs = store[league].showPlayoffs;
+      const inPlayoffs = store.playoffs[league];
 
-      const scores = inPlayoffs ? store[league].scoresPlayoffs : store[league].scoresRS;
+      const results = _.get(
+         store.stats[league],
+         [inPlayoffs ? 'playoffs_game_results' : 'season_game_results']
+      );
+      const scores = results.reverse().slice(6);
 
       // loop through scores twice
       const repreatedScores = scores.concat(scores)

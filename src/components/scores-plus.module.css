@@ -1,0 +1,52 @@
+.container {
+  width: 560px;
+  height: var(--news-bottom-bar-height);
+}
+
+.innerContainer {
+  height: 100%;
+  margin: 4px 0px;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+}
+
+.content {
+  padding: 0px 4px;
+}
+
+.topLine {
+  font-size: 24px;
+}
+
+.teamLogo {
+  margin-top: 4px;
+}
+
+.teamName {
+  padding-left: 0.5em;
+}
+
+.team {
+  width: calc((560px - 64px) / 2);
+  max-height: 36px;
+  padding: 0 4px;
+}
+
+.teamRecord {
+  padding-left: 0.5em;
+  padding-bottom: 4px;
+  font-size: 1rem;
+}
+
+.winner {
+  color: #dcb506;
+}
+
+.innings {
+  font-size: 18px;
+  text-align: center;
+}
+
+.bottomLine {
+  font-size: 18px;
+}

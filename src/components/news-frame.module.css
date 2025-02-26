@@ -1,0 +1,40 @@
+.container {
+  background-color: #000;
+
+  font-family: 'Oswald';
+  font-size: 1.5rem;
+  color: white;
+
+  overflow: hidden;
+}
+
+.leftBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  height: var(--news-left-bar-height);
+  width: var(--news-left-bar-width);
+}
+
+.bottomBar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+
+  height: var(--news-bottom-bar-height);
+  width: var(--news-bottom-bar-width);
+}
+
+.season {
+  font-size: 32px;
+  text-align: center;
+  line-height: 1.25em;
+  text-transform: capitalize;
+}
+
+.url {
+  min-width: 128px;
+  margin-top: 4px;
+  font-size: 18px;
+}

@@ -6,7 +6,12 @@ Renders a 1920x1080 ticker with [XBL scores and stats](https://www.xblbaseball.c
 
 ## Usage
 
-In your broadcasting software, add a browser source pointed to [https://xblbaseball.github.io/ticker/](). Put the browser layer below your content.
+In your broadcasting software, add a browser source pointed to either:
+
+* [https://xblbaseball.github.io/ticker/]() for a small bar at the bottom of the screen
+* [https://xblbaseball.github.io/ticker/news]() for the full sports news style frame
+
+Put the browser layer below your content.
 
 ### Regular Season vs Playoffs
 
@@ -19,20 +24,6 @@ By default, you'll see regular season games and stats. If you want playoff games
 
 We load every single score and marquee element into the page on the first load, then we use CSS animations (with `overflow: hidden`) to scroll through them. The animations are programmatically generated beforehand using the `calc-keyframes.py` script, which does all the math to make sure animation keyframes make sense and are mostly synced up.
 
-### Environment Variables
-
-Create a `.env` file at the root of this repo with the following variables:
-
-```
-G_SHEETS_API_KEY=
-```
-
-You'll need a developer to give you the API key for google sheets
-
-### Testing
-
-OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
-
 ### Getting Started
 
 First, run the development server:
@@ -41,7 +32,7 @@ First, run the development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The page auto-updates as you edit files.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The page auto-updates as you edit files. OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
 
 ### Building
 
@@ -56,3 +47,14 @@ To see the same static HTML, CSS, JS files that are served on GH Pages, you need
   python3 -m http.server -d out 8000
   ```
 3. Navigate Chrome to [http://localhost:8000](http://localhost:8000)
+
+### Models and TS Types
+
+If the models in the [https://github.com/xblbaseball/stats](stats repo) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
+
+```sh
+# download new schemas and turn the JSON schemas into TS interfaces
+npm run types
+```
+
+Then commit the changes to `src/typings`.

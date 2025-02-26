@@ -1,3 +1,17 @@
+.scores-plus-fade {
+  /* interval matches the interval for swapping out scores in components/scores-plus.tsx */
+  animation: fade 15s ease 0s infinite forwards;
+}
+
+.headlines-fade {
+  animation: fade 30s ease 0s infinite forwards;
+}
+
+.headlines-scroll {
+  /* interval matches the interval for swapping out headlines in components/headlines.tsx */
+  animation: headlinesScroll 30s linear 0s infinite forwards;
+}
+
 .marquee-scroll-0 {
   animation: marqueeBodyScroll var(--marquee-cycle) linear 0s infinite forwards;
 }
@@ -32,6 +46,38 @@
 
 .vertical-scroll-60 {
   animation: vertical-scroll-60 var(--ticker-cycle) ease 0s infinite forwards;
+}
+
+@keyframes fade {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  5% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+
+  95% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes headlinesScroll {
+  0% {
+    transform: translateX(20em);
+  }
+
+  100% {
+    transform: translateX(-50em);
+  }
 }
 
 @keyframes marqueeBodyScroll {
