@@ -1,0 +1,44 @@
+.container {
+  max-width: 100%;
+  padding-top: 8px;
+  padding-left: 8px;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 18px;
+}
+
+.content {
+  margin-top: -2px;
+  font-size: 28px;
+}
+
+/* just using this to control when we fade out text on the left side */
+.fade {
+  display: block;
+}
+
+.fade:before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to left, rgba(255, 255, 255, 0), rgba(0, 0, 0, 1) 90%);
+  width: 1em;
+  height: 32px;
+}
+
+.fade:after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(0, 0, 0, 1) 90%);
+  width: 1em;
+  height: 32px;
+}

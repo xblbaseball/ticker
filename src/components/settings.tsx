@@ -632,6 +632,7 @@ export default function Settings() {
     </pre>
 
     <TextArea
+      value={settingsStore.headlines}
       onChange={(value) => {
         settingsDispatch({
           type: "set",

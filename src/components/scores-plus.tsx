@@ -195,7 +195,7 @@ export default function ScoresPlus() {
   const delay = 15000;
 
   useInterval(() => {
-    setGameIndex(gameIndex + 1 % recentGames.length);
+    setGameIndex((gameIndex + 1) % recentGames.length);
   }, delay);
 
   return <div className={`flex column space-around ${styles.container}`}>

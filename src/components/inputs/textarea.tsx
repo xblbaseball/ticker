@@ -1,8 +1,9 @@
 import React from 'react';
 
 export default function TextArea(
-  { onChange, children }:
+  { value, onChange, children }:
     {
+      value: string;
       onChange: (value: string) => void
     } & React.PropsWithChildren
 ) {
@@ -14,7 +15,13 @@ export default function TextArea(
     <div>
       <label>
         <div><em>{children}</em></div>
-        <textarea onChange={handleChange} />
+        <textarea
+          value={value}
+          onChange={handleChange}
+          cols={80}
+          rows={10}
+          style={{ fontSize: "20px" }}
+        />
       </label>
     </div>
   );
