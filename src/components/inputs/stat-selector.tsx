@@ -1,7 +1,4 @@
-import _ from 'lodash';
 import React from 'react';
-import { string } from '@/typings/stats';
-import { League } from '@/typings/league';
 
 const STATS = [
   "rs",

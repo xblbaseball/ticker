@@ -5,8 +5,7 @@ import { useContext, useState } from "react";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
 import useInterval from "@/utils/useInterval";
-
-import styles from "./scores-plus.module.css";
+import { TeamSeason } from "@/typings/careers";
 import {
   PlayoffsGameResults,
   PlayoffsGameResults1,
@@ -14,7 +13,8 @@ import {
   SeasonGameResults1,
   SeasonTeamRecord
 } from "@/typings/season";
-import { HeadToHead, TeamSeason } from "@/typings/careers";
+
+import styles from "./scores-plus.module.css";
 
 const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
@@ -40,9 +40,10 @@ function Team(
   </div>
 }
 
+/** render away away_score - home_score home | Final */
 function TopLine(
-  { awayTeam, homeTeam, awayScore, homeScore, innings, fadeIn, fadeOut }:
-    { awayTeam: string, homeTeam: string, awayScore: number, homeScore: number, innings: number, fadeIn: boolean, fadeOut: boolean }
+  { awayTeam, homeTeam, awayScore, homeScore, innings, }:
+    { awayTeam: string, homeTeam: string, awayScore: number, homeScore: number, innings: number, }
 ) {
 
   const inningsText = _.ceil(innings) !== 9 ? `F/${innings}` : "Final";
@@ -82,12 +83,6 @@ function BottomLine(
   const awayTeamInfo = teamsForLeague.find(teamSeason => teamSeason.team_name === awayTeam);
   const homeTeamInfo = teamsForLeague.find(teamSeason => teamSeason.team_name === homeTeam);
 
-  const awayPlayer = awayTeamInfo?.player;
-  const homePlayer = homeTeamInfo?.player;
-  // for h2h lookups later
-  const [playerA, playerZ] = [awayPlayer, homePlayer].sort();
-  const awayIsPlayerA = awayPlayer === playerA;
-
   if (!_.isNil(awayTeamInfo)) {
     awayTeamAbbrev = awayTeamInfo.team_abbrev;
   }
@@ -105,13 +100,8 @@ function BottomLine(
     weekOrRound = `${league} Playoffs RD${round.slice(1, 2)},`;
   }
 
-  // where we'll be able to find head-to-head stats
-  // let h2hLookupPath = [];
-
   let winsAndLosses = "";
   if (playoffsGame) {
-    // h2hLookupPath = ["stats", "careers", "playoffs_head_to_head", playerA, playerZ];
-
     // look up the series from playoffs table
     const awayTeamRoundRecord = _.get(
       statsStore,
@@ -124,8 +114,6 @@ function BottomLine(
       winsAndLosses = `${awayTeamAbbrev} ${awayWins} - ${awayLosses} ${homeTeamAbbrev}.`;
     }
   } else {
-    // h2hLookupPath = ["stats", "careers", "regular_season_head_to_head", playerA, playerZ];
-
     const awayTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", awayTeam], null);
     const homeTeamRecords: SeasonTeamRecord = _.get(statsStore, ["stats", league, "season_team_records", homeTeam], null);
 
@@ -203,24 +191,25 @@ export default function ScoresPlus() {
     recentGames.push(...aaGames);
   }
 
+  // matches the interval in styles/scrolls.css/.scores-plus-fade
+  const delay = 15000;
+
   useInterval(() => {
     setGameIndex(gameIndex + 1 % recentGames.length);
-  }, 15000);
+  }, delay);
 
   return <div className={`flex column space-around ${styles.container}`}>
     <div className={`flex column space-around ${styles.innerContainer}`}>
-      <div className={styles.content}>
+      <div className={`scores-plus-fade ${styles.content}`}>
         <TopLine
           awayTeam={recentGames[gameIndex].away_team}
           homeTeam={recentGames[gameIndex].home_team}
           awayScore={recentGames[gameIndex].away_score}
           homeScore={recentGames[gameIndex].home_score}
           innings={recentGames[gameIndex].innings}
-          fadeIn={false}
-          fadeOut={false}
         />
       </div>
-      <div className={styles.content}>
+      <div className={`scores-plus-fade ${styles.content}`}>
         <BottomLine
           awayTeam={recentGames[gameIndex].away_team}
           homeTeam={recentGames[gameIndex].home_team}

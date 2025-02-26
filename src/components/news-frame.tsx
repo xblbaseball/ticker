@@ -4,9 +4,12 @@ import _ from "lodash";
 import { useCallback, useEffect, useReducer } from "react";
 import { Oswald } from "next/font/google";
 
+import Headlines from "@/components/headlines";
 import LeagueLogo from "@/components/league-logo";
 import Modal from "@/components/modal";
+import ScoresPlus from "@/components/scores-plus";
 import Series from "@/components/series";
+import SidebarPlayerStats from "@/components/sidebar-player-stats";
 import Settings from "@/components/settings";
 import { ModalContext, ModalDispatchContext } from "@/store/modal.context";
 import modalReducer, { initialState as modalInitialState } from "@/store/modal.reducer";
@@ -14,8 +17,6 @@ import { SettingsContext, SettingsDispatchContext } from "@/store/settings.conte
 import settingsReducer, { initialState as settingsInitialState } from "@/store/settings.reducer";
 
 import styles from "./news-frame.module.css";
-import SidebarPlayerStats from "./sidebar-player-stats";
-import ScoresPlus from "./scores-plus";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -114,6 +115,7 @@ export default function NewsFrame() {
                 </div>
 
                 <ScoresPlus />
+                <Headlines />
               </div>
             </div>
 

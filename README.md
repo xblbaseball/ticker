@@ -6,7 +6,12 @@ Renders a 1920x1080 ticker with [XBL scores and stats](https://www.xblbaseball.c
 
 ## Usage
 
-In your broadcasting software, add a browser source pointed to [https://xblbaseball.github.io/ticker/](). Put the browser layer below your content.
+In your broadcasting software, add a browser source pointed to either:
+
+* [https://xblbaseball.github.io/ticker/]() for a small bar at the bottom of the screen
+* [https://xblbaseball.github.io/ticker/news]() for the full sports news style frame
+
+Put the browser layer below your content.
 
 ### Regular Season vs Playoffs
 

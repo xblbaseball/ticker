@@ -648,7 +648,7 @@ export default function Settings() {
       value={settingsStore.maxBoxScores || ""}
       onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
     >
-      How many box scores should we rotate through? If you change this, you'll need to reload the page for the changes to take effect.
+      How many box scores should we rotate through? If you change this, you&apos;ll need to reload the page for the changes to take effect.
     </Input>
 
     <h3>Current Settings</h3>
