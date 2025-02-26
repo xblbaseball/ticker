@@ -34,7 +34,7 @@
 }
 
 .url {
-  width: 128px;
+  min-width: 128px;
   margin-top: 4px;
   font-size: 18px;
 }
