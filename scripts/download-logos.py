@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 from PIL import Image
+import string
 import urllib.request
 
 
@@ -56,11 +57,12 @@ def main():
 
     for team_name, url in logos_to_download:
         suffix = Path(url).suffix
-        # TODO Myst Inc. with the period at the end breaks with_suffix...
-        # TODO RiseNFall is also messed up? oh it's just the pirates...
-        full_size_logo_path = logos_dir.joinpath(team_name).with_suffix(suffix)
+        # no punctuation
+        cleaned_name = team_name.translate(str.maketrans("", "", string.punctuation))
+
+        full_size_logo_path = logos_dir.joinpath(cleaned_name).with_suffix(suffix)
         thumbnail_logo_path = logos_dir.joinpath(
-            f"{team_name}-{'x'.join(map(str, thumbnail_res))}"
+            f"{cleaned_name}-{'x'.join(map(str, thumbnail_res))}"
         ).with_suffix(suffix)
 
         # pretend to be curl
