@@ -15,6 +15,7 @@ import { ModalContext, ModalDispatchContext } from "@/store/modal.context";
 import modalReducer, { initialState as modalInitialState } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
 import settingsReducer, { initialState as settingsInitialState } from "@/store/settings.reducer";
+import { toRoman } from "@/utils/romanize";
 
 import styles from "./news-frame.module.css";
 
@@ -86,7 +87,7 @@ export default function NewsFrame() {
 
                 <div className={`flex column ${styles.title}`}>
                   <div className={styles.season}>
-                    Season {settingsStore.season}
+                    Season {toRoman(settingsStore.season)}
                     {!_.isEmpty(settingsStore.seasonSubtext) && <><br />{settingsStore.seasonSubtext}</>}
                   </div>
                 </div>
