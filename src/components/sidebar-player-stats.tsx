@@ -3,7 +3,7 @@ import { useContext } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
-import { toRoman } from "@/utils/romanize";
+import toRoman from "@/utils/romanize";
 
 import styles from "./sidebar-player-stats.module.css";
 

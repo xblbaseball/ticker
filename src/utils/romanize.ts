@@ -1,4 +1,4 @@
-export function toRoman(value: number) {
+export default function toRoman(value: number) {
     if (isNaN(value)) {
       return '';
     }
