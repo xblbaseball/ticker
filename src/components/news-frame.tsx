@@ -26,9 +26,13 @@ const oswald = Oswald({
 
 const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
-export default function NewsFrame() {
+export default function NewsFrame({ allLogos }: { allLogos: string[] }) {
+  console.log({ ...settingsInitialState, ...{ allLogos } })
   const [modalStore, modalDispatch] = useReducer(modalReducer, modalInitialState);
-  const [settingsStore, settingsDispatch] = useReducer(settingsReducer, settingsInitialState);
+  const [settingsStore, settingsDispatch] = useReducer(
+    settingsReducer,
+    { ...settingsInitialState, ...{ allLogos } }
+  );
 
   const handleBodyClick = useCallback(() => {
     if (modalStore.modals.length > 0) {

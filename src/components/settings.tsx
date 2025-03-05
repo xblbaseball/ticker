@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
 import Checkbox from '@/components/inputs/checkbox';
@@ -16,6 +16,8 @@ import { StatsContext } from '@/store/stats.context';
 import { TeamSeason } from '@/typings/careers';
 
 import styles from "./settings.module.css";
+
+const punctuation = /[.,\/#!$%\^&\*;:{}=\-_`~()]/g;
 
 function isJSON(e: unknown) {
   try {
@@ -39,14 +41,21 @@ export default function Settings() {
   }
 
   /** all teams who have ever played */
-  const allTeams = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+  const allPlayers = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+
+  const teamsWithLogos = _.chain(settingsStore.allLogos)
+    .filter(filename => !filename.includes("72x72"))
+    .map(filename => filename.slice(0, -4))
+    .value();
+
+  console.log(teamsWithLogos)
 
   /** list of all players except one */
   const allPlayersBut = (player = "") => {
     if (player === "") {
-      return allTeams;
+      return allPlayers;
     }
-    return _.filter(allTeams, (otherPlayer) => otherPlayer !== player);
+    return _.filter(allPlayers, (otherPlayer) => otherPlayer !== player);
   }
 
   /** given a player, get a list of the teams they've fielded */
@@ -225,6 +234,7 @@ export default function Settings() {
       onSelect={(team) => {
         updateSetting(["awayTeam"], team);
         updateSetting(["awayAbbrev"], getAbbrevFromTeam(settingsStore.awayPlayer, team));
+        updateSetting(["awayLogo"], team);
       }}
     >
       Away Team
@@ -236,6 +246,15 @@ export default function Settings() {
     >
       Away Abbreviation
     </Input>
+
+    <Dropdown
+      options={teamsWithLogos}
+      optionsLabel={"Select a logo"}
+      selected={settingsStore.awayLogo}
+      onSelect={(team) => updateSetting(["awayLogo"], team)}
+    >
+      Away Logo Override
+    </Dropdown>
 
     <Dropdown
       options={allPlayersBut(settingsStore.awayPlayer)}
@@ -253,6 +272,7 @@ export default function Settings() {
       onSelect={(team) => {
         updateSetting(["homeTeam"], team);
         updateSetting(["homeAbbrev"], getAbbrevFromTeam(settingsStore.homePlayer, team));
+        updateSetting(["homeLogo"], team);
       }}
     >
       Home Team
@@ -264,6 +284,14 @@ export default function Settings() {
     >
       Home Abbreviation
     </Input>
+
+    <Dropdown
+      options={teamsWithLogos}
+      selected={settingsStore.homeLogo}
+      onSelect={(team) => updateSetting(["homeLogo"], team)}
+    >
+      Home Logo Override
+    </Dropdown>
 
     <Checkbox
       checked={settingsStore.showSeries}
