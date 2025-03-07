@@ -3,7 +3,6 @@ import { useContext } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
-import toRoman from "@/utils/romanize";
 
 import styles from "./sidebar-player-stats.module.css";
 
@@ -90,7 +89,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
   const RenderTimeframe = () => {
     if (statsTimeframe === "regularSeason") {
-      return `Season ${toRoman(statsSeason)}`;
+      return `Season ${statsSeason}`;
     }
 
     if (statsTimeframe === "playoffs") {
