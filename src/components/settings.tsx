@@ -1,4 +1,4 @@
-import _, { update } from 'lodash';
+import _ from 'lodash';
 import { ActionDispatch, useContext } from "react";
 
 import Checkbox from '@/components/inputs/checkbox';
@@ -16,8 +16,6 @@ import { StatsContext } from '@/store/stats.context';
 import { TeamSeason } from '@/typings/careers';
 
 import styles from "./settings.module.css";
-
-const punctuation = /[.,\/#!$%\^&\*;:{}=\-_`~()]/g;
 
 function isJSON(e: unknown) {
   try {
