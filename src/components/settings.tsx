@@ -48,8 +48,6 @@ export default function Settings() {
     .map(filename => filename.slice(0, -4))
     .value();
 
-  console.log(teamsWithLogos)
-
   /** list of all players except one */
   const allPlayersBut = (player = "") => {
     if (player === "") {
@@ -684,7 +682,7 @@ export default function Settings() {
       value={settingsStore.maxBoxScores || ""}
       onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
     >
-      How many box scores should we rotate through? If you change this, you&apos;ll need to reload the page for the changes to take effect.
+      How many box scores should we rotate through? This number should be divisible by 3. If you change this, you&apos;ll need to reload the page for the changes to take effect.
     </Input>
 
     <h3>Current Settings</h3>

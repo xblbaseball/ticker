@@ -152,11 +152,13 @@ export default function ScoresPlus() {
 
   const recentGames: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
 
+  const maxScoresPerLeague = _.floor(maxBoxScores / 3);
+
   for (const path of playoffsScoresPaths) {
     // slice with a negative number and reverse to get the last 8 games in descending chronological order
     const eightGames: PlayoffsGameResults = _.get(
       statsStore, path, []
-    ).slice(-8).reverse();
+    ).slice(-maxScoresPerLeague).reverse();
     recentGames.push(...eightGames);
   }
 
@@ -197,6 +199,11 @@ export default function ScoresPlus() {
   useInterval(() => {
     setGameIndex((gameIndex + 1) % recentGames.length);
   }, delay);
+
+  if (recentGames.length === 0) {
+    // no scores to show!
+    return <div className={"border-left"}></div>;
+  }
 
   return <div className={`flex column space-around ${styles.container}`}>
     <div className={`flex column space-around ${styles.innerContainer}`}>
