@@ -41,11 +41,6 @@ export default function Settings() {
   /** all teams who have ever played */
   const allPlayers = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
 
-  const teamsWithLogos = _.chain(settingsStore.allLogos)
-    .filter(filename => !filename.includes("72x72"))
-    .map(filename => filename.slice(0, -4))
-    .value();
-
   /** list of all players except one */
   const allPlayersBut = (player = "") => {
     if (player === "") {
