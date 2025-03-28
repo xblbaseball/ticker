@@ -1,3 +1,7 @@
+/**
+ * User settings
+*/
+
 import _ from "lodash";
 import { League } from "@/typings/league";
 
@@ -14,8 +18,6 @@ export interface SettingsStore {
     AAA: boolean;
     AA: boolean;
   };
-  /** every logo available to render */
-  allLogos: string[];
   /** what league are the players in. controls the logo in the top left and stats */
   league: League;
   /** what season are we in */
@@ -95,8 +97,6 @@ export const initialState: SettingsStore = {
     AAA: false,
     AA: false,
   },
-  // TODO needs to stay out of the user settings!
-  allLogos: [],
   league: "XBL",
   season: currentSeason,
   seasonSubtext: "",

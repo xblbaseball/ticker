@@ -4,11 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import getCareers from "@/client/careers";
 import getSeason from "@/client/seasons";
 import NewsFrame from "@/components/news-frame";
+import { ConstantsContext } from "@/store/constants.context";
+import { ConstantsStore } from "@/store/constants.reducer";
 import { StatsContext } from "@/store/stats.context";
 import { StatsStore } from "@/store/stats.reducer";
 import listPublicLogos from "@/client/logos";
 
-export default function News({ statsStore, allLogos }: { statsStore: StatsStore, allLogos: string[] }) {
+export default function News({ statsStore, constantsStore }: { statsStore: StatsStore, constantsStore: ConstantsStore }) {
   const searchParams = useSearchParams()
 
   const xblPlayoffs = searchParams.get('xbl-playoffs') === "true";
@@ -23,13 +25,15 @@ export default function News({ statsStore, allLogos }: { statsStore: StatsStore,
       <link rel="icon" href="/favicon.ico" />
     </Head>
 
-    <StatsContext.Provider value={
-      {
-        ...statsStore,
-        ...{ playoffs: { XBL: xblPlayoffs, AAA: aaaPlayoffs, AA: aaPlayoffs } }
-      }}>
-      <NewsFrame allLogos={allLogos} />
-    </StatsContext.Provider>
+    <ConstantsContext.Provider value={constantsStore}>
+      <StatsContext.Provider value={
+        {
+          ...statsStore,
+          ...{ playoffs: { XBL: xblPlayoffs, AAA: aaaPlayoffs, AA: aaPlayoffs } }
+        }}>
+        <NewsFrame />
+      </StatsContext.Provider>
+    </ConstantsContext.Provider>
   </>
 }
 
@@ -49,10 +53,12 @@ export async function getStaticProps() {
         AA: false,
       }
     },
-    allLogos: listPublicLogos()
+    constantsStore: {
+      allLogos: listPublicLogos()
+    }
   } as {
     statsStore: StatsStore;
-    allLogos: string[];
+    constantsStore: ConstantsStore;
   }
 
   return { props };

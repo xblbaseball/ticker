@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+/** get a list of all logos available */
 export default function listPublicLogos(directory="public/logos", current: string[] = []) {
   const ret: string[] = current;
 

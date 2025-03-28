@@ -26,11 +26,10 @@ const oswald = Oswald({
 
 const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
-export default function NewsFrame({ allLogos }: { allLogos: string[] }) {
+export default function NewsFrame() {
   const [modalStore, modalDispatch] = useReducer(modalReducer, modalInitialState);
   const [settingsStore, settingsDispatch] = useReducer(
-    settingsReducer,
-    { ...settingsInitialState, ...{ allLogos } }
+    settingsReducer, settingsInitialState
   );
 
   const handleBodyClick = useCallback(() => {

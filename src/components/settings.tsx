@@ -7,6 +7,7 @@ import Input from "@/components/inputs/input";
 import Radio from '@/components/inputs/radio';
 import StatSelector from '@/components/inputs/stat-selector';
 import TextArea from '@/components/inputs/textarea';
+import { ConstantsContext } from '@/store/constants.context';
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
@@ -32,6 +33,9 @@ export default function Settings() {
   const settingsDispatch: ActionDispatch<[action: settingsAction]> = useContext(SettingsDispatchContext);
   const settingsStore = useContext(SettingsContext);
   const statsStore = useContext(StatsContext);
+  const constantsStore = useContext(
+    ConstantsContext
+  );
 
   /** dispatch an update to a setting in the store */
   const updateSetting = (path: string[], value: unknown) => {
@@ -40,6 +44,11 @@ export default function Settings() {
 
   /** all teams who have ever played */
   const allPlayers = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+
+  const logoList = _.chain(constantsStore.allLogos)
+    .filter(filename => !filename.includes("72x72"))
+    .map(filename => filename.slice(0, -4))
+    .value();
 
   /** list of all players except one */
   const allPlayersBut = (player = "") => {
@@ -239,6 +248,15 @@ export default function Settings() {
     </Input>
 
     <Dropdown
+      options={logoList}
+      optionsLabel={"Select a logo"}
+      selected={settingsStore.awayLogo}
+      onSelect={(team) => updateSetting(["awayLogo"], team)}
+    >
+      Away Logo Override
+    </Dropdown>
+
+    <Dropdown
       options={allPlayersBut(settingsStore.awayPlayer)}
       optionsLabel={"Select a player"}
       selected={settingsStore.homePlayer}
@@ -266,6 +284,15 @@ export default function Settings() {
     >
       Home Abbreviation
     </Input>
+
+    <Dropdown
+      options={logoList}
+      optionsLabel={"Select a logo"}
+      selected={settingsStore.homeLogo}
+      onSelect={(team) => updateSetting(["homeLogo"], team)}
+    >
+      Home Logo Override
+    </Dropdown>
 
     <Checkbox
       checked={settingsStore.showSeries}
