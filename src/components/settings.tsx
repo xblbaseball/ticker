@@ -244,15 +244,6 @@ export default function Settings() {
     </Input>
 
     <Dropdown
-      options={teamsWithLogos}
-      optionsLabel={"Select a logo"}
-      selected={settingsStore.awayLogo}
-      onSelect={(team) => updateSetting(["awayLogo"], team)}
-    >
-      Away Logo Override
-    </Dropdown>
-
-    <Dropdown
       options={allPlayersBut(settingsStore.awayPlayer)}
       optionsLabel={"Select a player"}
       selected={settingsStore.homePlayer}
@@ -280,14 +271,6 @@ export default function Settings() {
     >
       Home Abbreviation
     </Input>
-
-    <Dropdown
-      options={teamsWithLogos}
-      selected={settingsStore.homeLogo}
-      onSelect={(team) => updateSetting(["homeLogo"], team)}
-    >
-      Home Logo Override
-    </Dropdown>
 
     <Checkbox
       checked={settingsStore.showSeries}
