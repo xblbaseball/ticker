@@ -12,6 +12,8 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     homePlayer,
     awayTeam,
     homeTeam,
+    awayLogo,
+    homeLogo,
     awayStatsTimeframe,
     homeStatsTimeframe,
     showStatTimeframes,
@@ -32,8 +34,8 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   }
 
   const otherPlayer = away ? homePlayer : awayPlayer;
-
   const team = away ? awayTeam : homeTeam;
+  const logo = away ? awayLogo : homeLogo;
 
   if (team === "") {
     return <div>no team selected</div>;
@@ -45,7 +47,6 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   const statsLeague = away ? awayStatsLeague : homeStatsLeague;
 
   const showPlayoffRecord = _.get(playoffs, [league]);
-  // console.log(league, showPlayoffRecord);
 
   let recordOrSeed = "(0-0)";
 
@@ -196,7 +197,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   return <div className={`flex column ${styles.container} ${away && styles.first}`}>
     <div className={`flex space-around`}>
       <div style={{ width: "54px" }}>
-        <TeamLogo team={team} small={true} width="54px" />
+        <TeamLogo team={logo} small={true} width="54px" />
       </div>
     </div>
     <div className="flex space-around">

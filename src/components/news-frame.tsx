@@ -28,7 +28,9 @@ const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
 
 export default function NewsFrame() {
   const [modalStore, modalDispatch] = useReducer(modalReducer, modalInitialState);
-  const [settingsStore, settingsDispatch] = useReducer(settingsReducer, settingsInitialState);
+  const [settingsStore, settingsDispatch] = useReducer(
+    settingsReducer, settingsInitialState
+  );
 
   const handleBodyClick = useCallback(() => {
     if (modalStore.modals.length > 0) {

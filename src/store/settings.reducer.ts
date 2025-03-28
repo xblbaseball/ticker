@@ -1,3 +1,7 @@
+/**
+ * User settings
+*/
+
 import _ from "lodash";
 import { League } from "@/typings/league";
 
@@ -13,7 +17,7 @@ export interface SettingsStore {
     XBL: boolean;
     AAA: boolean;
     AA: boolean;
-  }
+  };
   /** what league are the players in. controls the logo in the top left and stats */
   league: League;
   /** what season are we in */
@@ -34,6 +38,10 @@ export interface SettingsStore {
   awayAbbrev: string;
   /** abbreviation for home team. doesn't need to be the official one */
   homeAbbrev: string;
+  /** logo to use for the away team */
+  awayLogo: string;
+  /** logo to use for the home team */
+  homeLogo: string;
   /** wins for away player. to be shown in the series box */
   awayWins: number;
   /** wins for home player. to be shown in the series box */
@@ -99,6 +107,8 @@ export const initialState: SettingsStore = {
   homePlayer: "",
   awayAbbrev: "",
   homeAbbrev: "",
+  awayLogo: "",
+  homeLogo: "",
   awayWins: 0,
   homeWins: 0,
   seriesLeft: "",

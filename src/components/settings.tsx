@@ -7,6 +7,7 @@ import Input from "@/components/inputs/input";
 import Radio from '@/components/inputs/radio';
 import StatSelector from '@/components/inputs/stat-selector';
 import TextArea from '@/components/inputs/textarea';
+import { ConstantsContext } from '@/store/constants.context';
 import { ModalDispatchContext } from "@/store/modal.context";
 import { action as modalAction } from "@/store/modal.reducer";
 import { SettingsContext, SettingsDispatchContext } from "@/store/settings.context";
@@ -32,6 +33,9 @@ export default function Settings() {
   const settingsDispatch: ActionDispatch<[action: settingsAction]> = useContext(SettingsDispatchContext);
   const settingsStore = useContext(SettingsContext);
   const statsStore = useContext(StatsContext);
+  const constantsStore = useContext(
+    ConstantsContext
+  );
 
   /** dispatch an update to a setting in the store */
   const updateSetting = (path: string[], value: unknown) => {
@@ -39,14 +43,19 @@ export default function Settings() {
   }
 
   /** all teams who have ever played */
-  const allTeams = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+  const allPlayers = _.keys(statsStore.stats.careers.all_players).sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+
+  const logoList = _.chain(constantsStore.allLogos)
+    .filter(filename => !filename.includes("72x72"))
+    .map(filename => filename.slice(0, -4))
+    .value();
 
   /** list of all players except one */
   const allPlayersBut = (player = "") => {
     if (player === "") {
-      return allTeams;
+      return allPlayers;
     }
-    return _.filter(allTeams, (otherPlayer) => otherPlayer !== player);
+    return _.filter(allPlayers, (otherPlayer) => otherPlayer !== player);
   }
 
   /** given a player, get a list of the teams they've fielded */
@@ -225,6 +234,7 @@ export default function Settings() {
       onSelect={(team) => {
         updateSetting(["awayTeam"], team);
         updateSetting(["awayAbbrev"], getAbbrevFromTeam(settingsStore.awayPlayer, team));
+        updateSetting(["awayLogo"], team);
       }}
     >
       Away Team
@@ -236,6 +246,15 @@ export default function Settings() {
     >
       Away Abbreviation
     </Input>
+
+    <Dropdown
+      options={logoList}
+      optionsLabel={"Select a logo"}
+      selected={settingsStore.awayLogo}
+      onSelect={(team) => updateSetting(["awayLogo"], team)}
+    >
+      Away Logo Override
+    </Dropdown>
 
     <Dropdown
       options={allPlayersBut(settingsStore.awayPlayer)}
@@ -253,6 +272,7 @@ export default function Settings() {
       onSelect={(team) => {
         updateSetting(["homeTeam"], team);
         updateSetting(["homeAbbrev"], getAbbrevFromTeam(settingsStore.homePlayer, team));
+        updateSetting(["homeLogo"], team);
       }}
     >
       Home Team
@@ -264,6 +284,15 @@ export default function Settings() {
     >
       Home Abbreviation
     </Input>
+
+    <Dropdown
+      options={logoList}
+      optionsLabel={"Select a logo"}
+      selected={settingsStore.homeLogo}
+      onSelect={(team) => updateSetting(["homeLogo"], team)}
+    >
+      Home Logo Override
+    </Dropdown>
 
     <Checkbox
       checked={settingsStore.showSeries}
@@ -656,7 +685,7 @@ export default function Settings() {
       value={settingsStore.maxBoxScores || ""}
       onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
     >
-      How many box scores should we rotate through? If you change this, you&apos;ll need to reload the page for the changes to take effect.
+      How many box scores should we rotate through? This number should be divisible by 3. If you change this, you&apos;ll need to reload the page for the changes to take effect.
     </Input>
 
     <h3>Current Settings</h3>
