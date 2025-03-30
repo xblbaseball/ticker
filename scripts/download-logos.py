@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from PIL import Image
 import string
+import traceback
 import urllib.request
 
 
@@ -86,4 +87,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(
+            "Something went wrong but we don't want logos to block the rest of the pipeline"
+        )
+        traceback.print_exc()
