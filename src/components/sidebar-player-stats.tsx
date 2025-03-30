@@ -197,7 +197,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
   return <div className={`flex column ${styles.container} ${away && styles.first}`}>
     <div className={`flex space-around`}>
       <div style={{ width: "54px" }}>
-        <TeamLogo team={logo} small={true} width="54px" />
+        <TeamLogo team={logo} small={true} width="54px" league={league} />
       </div>
     </div>
     <div className="flex space-around">

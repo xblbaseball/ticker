@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from PIL import Image
 import string
+import traceback
 import urllib.request
 
 
@@ -44,11 +45,11 @@ def main():
 
         [team1, team1_url, team2, team2_url, team3, team3_url] = row
 
-        if team1 != "":
+        if team1 != "" and team1_url != "":
             logos_to_download.append((team1, team1_url))
-        if team2 != "":
+        if team2 != "" and team2_url != "":
             logos_to_download.append((team2, team2_url))
-        if team3 != "":
+        if team3 != "" and team3_url != "":
             logos_to_download.append((team3, team3_url))
 
     print(f"Found {len(logos_to_download)} teams+league logos")
@@ -56,6 +57,8 @@ def main():
     thumbnail_res = (72, 72)
 
     for team_name, url in logos_to_download:
+        print(f"Downloading {team_name}... ", end="\t")
+
         suffix = Path(url).suffix
         # no punctuation
         cleaned_name = team_name.translate(str.maketrans("", "", string.punctuation))
@@ -76,7 +79,7 @@ def main():
             data = logo_req.read()
             image = Image.open(io.BytesIO(data))
             image.save(f)
-            print(f"saved {full_size_logo_path}")
+            print(f"saved {full_size_logo_path}... ", end="")
 
             image.thumbnail(size=thumbnail_res, resample=Image.Resampling.LANCZOS)
             image.save(thumb_f)
@@ -84,4 +87,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(
+            "Something went wrong but we don't want logos to block the rest of the pipeline"
+        )
+        traceback.print_exc()
