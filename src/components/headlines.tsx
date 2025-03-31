@@ -13,7 +13,8 @@ export default function Headlines() {
   const approxMaxTitleCharLength = 100;
 
   useEffect(() => {
-    const oneOrMoreNewlines = new RegExp("\n+")
+    const oneOrMoreNewlines = new RegExp("\n+");
+
     if (_.isString(headlines) && headlines.length > 0) {
       const newLines = headlines
         .trim()
