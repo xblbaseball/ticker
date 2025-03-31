@@ -11,7 +11,7 @@ export default function Headlines() {
 
   const approxMaxTitleCharLength = 100;
 
-  let lines = [["-"], ["-"]];
+  let lines = [[""], [""]];
 
   if (_.isString(headlines) && headlines.length > 0) {
     lines = headlines
