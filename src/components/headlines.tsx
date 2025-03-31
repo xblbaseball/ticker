@@ -39,10 +39,12 @@ export default function Headlines() {
 
   const needToScrollText = body.length > approxMaxTitleCharLength;
 
-  return <div className={`flex column headlines-fade ${styles.container}`}>
-    <div className={styles.title}>{title}</div>
-    <div className={needToScrollText ? styles.fade : undefined}>
-      <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
+  return <div className={`flex column ${styles.container}`}>
+    <div className={`headlines-fade ${styles.innerContainer}`}>
+      <div className={styles.title}>{title}</div>
+      <div className={needToScrollText ? styles.fade : undefined}>
+        <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
+      </div>
     </div>
   </div>
 }

@@ -683,7 +683,7 @@ export default function Settings() {
 
     <Input
       value={settingsStore.maxBoxScores || ""}
-      onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
+      onChange={(num) => updateSetting(['maxBoxScores'], parseInt(num as string) || 0)}
     >
       How many box scores should we rotate through? This number should be divisible by 3.
     </Input>

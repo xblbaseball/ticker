@@ -200,6 +200,7 @@ export default function ScoresPlus() {
       return ret;
     }
     setRecentGames(getRecentGames());
+    setGameIndex(0);
   }, [maxBoxScores, statsStore]);
 
   // matches the interval in _document.tsx/Head/style
@@ -209,30 +210,38 @@ export default function ScoresPlus() {
     setGameIndex((gameIndex + 1) % recentGames.length);
   }, delay);
 
-  if (recentGames.length === 0) {
-    // no scores to show!
-    return <div className={"border-left"}></div>;
-  }
-
-  return <div className={`flex column space-around ${styles.container}`}>
-    <div className={`flex column space-around ${styles.innerContainer}`}>
-      <div className={`${recentGames.length > 0 && "scores-plus-fade"} ${styles.content}`}>
-        <TopLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          awayScore={recentGames[gameIndex].away_score}
-          homeScore={recentGames[gameIndex].home_score}
-          innings={recentGames[gameIndex].innings}
-        />
+  return <div
+    className={`flex column space-around ${styles.container}`}
+    style={{ display: recentGames.length === 0 ? "hidden" : "block" }}
+  >
+    <div className={`flex column space-around ${recentGames.length > 0 && styles.innerContainer}`}>
+      <div className="scores-plus-fade">
+        {
+          recentGames.length > 0 &&
+          <div className={styles.content}>
+            <TopLine
+              awayTeam={recentGames[gameIndex].away_team}
+              homeTeam={recentGames[gameIndex].home_team}
+              awayScore={recentGames[gameIndex].away_score}
+              homeScore={recentGames[gameIndex].home_score}
+              innings={recentGames[gameIndex].innings}
+            />
+          </div>
+        }
       </div>
-      <div className={`${recentGames.length > 0 && "scores-plus-fade"} ${styles.content}`}>
-        <BottomLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          week={recentGames[gameIndex].week as string}
-          round={recentGames[gameIndex].round as string}
-          league={recentGames[gameIndex].league}
-        />
+      <div className="scores-plus-fade">
+        {
+          recentGames.length > 0 &&
+          <div className={styles.content}>
+            <BottomLine
+              awayTeam={recentGames[gameIndex].away_team}
+              homeTeam={recentGames[gameIndex].home_team}
+              week={recentGames[gameIndex].week as string}
+              round={recentGames[gameIndex].round as string}
+              league={recentGames[gameIndex].league}
+            />
+          </div>
+        }
       </div>
     </div>
   </div>
