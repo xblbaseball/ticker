@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "@/store/settings.context";
 
 import styles from "./headlines.module.css";
@@ -8,21 +8,25 @@ import useInterval from "@/utils/useInterval";
 export default function Headlines() {
   const { headlines } = useContext(SettingsContext);
   const [headlineIndex, setHeadlineIndex] = useState(0);
+  const [lines, setLines] = useState([[""], [""]]);
 
   const approxMaxTitleCharLength = 100;
 
-  let lines = [[""], [""]];
+  useEffect(() => {
+    const oneOrMoreNewlines = new RegExp("\n+")
+    if (_.isString(headlines) && headlines.length > 0) {
+      const newLines = headlines
+        .trim()
+        .split(oneOrMoreNewlines)
+        .map(line => line.trim().split("|")
+          .map(side => side.trim())
+        );
 
-  if (_.isString(headlines) && headlines.length > 0) {
-    lines = headlines
-      .trim()
-      .split("\n")
-      .map(line => line.trim().split("|")
-        .map(side => side.trim())
-      );
-  }
+      setLines(newLines);
+    }
+  }, [headlines]);
 
-  // make sure the horizontal scrolling interval matches
+  // matches the interval in styles/scrolls.css/.headlines-scroll
   const headlineSwapInterval = 30000;
 
   useInterval(() => {
