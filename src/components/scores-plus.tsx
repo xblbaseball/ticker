@@ -210,38 +210,39 @@ export default function ScoresPlus() {
     setGameIndex((gameIndex + 1) % recentGames.length);
   }, delay);
 
+  // we have to keep the divs with .scores-plus-fade alive in the DOM all the time, otherwise the score box fade in/out animation and the interval above will go out of sync
   return <div
     className={`flex column space-around ${styles.container}`}
     style={{ display: recentGames.length === 0 ? "hidden" : "block" }}
   >
     <div className={`flex column space-around ${recentGames.length > 0 && styles.innerContainer}`}>
       <div className="scores-plus-fade">
-        {
-          recentGames.length > 0 &&
-          <div className={styles.content}>
-            <TopLine
-              awayTeam={recentGames[gameIndex].away_team}
-              homeTeam={recentGames[gameIndex].home_team}
-              awayScore={recentGames[gameIndex].away_score}
-              homeScore={recentGames[gameIndex].home_score}
-              innings={recentGames[gameIndex].innings}
-            />
-          </div>
-        }
+        <div
+          className={styles.content}
+          style={{ display: recentGames.length > 0 ? 'block' : 'none' }}
+        >
+          <TopLine
+            awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+            homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+            awayScore={_.get(recentGames[gameIndex], ['away_score'], 0)}
+            homeScore={_.get(recentGames[gameIndex], ['home_score'], 0)}
+            innings={_.get(recentGames[gameIndex], ['innings'], 0)}
+          />
+        </div>
       </div>
       <div className="scores-plus-fade">
-        {
-          recentGames.length > 0 &&
-          <div className={styles.content}>
-            <BottomLine
-              awayTeam={recentGames[gameIndex].away_team}
-              homeTeam={recentGames[gameIndex].home_team}
-              week={recentGames[gameIndex].week as string}
-              round={recentGames[gameIndex].round as string}
-              league={recentGames[gameIndex].league}
-            />
-          </div>
-        }
+        <div
+          className={styles.content}
+          style={{ display: recentGames.length > 0 ? 'block' : 'none' }}
+        >
+          <BottomLine
+            awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+            homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+            week={_.get(recentGames[gameIndex], ['week'], null) as string}
+            round={_.get(recentGames[gameIndex], ['round'], null) as string}
+            league={_.get(recentGames[gameIndex], ['league'], "")}
+          />
+        </div>
       </div>
     </div>
   </div>
