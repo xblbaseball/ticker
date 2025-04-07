@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import _ from "lodash";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
 import useInterval from "@/utils/useInterval";
@@ -127,7 +127,7 @@ function BottomLine(
     winsAndLosses = `${awayTeamAbbrev} ${awayTeamRecord} ${homeTeamAbbrev} ${homeTeamRecord}.`
   }
 
-  const fullLine = `${weekOrRound} ${winsAndLosses}`.trim();
+  const fullLine = `${league} ${weekOrRound} ${winsAndLosses}`.trim();
 
   return <div>{fullLine}</div>
 }
@@ -138,92 +138,111 @@ export default function ScoresPlus() {
   const statsStore = useContext(StatsContext);
 
   const [gameIndex, setGameIndex] = useState(0);
+  const [recentGames, setRecentGames] = useState([] as (SeasonGameResults1 | PlayoffsGameResults1)[]);
 
-  const playoffsScoresPaths = [
-    ['stats', 'XBL', 'playoffs_game_results'],
-    ['stats', 'AAA', 'playoffs_game_results'],
-    ['stats', 'AA', 'playoffs_game_results']
-  ];
-  const regularSeasonScoresPaths = [
-    ['stats', 'XBL', 'season_game_results'],
-    ['stats', 'AAA', 'season_game_results'],
-    ['stats', 'AA', 'season_game_results'],
-  ];
+  /** update the list of recent games */
+  useEffect(() => {
+    const playoffsScoresPaths = [
+      ['stats', 'XBL', 'playoffs_game_results'],
+      ['stats', 'AAA', 'playoffs_game_results'],
+      ['stats', 'AA', 'playoffs_game_results']
+    ];
+    const regularSeasonScoresPaths = [
+      ['stats', 'XBL', 'season_game_results'],
+      ['stats', 'AAA', 'season_game_results'],
+      ['stats', 'AA', 'season_game_results'],
+    ];
 
-  const recentGames: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
+    const getRecentGames = () => {
+      const ret: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
 
-  const maxScoresPerLeague = _.floor(maxBoxScores / 3);
+      const maxScoresPerLeague = _.floor(maxBoxScores / 3);
 
-  for (const path of playoffsScoresPaths) {
-    // slice with a negative number and reverse to get the last 8 games in descending chronological order
-    const eightGames: PlayoffsGameResults = _.get(
-      statsStore, path, []
-    ).slice(-maxScoresPerLeague).reverse();
-    recentGames.push(...eightGames);
-  }
+      for (const path of playoffsScoresPaths) {
+        // slice with a negative number and reverse to get the last 8 games in descending chronological order
+        const eightGames: PlayoffsGameResults = _.get(
+          statsStore, path, []
+        ).slice(-maxScoresPerLeague).reverse();
+        ret.push(...eightGames);
+      }
 
-  if (recentGames.length < maxBoxScores) {
-    // we didn't fill up on playoff games, top off with regular season
-    const remaining = maxBoxScores - recentGames.length;
-    const thirdRemaining = remaining / 3;
+      if (ret.length < maxBoxScores) {
+        // we didn't fill up on playoff games, top off with regular season
+        const remaining = maxBoxScores - ret.length;
+        const thirdRemaining = remaining / 3;
 
-    // if the remaining games aren't divisible by three, keep the number of games even but bias to XBL and AAA
-    const numXBL = -1 * _.ceil(thirdRemaining);
-    const numAAA = -1 * _.round(thirdRemaining); // rounds up if thirdRemaining is .6 repeating, down if .3 repeating
-    const numAA = -1 * _.floor(thirdRemaining);
+        // if the remaining games aren't divisible by three, keep the number of games even but bias to XBL and AAA
+        const numXBL = -1 * _.ceil(thirdRemaining);
+        const numAAA = -1 * _.round(thirdRemaining); // rounds up if thirdRemaining is .6 repeating, down if .3 repeating
+        const numAA = -1 * _.floor(thirdRemaining);
 
-    const xblGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[0],
-      []
-    ).slice(numXBL).reverse();
-    const aaaGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[1],
-      []
-    ).slice(numAAA).reverse();
-    const aaGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[2],
-      []
-    ).slice(numAA).reverse();
+        const xblGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[0],
+          []
+        ).slice(numXBL).reverse();
+        const aaaGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[1],
+          []
+        ).slice(numAAA).reverse();
+        const aaGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[2],
+          []
+        ).slice(numAA).reverse();
 
-    recentGames.push(...xblGames);
-    recentGames.push(...aaaGames);
-    recentGames.push(...aaGames);
-  }
+        ret.push(...xblGames);
+        ret.push(...aaaGames);
+        ret.push(...aaGames);
+      }
 
-  // matches the interval in styles/scrolls.css/.scores-plus-fade
+      return ret;
+    }
+    setRecentGames(getRecentGames());
+    setGameIndex(0);
+  }, [maxBoxScores, statsStore]);
+
+  // matches the interval in _document.tsx/Head/style
   const delay = 15000;
 
   useInterval(() => {
     setGameIndex((gameIndex + 1) % recentGames.length);
   }, delay);
 
-  if (recentGames.length === 0) {
-    // no scores to show!
-    return <div className={"border-left"}></div>;
-  }
-
-  return <div className={`flex column space-around ${styles.container}`}>
-    <div className={`flex column space-around ${styles.innerContainer}`}>
-      <div className={`scores-plus-fade ${styles.content}`}>
-        <TopLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          awayScore={recentGames[gameIndex].away_score}
-          homeScore={recentGames[gameIndex].home_score}
-          innings={recentGames[gameIndex].innings}
-        />
+  // we have to keep the divs with .scores-plus-fade alive in the DOM all the time, otherwise the score box fade in/out animation and the interval above will go out of sync
+  return <div
+    className={`flex column space-around ${styles.container}`}
+    style={{ display: recentGames.length === 0 ? "hidden" : "block" }}
+  >
+    <div className={`flex column space-around ${recentGames.length > 0 && styles.innerContainer}`}>
+      <div className="scores-plus-fade">
+        <div
+          className={styles.content}
+          style={{ display: recentGames.length > 0 ? 'block' : 'none' }}
+        >
+          <TopLine
+            awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+            homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+            awayScore={_.get(recentGames[gameIndex], ['away_score'], 0)}
+            homeScore={_.get(recentGames[gameIndex], ['home_score'], 0)}
+            innings={_.get(recentGames[gameIndex], ['innings'], 0)}
+          />
+        </div>
       </div>
-      <div className={`scores-plus-fade ${styles.content}`}>
-        <BottomLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          week={recentGames[gameIndex].week as string}
-          round={recentGames[gameIndex].round as string}
-          league={recentGames[gameIndex].league}
-        />
+      <div className="scores-plus-fade">
+        <div
+          className={styles.content}
+          style={{ display: recentGames.length > 0 ? 'block' : 'none' }}
+        >
+          <BottomLine
+            awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+            homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+            week={_.get(recentGames[gameIndex], ['week'], null) as string}
+            round={_.get(recentGames[gameIndex], ['round'], null) as string}
+            league={_.get(recentGames[gameIndex], ['league'], "")}
+          />
+        </div>
       </div>
     </div>
   </div>

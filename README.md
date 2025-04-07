@@ -50,7 +50,7 @@ To see the same static HTML, CSS, JS files that are served on GH Pages, you need
 
 ### Models and TS Types
 
-If the models in the [https://github.com/xblbaseball/stats](stats repo) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
+If the models in the [stats repo](https://github.com/xblbaseball/stats) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
 
 ```sh
 # download new schemas and turn the JSON schemas into TS interfaces

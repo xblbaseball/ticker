@@ -138,7 +138,7 @@ export const initialState: SettingsStore = {
     fifth: "opphr9",
     sixth: "whip",
   },
-  headlines: "",
+  headlines: `League News | You're watching season ${currentSeason} XBL baseball`,
   maxBoxScores: 24
 };
 
