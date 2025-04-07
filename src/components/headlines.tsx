@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "@/store/settings.context";
 
 import styles from "./headlines.module.css";
@@ -8,21 +8,26 @@ import useInterval from "@/utils/useInterval";
 export default function Headlines() {
   const { headlines } = useContext(SettingsContext);
   const [headlineIndex, setHeadlineIndex] = useState(0);
+  const [lines, setLines] = useState([[""], [""]]);
 
   const approxMaxTitleCharLength = 100;
 
-  let lines = [["-"], ["-"]];
+  useEffect(() => {
+    const oneOrMoreNewlines = new RegExp("\n+");
 
-  if (_.isString(headlines) && headlines.length > 0) {
-    lines = headlines
-      .trim()
-      .split("\n")
-      .map(line => line.trim().split("|")
-        .map(side => side.trim())
-      );
-  }
+    if (_.isString(headlines) && headlines.length > 0) {
+      const newLines = headlines
+        .trim()
+        .split(oneOrMoreNewlines)
+        .map(line => line.trim().split("|")
+          .map(side => side.trim())
+        );
 
-  // make sure the horizontal scrolling interval matches
+      setLines(newLines);
+    }
+  }, [headlines]);
+
+  // matches the interval in styles/scrolls.css/.headlines-scroll
   const headlineSwapInterval = 30000;
 
   useInterval(() => {
@@ -34,10 +39,12 @@ export default function Headlines() {
 
   const needToScrollText = body.length > approxMaxTitleCharLength;
 
-  return <div className={`flex column headlines-fade ${styles.container}`}>
-    <div className={styles.title}>{title}</div>
-    <div className={needToScrollText ? styles.fade : undefined}>
-      <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
+  return <div className={`flex column ${styles.container}`}>
+    <div className={`headlines-fade ${styles.innerContainer}`}>
+      <div className={styles.title}>{title}</div>
+      <div className={needToScrollText ? styles.fade : undefined}>
+        <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
+      </div>
     </div>
   </div>
 }
