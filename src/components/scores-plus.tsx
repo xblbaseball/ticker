@@ -127,7 +127,7 @@ function BottomLine(
     winsAndLosses = `${awayTeamAbbrev} ${awayTeamRecord} ${homeTeamAbbrev} ${homeTeamRecord}.`
   }
 
-  const fullLine = `${weekOrRound} ${winsAndLosses}`.trim();
+  const fullLine = `${league} ${weekOrRound} ${winsAndLosses}`.trim();
 
   return <div>{fullLine}</div>
 }
