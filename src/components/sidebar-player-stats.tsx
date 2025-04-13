@@ -182,9 +182,18 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
         break;
     }
 
+    const twoDigitStats = ["rs9", "ab9", "hr9", "so9", "bb9", "ra9", "oppab9", "opph9", "opphr9", "oppabhr", "oppk9", "oppbb9", "whip", "fip", "rd9", "innings_game"];
+    const threeDigitStats = ["ba", "h9", "abhr", "obp", "rc", "babip", "oppba", "lob"];
+
     const rawValue: number | string = _.get(statsStore, lookupPath, "-");
     if (_.isNumber(rawValue) && !Number.isInteger(rawValue)) {
       let num = `${rawValue}`;
+      if (twoDigitStats.includes(stat)) {
+        num = rawValue.toFixed(2);
+      }
+      if (threeDigitStats.includes(stat)) {
+        num = rawValue.toFixed(3);
+      }
       if (rawValue < 1) {
         // cut the leading 0 off numbers like 0.123 to make them render as .123
         num = num.slice(1);
