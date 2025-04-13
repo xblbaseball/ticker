@@ -20,7 +20,7 @@
 .bottomBar {
   position: absolute;
   left: 0;
-  bottom: 0;
+  top: var(--news-left-bar-height);
 
   height: var(--news-bottom-bar-height);
   width: var(--news-bottom-bar-width);
