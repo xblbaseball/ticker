@@ -5,7 +5,6 @@ import { useContext, useState } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
-import useInterval from "@/utils/useInterval";
 import { TeamSeason } from "@/typings/careers";
 import {
   PlayoffsGameResults,
@@ -190,12 +189,6 @@ export default function ScoresPlus() {
     recentGames.push(...aaGames);
   }
 
-  // matches the interval in styles/scrolls.css/.scores-plus-fade
-  const delay = 15000;
-
-  useInterval(() => {
-    setGameIndex((gameIndex + 1) % recentGames.length);
-  }, delay);
 
   if (recentGames.length === 0) {
     // no scores to show!
@@ -204,7 +197,11 @@ export default function ScoresPlus() {
 
   return <div className={`flex column space-around ${styles.container}`}>
     <div className={`flex column space-around ${styles.innerContainer}`}>
-      <div className={`scores-plus-fade ${styles.content}`}>
+      <div className={`scores-plus-fade ${styles.content}`}
+        onAnimationIteration={() => {
+          // swap to the next game
+          setGameIndex((gameIndex + 1) % recentGames.length);
+        }}>
         <TopLine
           awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
           homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
