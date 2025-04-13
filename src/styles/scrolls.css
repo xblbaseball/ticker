@@ -8,8 +8,7 @@
 }
 
 .headlines-scroll {
-  /* interval matches the interval for swapping out headlines in components/headlines.tsx */
-  animation: headlinesScroll 30s linear 0s infinite forwards;
+  animation: headlinesScroll 20s linear 0s infinite forwards;
 }
 
 .marquee-scroll-0 {
