@@ -10,7 +10,7 @@ export default function Headlines() {
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const [lines, setLines] = useState([[""], [""]]);
 
-  const approxMaxTitleCharLength = 100;
+  const approxMaxHeadlineCharLength = 100;
 
   useEffect(() => {
     const oneOrMoreNewlines = new RegExp("\n+");
@@ -34,10 +34,10 @@ export default function Headlines() {
     setHeadlineIndex((headlineIndex + 1) % lines.length);
   }, headlineSwapInterval);
 
-  const title = _.get(lines, [headlineIndex, 0], "-");
-  const body = _.get(lines, [headlineIndex, 1], "-");
+  const title = _.get(lines, [headlineIndex, 0], "");
+  const body = _.get(lines, [headlineIndex, 1], "");
 
-  const needToScrollText = body.length > approxMaxTitleCharLength;
+  const needToScrollText = body.length > approxMaxHeadlineCharLength;
 
   return <div className={`flex column ${styles.container}`}>
     <div className={`headlines-fade ${styles.innerContainer}`}>
