@@ -5,6 +5,11 @@
   overflow: hidden;
 }
 
+.innerContainer {
+  overflow: hidden;
+  padding-left: 8px;
+}
+
 .title {
   font-size: 18px;
 }
