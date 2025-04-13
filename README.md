@@ -4,6 +4,8 @@ _Credit to [spacemanspumoni](https://github.com/spacemanspumoni/xbl-ticker) for 
 
 Renders a 1920x1080 ticker with [XBL scores and stats](https://www.xblbaseball.com) across the bottom of the screen. This ticker is meant for use in OBS (or similar broadcasting software).
 
+How to use the ticker in your broadcast: [link](https://github.com/xblbaseball/ticker/wiki/How-to-use-the-ticker-in-OBS)
+
 ## Usage
 
 In your broadcasting software, add a browser source pointed to either:
@@ -50,7 +52,7 @@ To see the same static HTML, CSS, JS files that are served on GH Pages, you need
 
 ### Models and TS Types
 
-If the models in the [https://github.com/xblbaseball/stats](stats repo) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
+If the models in the [stats repo](https://github.com/xblbaseball/stats) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
 
 ```sh
 # download new schemas and turn the JSON schemas into TS interfaces
