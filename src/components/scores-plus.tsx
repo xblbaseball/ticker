@@ -2,6 +2,7 @@
 
 import _ from "lodash";
 import { useContext, useState } from "react";
+import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
 import useInterval from "@/utils/useInterval";
@@ -16,8 +17,6 @@ import {
 
 import styles from "./scores-plus.module.css";
 
-const basePath = process.env.NEXT_PUBLIC_BASEPATH || "";
-
 function Team(
   { teamName, score, winner }:
     { teamName: string, score: number, winner: boolean }) {
@@ -30,9 +29,7 @@ function Team(
   return <div className={classes.join(" ")}>
     <div className="flex flex-start">
       <div className={styles.teamLogo}>
-        <img src={`${basePath}/logos/${teamName}.png`}
-          alt={`${teamName} logo`}
-          style={{ maxWidth: "28px" }} />
+        <TeamLogo team={teamName} width="28px" small={true} />
       </div>
       <div className={styles.teamName}>{teamName}</div>
     </div>
@@ -209,20 +206,20 @@ export default function ScoresPlus() {
     <div className={`flex column space-around ${styles.innerContainer}`}>
       <div className={`scores-plus-fade ${styles.content}`}>
         <TopLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          awayScore={recentGames[gameIndex].away_score}
-          homeScore={recentGames[gameIndex].home_score}
-          innings={recentGames[gameIndex].innings}
+          awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+          homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+          awayScore={_.get(recentGames[gameIndex], ['away_score'], 0)}
+          homeScore={_.get(recentGames[gameIndex], ['home_score'], 0)}
+          innings={_.get(recentGames[gameIndex], ['innings'], 0)}
         />
       </div>
       <div className={`scores-plus-fade ${styles.content}`}>
         <BottomLine
-          awayTeam={recentGames[gameIndex].away_team}
-          homeTeam={recentGames[gameIndex].home_team}
-          week={recentGames[gameIndex].week as string}
-          round={recentGames[gameIndex].round as string}
-          league={recentGames[gameIndex].league}
+          awayTeam={_.get(recentGames[gameIndex], ['away_team'], "")}
+          homeTeam={_.get(recentGames[gameIndex], ['home_team'], "")}
+          week={_.get(recentGames[gameIndex], ['week'], null) as string}
+          round={_.get(recentGames[gameIndex], ['round'], null) as string}
+          league={_.get(recentGames[gameIndex], ['league'], "")}
         />
       </div>
     </div>
