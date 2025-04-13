@@ -184,7 +184,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
     const rawValue: number | string = _.get(statsStore, lookupPath, "-");
     if (_.isNumber(rawValue) && !Number.isInteger(rawValue)) {
-      let num = `${rawValue.toFixed(3)}`;
+      let num = `${rawValue}`;
       if (rawValue < 1) {
         // cut the leading 0 off numbers like 0.123 to make them render as .123
         num = num.slice(1);
