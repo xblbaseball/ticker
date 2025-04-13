@@ -1,5 +1,4 @@
 .scores-plus-fade {
-  /* interval matches the interval for swapping out scores in components/scores-plus.tsx */
   animation: fade 15s ease 0s infinite forwards;
 }
 
