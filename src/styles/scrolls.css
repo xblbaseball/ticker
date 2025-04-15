@@ -3,7 +3,7 @@
 }
 
 .headlines-fade {
-  animation: fade 30s ease 0s infinite forwards;
+  animation: fade 20s ease 0s infinite forwards;
 }
 
 .headlines-scroll {
