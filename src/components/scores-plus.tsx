@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import _ from "lodash";
 import { useContext, useEffect, useState } from "react";
 import TeamLogo from "@/components/team-logo";
