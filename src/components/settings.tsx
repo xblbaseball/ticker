@@ -685,7 +685,7 @@ export default function Settings() {
       value={settingsStore.maxBoxScores || ""}
       onChange={(games) => updateSetting(['maxBoxScores'], parseInt(games as string))}
     >
-      How many box scores should we rotate through? This number should be divisible by 3. If you change this, you&apos;ll need to reload the page for the changes to take effect.
+      How many box scores should we rotate through? You should probably make this number divisible by 3.
     </Input>
 
     <h3>Current Settings</h3>
