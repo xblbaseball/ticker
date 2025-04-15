@@ -663,9 +663,10 @@ export default function Settings() {
 
     <p>Example:</p>
 
-    <pre>XBL News|Spokesmen def. Holograms to move on to XBL World Series. Coverage starts Monday</pre>
-    <pre>AAA News|Mystery Men win it all! The caster extraordinaire finally walks away with hardware.
+    <pre>XBL News | Spokesmen def. Holograms to move on to XBL World Series. Coverage starts Monday<br />AAA News | Mystery Men win it all! The caster extraordinaire finally walks away with hardware.
     </pre>
+
+    <p>Try to keep the text to scroll under 160 characters, otherwise it might get cut off.</p>
 
     <TextArea
       value={settingsStore.headlines}
