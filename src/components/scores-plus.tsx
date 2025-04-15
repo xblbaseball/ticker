@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import _ from "lodash";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
@@ -134,60 +134,70 @@ export default function ScoresPlus() {
   const statsStore = useContext(StatsContext);
 
   const [gameIndex, setGameIndex] = useState(0);
+  const [recentGames, setRecentGames] = useState([] as (SeasonGameResults1 | PlayoffsGameResults1)[]);
 
-  const playoffsScoresPaths = [
-    ['stats', 'XBL', 'playoffs_game_results'],
-    ['stats', 'AAA', 'playoffs_game_results'],
-    ['stats', 'AA', 'playoffs_game_results']
-  ];
-  const regularSeasonScoresPaths = [
-    ['stats', 'XBL', 'season_game_results'],
-    ['stats', 'AAA', 'season_game_results'],
-    ['stats', 'AA', 'season_game_results'],
-  ];
+  /** update the list of recent games */
+  useEffect(() => {
+    const getRecentGames = () => {
+      const ret: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
 
-  const recentGames: (SeasonGameResults1 | PlayoffsGameResults1)[] = [];
+      const playoffsScoresPaths = [
+        ['stats', 'XBL', 'playoffs_game_results'],
+        ['stats', 'AAA', 'playoffs_game_results'],
+        ['stats', 'AA', 'playoffs_game_results']
+      ];
+      const regularSeasonScoresPaths = [
+        ['stats', 'XBL', 'season_game_results'],
+        ['stats', 'AAA', 'season_game_results'],
+        ['stats', 'AA', 'season_game_results'],
+      ];
 
-  const maxScoresPerLeague = _.floor(maxBoxScores / 3);
+      const maxScoresPerLeague = _.floor(maxBoxScores / 3);
 
-  for (const path of playoffsScoresPaths) {
-    // slice with a negative number and reverse to get the last 8 games in descending chronological order
-    const eightGames: PlayoffsGameResults = _.get(
-      statsStore, path, []
-    ).slice(-maxScoresPerLeague).reverse();
-    recentGames.push(...eightGames);
-  }
+      for (const path of playoffsScoresPaths) {
+        // slice with a negative number and reverse to get the last 8 games in descending chronological order
+        const someGames: PlayoffsGameResults = _.get(
+          statsStore, path, []
+        ).slice(-maxScoresPerLeague).reverse();
+        ret.push(...someGames);
+      }
 
-  if (recentGames.length < maxBoxScores) {
-    // we didn't fill up on playoff games, top off with regular season
-    const remaining = maxBoxScores - recentGames.length;
-    const thirdRemaining = remaining / 3;
+      if (ret.length < maxBoxScores) {
+        // we didn't fill up on playoff games, top off with regular season
+        const remaining = maxBoxScores - ret.length;
+        const thirdRemaining = remaining / 3;
 
-    // if the remaining games aren't divisible by three, keep the number of games even but bias to XBL and AAA
-    const numXBL = -1 * _.ceil(thirdRemaining);
-    const numAAA = -1 * _.round(thirdRemaining); // rounds up if thirdRemaining is .6 repeating, down if .3 repeating
-    const numAA = -1 * _.floor(thirdRemaining);
+        // if the remaining games aren't divisible by three, keep the number of games even but bias to XBL and AAA
+        const numXBL = _.ceil(thirdRemaining);
+        const numAAA = _.round(thirdRemaining); // rounds up if thirdRemaining is .6 repeating, down if .3 repeating
+        const numAA = _.floor(thirdRemaining);
 
-    const xblGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[0],
-      []
-    ).slice(numXBL).reverse();
-    const aaaGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[1],
-      []
-    ).slice(numAAA).reverse();
-    const aaGames: SeasonGameResults = _.get(
-      statsStore,
-      regularSeasonScoresPaths[2],
-      []
-    ).slice(numAA).reverse();
+        const xblGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[0],
+          []
+        ).slice(-numXBL).reverse();
+        const aaaGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[1],
+          []
+        ).slice(-numAAA).reverse();
+        const aaGames: SeasonGameResults = _.get(
+          statsStore,
+          regularSeasonScoresPaths[2],
+          []
+        ).slice(-numAA).reverse();
 
-    recentGames.push(...xblGames);
-    recentGames.push(...aaaGames);
-    recentGames.push(...aaGames);
-  }
+        ret.push(...xblGames);
+        ret.push(...aaaGames);
+        ret.push(...aaGames);
+      }
+
+      return ret;
+    }
+    setRecentGames(getRecentGames());
+    setGameIndex(0);
+  }, [maxBoxScores, statsStore]);
 
 
   if (recentGames.length === 0) {
