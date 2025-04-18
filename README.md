@@ -38,7 +38,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The page auto-updates as you edit files. OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
 
-Open [http://localhost:3000](http://localhost:3000/news) to view the larger ticker rendered.
+Open [http://localhost:3000/news](http://localhost:3000/news) to view the larger ticker rendered.
 
 ### Building
 
