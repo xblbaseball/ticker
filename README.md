@@ -27,21 +27,28 @@ By default, you'll see regular season games and stats. If you want playoff games
 We load every single score and marquee element into the page on the first load, then we use CSS animations (with `overflow: hidden`) to scroll through them. The animations are programmatically generated beforehand using the `calc-keyframes.py` script, which does all the math to make sure animation keyframes make sense and are mostly synced up.
 
 ### Getting Started
+You'll need Node available in the dev environemnt of your choice.
 
 First, run the development server:
 
 ```bash
+npm i
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The page auto-updates as you edit files. OBS uses a Chromium renderer, so we recommend you do the same when testing changes.
 
+Open [http://localhost:3000/news](http://localhost:3000/news) to view the larger ticker rendered.
+
 ### Building
+
+You'll need Node and Python 3 available in the development environment of your choice.
 
 To see the same static HTML, CSS, JS files that are served on GH Pages, you need to:
 
 1. Build the site.
   ```bash
+  npm i
   npm run build
   ```
 2. Serve the `out/` directory. An easy way to do so is:
@@ -54,7 +61,7 @@ To see the same static HTML, CSS, JS files that are served on GH Pages, you need
 
 If the models in the [stats repo](https://github.com/xblbaseball/stats) have changed, collect the new JSON schemas and rebuild our TS type interfaces.
 
-```sh
+```bash
 # download new schemas and turn the JSON schemas into TS interfaces
 npm run types
 ```
