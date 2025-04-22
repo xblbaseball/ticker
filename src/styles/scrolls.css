@@ -1,15 +1,13 @@
 .scores-plus-fade {
-  /* interval matches the interval for swapping out scores in components/scores-plus.tsx */
   animation: fade 15s ease 0s infinite forwards;
 }
 
 .headlines-fade {
-  animation: fade 30s ease 0s infinite forwards;
+  animation: fade 20s ease 0s infinite forwards;
 }
 
 .headlines-scroll {
-  /* interval matches the interval for swapping out headlines in components/headlines.tsx */
-  animation: headlinesScroll 30s linear 0s infinite forwards;
+  animation: headlinesScroll 20s linear 0s infinite forwards;
 }
 
 .marquee-scroll-0 {
