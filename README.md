@@ -6,21 +6,28 @@ Renders a 1920x1080 ticker with [XBL scores and stats](https://www.xblbaseball.c
 
 How to use the ticker in your broadcast: [link](https://github.com/xblbaseball/ticker/wiki/How-to-use-the-ticker-in-OBS)
 
-## Usage
+## The Two Tickers
 
-In your broadcasting software, add a browser source pointed to either:
+We provide two ticker options.
 
-* [https://xblbaseball.github.io/ticker/]() for a small bar at the bottom of the screen
-* [https://xblbaseball.github.io/ticker/news]() for the full sports news style frame
+### The Big Ticker
 
-Put the browser layer below your content.
+![sample screenshot](/public/screenshots/sample.png)
 
-### Regular Season vs Playoffs
+- [](https://xblbaseball.github.io/ticker)
+
+This ticker is probably why you're here.
+
+### Ticker Classic
+
+This ticker was inspired by [spaceman's original ticker](https://github.com/spacemanspumoni/xbl-ticker). It's essentially the same, just rewritten in React and with a different underlying data structure.
+
+#### Regular Season vs Playoffs
 
 By default, you'll see regular season games and stats. If you want playoff games and stats, use one of these links:
 
-* Every league in playoffs: [https://xblbaseball.github.io/ticker/?xbl-playoffs=true&aaa-playoffs=true&aa-playoffs=true]()
-* Only AA in playoffs: [https://xblbaseball.github.io/ticker/?aa-playoffs=true]()
+* Every league in playoffs: [](https://xblbaseball.github.io/ticker/simple?xbl-playoffs=true&aaa-playoffs=true&aa-playoffs=true)
+* Only AA in playoffs: [](https://xblbaseball.github.io/ticker/simple?aa-playoffs=true)
 
 ## Development
 
