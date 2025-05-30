@@ -91,7 +91,7 @@ function BottomLine(
   }
   if (!_.isNil(round)) {
     playoffsGame = true;
-    weekOrRound = `${league} Playoffs RD${round.slice(1, 2)},`;
+    weekOrRound = `Playoffs RD${round.slice(1, 2)},`;
   }
 
   let winsAndLosses = "";
