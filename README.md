@@ -10,8 +10,8 @@ How to use the ticker in your broadcast: [link](https://github.com/xblbaseball/t
 
 In your broadcasting software, add a browser source pointed to either:
 
-* https://xblbaseball.github.io/ticker/ for a small bar at the bottom of the screen
-* https://xblbaseball.github.io/ticker/news for the full sports news style frame
+* [https://xblbaseball.github.io/ticker/] for a small bar at the bottom of the screen
+* [https://xblbaseball.github.io/ticker/news] for the full sports news style frame
 
 Put the browser layer below your content.
 
