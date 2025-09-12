@@ -680,6 +680,13 @@ export default function Settings() {
       Headlines
     </TextArea>
 
+    <Checkbox
+      checked={settingsStore.randomHeadlines}
+      onChange={(doRandom) => updateSetting(["randomHeadlines"], doRandom)}
+    >
+      Randomize the order in which headlines are shown. If there are 4 or more headlines, we will avoid repeating the same headline twice in a row.
+    </Checkbox>
+
     <h3>Bottom Bar</h3>
 
     <Input

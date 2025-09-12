@@ -86,6 +86,8 @@ export interface SettingsStore {
   };
   /** marquees in the format of "AAA News | This is text I want to scroll" */
   headlines: string;
+  /** if true, show headlines in a random order */
+  randomHeadlines: boolean;
   /** how many games to rotate through the box scores */
   maxBoxScores: number;
 }
@@ -139,6 +141,7 @@ export const initialState: SettingsStore = {
     sixth: "whip",
   },
   headlines: `Broadcast News | You're watching season ${currentSeason} XBL baseball!`,
+  randomHeadlines: false,
   maxBoxScores: 24
 };
 
