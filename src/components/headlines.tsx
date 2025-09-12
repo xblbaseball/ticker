@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "@/store/settings.context";
 
 import styles from "./headlines.module.css";
