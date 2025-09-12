@@ -45,6 +45,7 @@ export default function Headlines() {
         setBody(firstBody);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlines]);
 
   /** called when a headline fades out */
