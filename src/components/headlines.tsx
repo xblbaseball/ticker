@@ -26,7 +26,6 @@ export default function Headlines() {
   const approxMaxHeadlineCharLengthNoScroll = 100;
 
   useEffect(() => {
-    console.log('hi')
     const oneOrMoreNewlines = new RegExp("\n+");
 
     if (_.isString(headlines) && headlines.length > 0) {
