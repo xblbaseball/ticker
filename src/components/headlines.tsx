@@ -63,11 +63,12 @@ export default function Headlines() {
     }
 
     // track the last few headlines we showed
-    const historyCopy = _.clone(history);
+    let historyCopy = _.clone(history);
     historyCopy.push(nextIndex);
-    if (historyCopy.length > Math.max(2, Math.floor(lines.length / 2))) {
+    const halfway = Math.floor(lines.length / 2)
+    if (historyCopy.length > Math.max(2, halfway)) {
       // keep track of a list of lines.length / 2 headlines we've shown to avoid repeats
-      historyCopy.shift();
+      historyCopy = historyCopy.slice(-halfway);
     }
 
     const thisTitle = _.get(lines, [nextIndex, 0], "");
