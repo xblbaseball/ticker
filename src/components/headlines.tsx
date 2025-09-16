@@ -66,7 +66,7 @@ export default function Headlines() {
     const halfway = Math.floor(lines.length / 2)
     if (historyCopy.length > Math.max(1, halfway)) {
       // it's a problem if the history grows too big
-      // keep it at a size where the headlines feel "random"
+      // keep it at a size where the headlines feel "random" without repeating the same couple headlines over and over
       historyCopy = historyCopy.slice(-halfway);
     }
 
