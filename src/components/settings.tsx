@@ -684,7 +684,7 @@ export default function Settings() {
       checked={settingsStore.randomHeadlines}
       onChange={(doRandom) => updateSetting(["randomHeadlines"], doRandom)}
     >
-      Randomize the order in which headlines are shown. If there are 4 or more headlines, we will avoid repeating the same headline twice in a row.
+      Randomize the order in which headlines are shown. This checkbox does nothing unless there are 3 or more headlines.
     </Checkbox>
 
     <h3>Bottom Bar</h3>
