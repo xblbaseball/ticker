@@ -52,22 +52,21 @@ export default function Headlines() {
   const handleAnimationIteration = () => {
     let nextIndex = (headlineIndex + 1) % lines.length;
 
-    if (randomHeadlines) {
+    if (randomHeadlines && lines.length > 2) {
+      // only randomize when there are at least 3 headlines
       nextIndex = getRandomInt(lines.length);
-      if (lines.length > 3) {
-        // only try to avoid repeats if there are 4 or more headlines
-        while (_.includes(history, nextIndex)) {
-          nextIndex = getRandomInt(lines.length);
-        }
+      while (_.includes(history, nextIndex)) {
+        nextIndex = getRandomInt(lines.length);
       }
     }
 
-    // track the last few headlines we showed
+    // track the last few headlines we showed to avoid repeats when randomization is on
     let historyCopy = _.clone(history);
     historyCopy.push(nextIndex);
     const halfway = Math.floor(lines.length / 2)
-    if (historyCopy.length > Math.max(2, halfway)) {
-      // keep track of a list of lines.length / 2 headlines we've shown to avoid repeats
+    if (historyCopy.length > Math.max(1, halfway)) {
+      // it's a problem if the history grows too big
+      // keep it at a size where the headlines feel "random"
       historyCopy = historyCopy.slice(-halfway);
     }
 
