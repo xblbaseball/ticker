@@ -42,6 +42,8 @@ jobs:
         run: python scripts/download-logos.py
         env:
           G_SHEETS_API_KEY: ${{ secrets.G_SHEETS_API_KEY }}
+          G_SHEETS_ORIGIN: ${{ secrets.G_SHEETS_ORIGIN }}
+          G_SHEETS_REFERER: ${{ secrets.G_SHEETS_REFERER }}
       - name: save logos
         uses: actions/upload-artifact@v4
         with:
