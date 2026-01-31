@@ -22,8 +22,15 @@ def main():
         raise Exception("Missing Google Drive API key")
     sheets_url = f"https://sheets.googleapis.com/v4/spreadsheets/1sMuZIiKGNxOG816mBpdYCHyogIlet_XPMBzF8YWFUus/values/Sheet1?key={g_sheets_api_key}"
 
+    custom_headers = {
+        "Origin": os.getenv("G_SHEETS_ORIGIN", ""),
+        "Referer": os.getenv("G_SHEETS_REFERER", ""),
+    }
+
+    req = urllib.request.Request(sheets_url, headers=custom_headers)
+
     data = {}
-    with urllib.request.urlopen(sheets_url) as logos_req:
+    with urllib.request.urlopen(req) as logos_req:
         res = logos_req.read().decode("utf-8")
         data = json.loads(res)
 
