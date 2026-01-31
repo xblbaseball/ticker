@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   collect-logos:
-    name: Collect logoss
+    name: Collect logos
     runs-on: ubuntu-latest
     environment: production
     steps:
