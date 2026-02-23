@@ -156,7 +156,7 @@ export default function Settings() {
         }
       }}
     >
-      Which league is playing? Controls the logo in the top left and some scores and records.
+      Choose a league logo to show.
     </Dropdown>
 
     <h3>Playoffs</h3>

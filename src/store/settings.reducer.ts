@@ -18,7 +18,7 @@ export interface SettingsStore {
     AAA: boolean;
     AA: boolean;
   };
-  /** what league are the players in. controls the logo in the top left and stats */
+  /** what league are the players in. controls the logo in the top left */
   league: League;
   /** what season are we in */
   season: number;
