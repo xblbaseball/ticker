@@ -29,7 +29,7 @@ export default function Headlines() {
   const approxMaxHeadlineCharLengthNoScroll = 100;
 
   const activePlayersByLeauge = _.get(statsStore, ["stats", "careers", "active_players"], {});
-  const allActivePlayers = _.concat(activePlayersByLeauge["AA"], activePlayersByLeauge["AAA"], activePlayersByLeauge["XBL"]);
+  const allActivePlayers = _.concat(..._.values(activePlayersByLeauge));
 
   useEffect(() => {
     const oneOrMoreNewlines = new RegExp("\n+");
@@ -110,7 +110,7 @@ export default function Headlines() {
     return parts.map((maybeTeam: string) => {
       const teamName = teamNameFromAbbr(maybeTeam);
       if (teamName !== "") {
-        return <TeamLogo team={teamName} width="28px" small={true} />
+        return <TeamLogo team={teamName} width="28px" small={true} key={maybeTeam} />
       }
       return maybeTeam;
     });
