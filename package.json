@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "GIT_SHA=$(git rev-parse --short HEAD) next dev --turbopack",
     "build": "GIT_SHA=$(git rev-parse --short HEAD) next build",
-    "start": "next start",
+    "start": "python -m http.server 3000 --directory out",
     "lint": "next lint",
     "types": "npx tsx scripts/stats-models-to-ts.ts"
   },
