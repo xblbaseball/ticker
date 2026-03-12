@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "GIT_SHA=$(git rev-parse --short HEAD) next dev --turbopack",
+    "build": "GIT_SHA=$(git rev-parse --short HEAD) next build",
     "start": "next start",
     "lint": "next lint",
     "types": "npx tsx scripts/stats-models-to-ts.ts"

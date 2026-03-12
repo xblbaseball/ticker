@@ -701,5 +701,7 @@ export default function Settings() {
     <pre className="pre-wrap">{JSON.stringify(settingsStore)}</pre>
 
     <button style={{ cursor: 'pointer', width: "10em" }} onClick={() => settingsDispatch({ type: "reset-all" })}>Reset settings</button>
+
+    <p className={styles.version}>Version: {process.env.GIT_SHA}</p>
   </div >;
 }
