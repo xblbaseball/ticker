@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
     unoptimized: true
   },
   output: "export",
-  reactStrictMode: true
+  reactStrictMode: true,
+  env: {
+    GIT_SHA: process.env.GIT_SHA
+  }
 };
 
 export default nextConfig;

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "GIT_SHA=$(git rev-parse --short HEAD) next dev --turbopack",
+    "build": "GIT_SHA=$(git rev-parse --short HEAD) next build",
+    "start": "python -m http.server 3000 --directory out",
     "lint": "next lint",
     "types": "npx tsx scripts/stats-models-to-ts.ts"
   },
