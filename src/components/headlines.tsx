@@ -1,11 +1,10 @@
 import _ from "lodash";
-import { createElement, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from '@/store/stats.context';
 
 import styles from "./headlines.module.css";
-import { TeamSeason } from "@/typings/careers";
 
 /**
  * Get a random integer in [0,max). Function from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#try_it
