@@ -666,7 +666,7 @@ export default function Settings() {
     <pre>XBL News | Spokesmen def. Holograms to move on to XBL World Series. Coverage starts Monday<br />AAA News | Mystery Men win it all! The caster extraordinaire finally walks away with hardware.
     </pre>
 
-    <p>You can drop logos in the headlines too! Just use discord style <code>:team:</code> notation using team abbreviations.</p>
+    <p>You can drop logos in the headlines too! Just use discord style <code>:team:</code> notation using team abbreviations. Note that the team must be active for the logo to render.</p>
 
     <p>Example:</p>
 
