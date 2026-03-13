@@ -108,10 +108,16 @@ export default function Headlines() {
     const parts = headline.split(/:(\w+):/g);
 
     return parts.map((maybeTeam: string) => {
+      if (maybeTeam.length > 4) {
+        // it's definitely not an abbreviation if it's more than 4 characters
+        return maybeTeam;
+      }
+
       const teamName = teamNameFromAbbr(maybeTeam);
       if (teamName !== "") {
         return <TeamLogo team={teamName} width="28px" small={true} key={maybeTeam} />
       }
+
       return maybeTeam;
     });
   }
