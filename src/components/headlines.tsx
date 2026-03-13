@@ -1,6 +1,8 @@
 import _ from "lodash";
 import { useContext, useEffect, useState } from "react";
+import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
+import { StatsContext } from '@/store/stats.context';
 
 import styles from "./headlines.module.css";
 
@@ -13,6 +15,7 @@ function getRandomInt(max: number) {
 
 export default function Headlines() {
   const { headlines, randomHeadlines } = useContext(SettingsContext);
+  const statsStore = useContext(StatsContext);
   // the index of the headline currently being shown
   const [headlineIndex, setHeadlineIndex] = useState(0);
   // a list of headlines in the form of ["title", "body"]
@@ -24,6 +27,9 @@ export default function Headlines() {
   const [history, setHistory] = useState([]);
 
   const approxMaxHeadlineCharLengthNoScroll = 100;
+
+  const activePlayersByLeauge = _.get(statsStore, ["stats", "careers", "active_players"], {});
+  const allActivePlayers = _.concat(..._.values(activePlayersByLeauge));
 
   useEffect(() => {
     const oneOrMoreNewlines = new RegExp("\n+");
@@ -81,12 +87,47 @@ export default function Headlines() {
 
   const needToScrollText = body.length > approxMaxHeadlineCharLengthNoScroll;
 
+  /** given a team abbreviation, look up the team's name */
+  const teamNameFromAbbr = (maybeTeamAbbr: string): string => {
+    if (maybeTeamAbbr === "") {
+      return "";
+    }
+
+    const upperMaybeTeamAddr = maybeTeamAbbr.toUpperCase()
+    const thisTeam = allActivePlayers.find(teamSeason => teamSeason.team_abbrev === upperMaybeTeamAddr);
+
+    if (_.isNil(thisTeam)) {
+      return "";
+    }
+
+    return thisTeam.team_name;
+  }
+
+  /** Parse for discord style :team: strings to render as logos */
+  const formatHeadlines = (headline: string) => {
+    const parts = headline.split(/:(\w+):/g);
+
+    return parts.map((maybeTeam: string) => {
+      if (maybeTeam.length > 4) {
+        // it's definitely not an abbreviation if it's more than 4 characters
+        return maybeTeam;
+      }
+
+      const teamName = teamNameFromAbbr(maybeTeam);
+      if (teamName !== "") {
+        return <TeamLogo team={teamName} width="28px" small={true} key={maybeTeam} />
+      }
+
+      return maybeTeam;
+    });
+  }
+
   return <div className={`flex column ${styles.container}`}>
     <div className={`headlines-fade ${styles.innerContainer}`}
       onAnimationIteration={handleAnimationIteration}>
       <div className={styles.title}>{title}</div>
       <div className={needToScrollText ? styles.fade : undefined}>
-        <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{body}</div>
+        <div className={`${needToScrollText ? "headlines-scroll" : undefined} ${styles.content}`}>{formatHeadlines(body)}</div>
       </div>
     </div>
   </div>
