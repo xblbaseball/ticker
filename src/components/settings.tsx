@@ -112,7 +112,10 @@ export default function Settings() {
 
   return <div className={`flex column ${styles.container}`}>
     <div className={`flex space-between`}>
-      <div>Changes are saved as you make them. Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.</div>
+      <div>
+        Changes are saved as you make them. Your settings {settingsStore.useLocalStorage ? 'will' : 'will NOT'} be saved for the next broadcast.
+        <p className={styles.version}>Stats were last compiled from the league spreadsheets at {statsStore.stats.careers.last_updated_at} eastern time</p>
+      </div>
 
       <div>
         <button style={{ cursor: 'pointer' }} onClick={() => modalDispatch({ type: "destroyed-modals" })}>Close</button>

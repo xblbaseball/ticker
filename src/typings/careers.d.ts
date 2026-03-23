@@ -160,6 +160,7 @@ export type SeriesLosses = number;
 export type ChampionshipSeasons = number[];
 export type SecondPlaceSeasons = number[];
 export type PlayoffsHeadToHead = HeadToHead[];
+export type LastUpdatedAt = string;
 
 /**
  * all-time stats for all players
@@ -171,6 +172,7 @@ export interface CareerStats {
   regular_season_head_to_head: RegularSeasonHeadToHead;
   playoffs: Playoffs;
   playoffs_head_to_head: PlayoffsHeadToHead;
+  last_updated_at: LastUpdatedAt;
   [k: string]: unknown;
 }
 export interface AllPlayers {
