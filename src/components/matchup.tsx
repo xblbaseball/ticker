@@ -18,6 +18,10 @@ function Team(
   const store = useContext(StatsContext);
   const inPlayoffs = store.playoffs[league];
 
+  if (teamName === "__PENALTY_LOSS__") {
+    teamName = "Penalty Loss"
+  }
+
   let wins = 0;
   let losses = 0;
 
