@@ -1,10 +1,11 @@
 import _ from "lodash";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import TeamLogo from "@/components/team-logo";
 import { SettingsContext } from "@/store/settings.context";
 import { StatsContext } from "@/store/stats.context";
 
 import styles from "./sidebar-player-stats.module.css";
+import { League } from "@/typings/league";
 
 export default function SidebarPlayerStats({ away }: { away: boolean }) {
   const {
@@ -23,12 +24,28 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
     homeStatsLeague,
     awayStatCategories,
     homeStatCategories,
-    league,
-    playoffs
+    playoffs,
+    league: settingsLeague,
+    season
   } = useContext(SettingsContext);
   const statsStore = useContext(StatsContext);
 
+  const [league, setLeague] = useState(null as League);
+
   const player = away ? awayPlayer : homePlayer;
+
+  /** figure out what league the player is in */
+  useEffect(() => {
+    const playerSeasons = _.get(statsStore, ["stats", "careers", "all_players", player, "teams"], []);
+    const thisSeason = _.find(playerSeasons, teamSeason => teamSeason.season === season);
+
+    if (!_.isNil(thisSeason)) {
+      setLeague(thisSeason.league as League);
+    } else if (league !== settingsLeague) {
+      setLeague(settingsLeague);
+    }
+  }, [league, player, season, settingsLeague, statsStore]);
+
   if (player === "") {
     return <div>no player selected</div>;
   }
@@ -48,7 +65,7 @@ export default function SidebarPlayerStats({ away }: { away: boolean }) {
 
   const showPlayoffRecord = _.get(playoffs, [league]);
 
-  let recordOrSeed = "(0-0)";
+  let recordOrSeed = "";
 
   if (showPlayoffRecord) {
     // we're in the playoffs. show seed instead of rank
